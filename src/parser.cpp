@@ -1,15 +1,18 @@
 #include "parser.h"
 
-Parser::Parser() { 
-    for(int i=0 ;i<9; i++) relation[i] = NULL;
-}
+/********************************* PARSER FUNCTIONS *********************************/
 
-Parser::~Parser() {}
+Parser::Parser() { queries = new Query*[50]; }
+
+Parser::~Parser() { 
+    for (int i = 0 ; i < 50 ; i++) delete queries[i];
+    delete [] queries;
+}
 
 void Parser::OpenFileAndParse() {
     FILE *fp;
     char *line = NULL; size_t len = 0; ssize_t read;
-    const char pipe_[2] = "|"; char *token; int counter;
+    const char pipe_[2] = "|"; char *token; int counter; int q_no = 0; // query number
 
     /* opening file for reading */
     fp = fopen("src/small.work" , "r");
@@ -19,6 +22,9 @@ void Parser::OpenFileAndParse() {
     char* parts[3];
 
     while ((read = getline(&line, &len, fp)) != -1) { 
+        if(!strcmp(line, "F\n")) continue; // A batch of queries ended (we'll see what to do with this info)
+        
+        queries[q_no++] = new Query();
         counter=0;
         // finding each one of the 3 parts
         token = strtok(line, pipe_); /* get the first token */
@@ -31,9 +37,9 @@ void Parser::OpenFileAndParse() {
         cout << "Parts: " << endl;
         for(int i=0; i<3; i++) cout << parts[i] << endl;
         // parsing each one of the 3 parts separately.
-        ParseRelations(parts[0]);
-        ParsePredicates(parts[1]);
-        ParseProjections(parts[2]);
+        queries[q_no-1]->ParseRelations(parts[0]);
+        queries[q_no-1]->ParsePredicates(parts[1]);
+        queries[q_no-1]->ParseProjections(parts[2]);
 
         
     }
@@ -41,7 +47,16 @@ void Parser::OpenFileAndParse() {
     if (line) free(line); // doesnt work without free(even with delete, memory leaks)
 }
 
-void Parser::ParseRelations(char* relations) {
+/********************************* QUERY FUNCTIONS *********************************/
+
+Query::Query() {
+    for(int i=0 ;i<9; i++) relation[i] = NULL;
+}
+
+Query::~Query() {}
+
+void Query::ParseRelations(char* relations) {
+    // cout << "RELATIONS: " << relations << endl;
     const char space[2] = " "; char *token; int index = 0;
 
     token = strtok(relations, space);
@@ -59,10 +74,10 @@ void Parser::ParseRelations(char* relations) {
     }
 }
 
-void Parser::ParsePredicates(char* predicates) {
+void Query::ParsePredicates(char* predicates) {
     cout << "In predicates: " << predicates << endl;
 }
 
-void Parser::ParseProjections(char* projections) {
+void Query::ParseProjections(char* projections) {
     cout << "Projections: " << projections << endl; 
 }
