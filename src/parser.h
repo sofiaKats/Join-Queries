@@ -9,8 +9,8 @@ class Parser {
 public:
     Parser();
     ~Parser();
-    void OpenFileAndParse();
-    void ParseRelations(char* relations);
-    void ParsePredicates(char* predicates);
-    void ParseProjections(char* projections);
+    void OpenFileAndParse(); //opens small.work and reads file line by line, extracting queries
+    void ParseRelations(char* relations); // parses first part of query to find the relations of the query
+    void ParsePredicates(char* predicates); // parses second part of query to find predicates of the query
+    void ParseProjections(char* projections); // parses third part of query to find projections of query
 };
