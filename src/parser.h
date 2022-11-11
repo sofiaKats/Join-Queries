@@ -5,7 +5,7 @@
 using namespace std;
 
 class Parser {
-
+    char* relation[9];
 public:
     Parser();
     ~Parser();
