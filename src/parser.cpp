@@ -32,7 +32,7 @@ void Parser::OpenFileAndParse() {
             parts[counter++] = token;
             token = strtok(NULL, pipe_);
         }
-        cout << "Parts: " << endl;
+        cout << REDFUL << "Parts: " << RESTORE << endl;
         for(int i=0; i<3; i++) cout << parts[i] << endl;
         // parsing each one of the 3 parts separately.
         // and making sure strtok pointer stays untouched by other functs
