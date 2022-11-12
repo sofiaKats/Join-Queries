@@ -2,16 +2,36 @@
 #include <cstdlib>
 #include <cstring>
 
+#define IS_FINISHED 1
+
 using namespace std;
 
+class Projection {
+private:
+    // holds the index of the relation we are going to use for the SUM
+    int relation_index; // (ex. projections: 0.2 1.3, relation_index will hold 0 and 1 in two separate objects)
+    int column;         // holds the column of the relation we use for the SUM
+    char relation_column_pair[5]; // used to separate the relation and the column from the dot .
+public:
+    Projection(int relation = -1, int column = -1);
+    ~Projection();
+    void setRelationIndex(const int index);
+    int getRelationIndex(void);
+    void setColumn(const int col);
+    int getColumn(void);
+    void setRelation_Column_Pair(char* relation_column);
+    void separateRelationFromColumn(void);
+};
+
 class Query {
-    char* relation[9];
+    char* relation[9]; // the relations that are to be used in the particular query
+    Projection** projections; // each object holds the relation and column to be SUMMED from part 3 of query 
 public:
     Query();
     ~Query();
-    void ParseRelations(char* relations); // parses first part of query to find the relations of the query
-    void ParsePredicates(char* predicates); // parses second part of query to find predicates of the query
-    void ParseProjections(char* projections); // parses third part of query to find projections of query
+    int ParseRelations(char* relations); // parses first part of query to find the relations of the query
+    int ParsePredicates(char* predicates); // parses second part of query to find predicates of the query
+    void ParseProjections(char* projection); // parses third part of query to find projections of query
 };
 
 class Parser {

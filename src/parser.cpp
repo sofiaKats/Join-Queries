@@ -28,8 +28,6 @@ void Parser::OpenFileAndParse() {
         counter=0;
         // finding each one of the 3 parts
         token = strtok(line, pipe_); /* get the first token */
-        parts[counter] = token;
-
         while( token != NULL ) { /* walk through other tokens */
             parts[counter++] = token;
             token = strtok(NULL, pipe_);
@@ -37,11 +35,11 @@ void Parser::OpenFileAndParse() {
         cout << "Parts: " << endl;
         for(int i=0; i<3; i++) cout << parts[i] << endl;
         // parsing each one of the 3 parts separately.
-        queries[q_no-1]->ParseRelations(parts[0]);
-        queries[q_no-1]->ParsePredicates(parts[1]);
-        queries[q_no-1]->ParseProjections(parts[2]);
-
-        
+        // and making sure strtok pointer stays untouched by other functs
+        if(queries[q_no-1]->ParseRelations(parts[0]) == IS_FINISHED) {
+            if(queries[q_no-1]->ParsePredicates(parts[1]) == IS_FINISHED)
+                queries[q_no-1]->ParseProjections(parts[2]);
+        }
     }
     fclose(fp);
     if (line) free(line); // doesnt work without free(even with delete, memory leaks)
@@ -51,17 +49,20 @@ void Parser::OpenFileAndParse() {
 
 Query::Query() {
     for(int i=0 ;i<9; i++) relation[i] = NULL;
+    projections = new Projection*[3]; //each query has maximum of 3 columns to sum
+    for (int i = 0 ; i < 3; i++) projections[i] = new Projection();
 }
 
-Query::~Query() {}
+Query::~Query() {
+    for (int i = 0 ; i < 3; i++) delete projections[i];
+    delete [] projections;
+}
 
-void Query::ParseRelations(char* relations) {
+int Query::ParseRelations(char* relations) {
     // cout << "RELATIONS: " << relations << endl;
     const char space[2] = " "; char *token; int index = 0;
 
     token = strtok(relations, space);
-    relation[index] = token;
-
     while( token != NULL ) { /* walk through other tokens */
         relation[index++] = token;
         token = strtok(NULL, space);
@@ -72,12 +73,43 @@ void Query::ParseRelations(char* relations) {
             cout << "relation[" << i << "]: " << relation[i] << endl;
         }
     }
+    return IS_FINISHED;
 }
 
-void Query::ParsePredicates(char* predicates) {
+int Query::ParsePredicates(char* predicates) {
     cout << "In predicates: " << predicates << endl;
+    return IS_FINISHED;
 }
 
-void Query::ParseProjections(char* projections) {
-    cout << "Projections: " << projections << endl; 
+void Query::ParseProjections(char* projection) {
+    cout << "Projections: " << projection << endl; 
+    const char space[2] = " "; char *token; int index=0; 
+
+    token = strtok(projection, space);
+    while( token != NULL ) { 
+        projections[index++]->setRelation_Column_Pair(token);
+        token = strtok(NULL, space);
+    }
 }
+
+/********************************* PROJECTION FUNCTIONS *********************************/
+Projection::Projection(int relation, int column)
+: relation_index(relation), column(column) { memset(relation_column_pair, '\0', sizeof(relation_column_pair)); }
+
+Projection::~Projection() {}
+
+void Projection::setRelationIndex(const int index) { relation_index = index; }
+
+int Projection::getRelationIndex(void) { return relation_index; }
+
+void Projection::setColumn(const int col) { column = col; }
+
+int Projection::getColumn(void) { return column;}
+
+void Projection::setRelation_Column_Pair(char* relation_column) { 
+    strcpy(relation_column_pair, relation_column);
+    cout << "Projection array: " ;
+    for(int i=0; i<5; i++) cout << relation_column_pair[i];
+    cout <<  endl;
+ }
+
