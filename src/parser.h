@@ -8,6 +8,17 @@
 
 using namespace std;
 
+// small.work file has 50 queries. These queries can have up to 4 relations,
+// up to 4 predicates and up to 3 projections
+
+class Predicates {
+    char predicate[15]; // store each predicate to later check if it is filter predicate or join predicate
+public:
+    Predicates();
+    ~Predicates();
+    void setPredicates(char* prdct);
+};
+
 class Projection {
 private:
     // holds the index of the relation we are going to use for the SUM
@@ -26,7 +37,8 @@ public:
 };
 
 class Query {
-    char* relation[9]; // the relations that are to be used in the particular query
+    char* relation[5]; // the relations that are to be used in the particular query
+    Predicates** prdcts;
     Projection** projections; // each object holds the relation and column to be SUMMED from part 3 of query 
 public:
     Query();

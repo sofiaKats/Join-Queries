@@ -48,12 +48,17 @@ void Parser::OpenFileAndParse() {
 /********************************* QUERY FUNCTIONS *********************************/
 
 Query::Query() {
-    for(int i=0 ;i<9; i++) relation[i] = NULL;
+    for(int i=0 ;i<5; i++) relation[i] = NULL;
     projections = new Projection*[3]; //each query has maximum of 3 columns to sum
     for (int i = 0 ; i < 3; i++) projections[i] = new Projection();
+
+    prdcts = new Predicates*[4];// each query has maximum of 4 predicates
+    for(int i=0; i<4; i++) prdcts[i] = new Predicates();
 }
 
 Query::~Query() {
+    for (int i = 0 ; i < 4; i++) delete prdcts[i];
+    delete [] prdcts;
     for (int i = 0 ; i < 3; i++) delete projections[i];
     delete [] projections;
 }
@@ -68,7 +73,7 @@ int Query::ParseRelations(char* relations) {
         token = strtok(NULL, space);
     }
 
-    for(int i=0; i<9; i++)  {
+    for(int i=0; i<5; i++)  {
         if(relation[i] != NULL) {
             cout << "relation[" << i << "]: " << relation[i] << endl;
         }
@@ -78,6 +83,13 @@ int Query::ParseRelations(char* relations) {
 
 int Query::ParsePredicates(char* predicates) {
     cout << "In predicates: " << predicates << endl;
+    const char and_[2] = "&"; char *token; int index=0;
+
+    token = strtok(predicates, and_);
+    while( token != NULL ) { /* walk through other tokens */
+        prdcts[index++]->setPredicates(token);
+        token = strtok(NULL, and_);
+    }
     return IS_FINISHED;
 }
 
@@ -117,3 +129,13 @@ void Projection::separateRelationFromColumn(void){
     cout << "RELATION: " << relation_index << " AND COLUMN: " << column << endl;
 }
 
+/********************************* PREDICATES FUNCTIONS *********************************/
+Predicates::Predicates() {memset(predicate, '\0', sizeof(predicate));}
+
+Predicates::~Predicates() {}
+
+void Predicates::setPredicates(char* prdct) { strcpy(predicate, prdct); 
+cout << "SEPARATED PREDICATES: ";
+for(int i=0; i<15; i++) cout << predicate[i] ;
+cout << endl;
+}
