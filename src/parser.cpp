@@ -88,7 +88,8 @@ void Query::ParseProjections(char* projection) {
     token = strtok(projection, space);
     while( token != NULL ) { 
         projections[index++]->setRelation_Column_Pair(token);
-        token = strtok(NULL, space);
+        projections[index-1]->separateRelationFromColumn(); // store relation and column to be summed
+        token = strtok(NULL, space); // find next relation-column pair
     }
 }
 
@@ -106,10 +107,13 @@ void Projection::setColumn(const int col) { column = col; }
 
 int Projection::getColumn(void) { return column;}
 
-void Projection::setRelation_Column_Pair(char* relation_column) { 
-    strcpy(relation_column_pair, relation_column);
-    cout << "Projection array: " ;
-    for(int i=0; i<5; i++) cout << relation_column_pair[i];
-    cout <<  endl;
- }
+void Projection::setRelation_Column_Pair(char* relation_column) { strcpy(relation_column_pair, relation_column); }
+
+void Projection::separateRelationFromColumn(void){
+    // convert char to int
+    relation_index = relation_column_pair[0] - '0';
+    column = relation_column_pair[2] - '0';
+
+    cout << "RELATION: " << relation_index << " AND COLUMN: " << column << endl;
+}
 
