@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# cleaning all .o files from directories
+make clean
+
+# invoke makefile
+if make -f Makefile; then
+    echo "Compilation all done."
+else
+    echo "An error occured during compilation, exit."
+    exit
+fi
+
+# execute code
+echo "Executing..";
+./program $1
