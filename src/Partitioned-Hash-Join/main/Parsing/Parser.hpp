@@ -3,7 +3,7 @@
 #include <functional>
 #include <string>
 #include <vector>
-#include "../Relation/Relation.hpp"
+#include "../../Relation/Relation.hpp"
 //---------------------------------------------------------------------------
 struct SelectInfo {
    /// Relation id

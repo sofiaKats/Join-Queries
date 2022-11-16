@@ -55,6 +55,7 @@ void Relation::loadRelation(const char* fileName)
 Relation::Relation(const char* fileName) : ownsMemory(false)
   // Constructor that loads relation from disk
 {
+  cout << "A Relation was created!" << endl;
   loadRelation(fileName);
 }
 //---------------------------------------------------------------------------

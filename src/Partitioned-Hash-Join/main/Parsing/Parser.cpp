@@ -189,15 +189,15 @@ static void dumpPart(stringstream& ss,vector<T> elements)
   }
 }
 //---------------------------------------------------------------------------
-template <typename T>
-static void dumpPartSQL(stringstream& ss,vector<T> elements)
-{
-  for (unsigned i=0;i<elements.size();++i) {
-    ss << elements[i].dumpSQL();
-    if (i<elements.size()-1)
-      ss << T::delimiterSQL;
-  }
-}
+// template <typename T>
+// static void dumpPartSQL(stringstream& ss,vector<T> elements)
+// {
+//   for (unsigned i=0;i<elements.size();++i) {
+//     ss << elements[i].dumpSQL();
+//     if (i<elements.size()-1)
+//       ss << T::delimiterSQL;
+//   }
+// }
 //---------------------------------------------------------------------------
 string QueryInfo::dumpText()
   // Dump text format
@@ -221,34 +221,34 @@ string QueryInfo::dumpText()
   return text.str();
 }
 //---------------------------------------------------------------------------
-string QueryInfo::dumpSQL()
-  // Dump SQL
-{
-  stringstream sql;
-  sql << "SELECT ";
-  for (unsigned i=0;i<selections.size();++i) {
-    sql << selections[i].dumpSQL(true);
-    if (i<selections.size()-1)
-      sql << ", ";
-  }
+// string QueryInfo::dumpSQL()
+//   // Dump SQL
+// {
+//   stringstream sql;
+//   sql << "SELECT ";
+//   for (unsigned i=0;i<selections.size();++i) {
+//     sql << selections[i].dumpSQL(true);
+//     if (i<selections.size()-1)
+//       sql << ", ";
+//   }
 
-  sql << " FROM ";
-  for (unsigned i=0;i<relationIds.size();++i) {
-    sql << "r" << relationIds[i] << " " << wrapRelationName(i);
-    if (i<relationIds.size()-1)
-      sql << ", ";
-  }
+//   sql << " FROM ";
+//   for (unsigned i=0;i<relationIds.size();++i) {
+//     sql << "r" << relationIds[i] << " " << wrapRelationName(i);
+//     if (i<relationIds.size()-1)
+//       sql << ", ";
+//   }
 
-  sql << " WHERE ";
-  dumpPartSQL(sql,predicates);
-  if (predicates.size()&&filters.size())
-    sql << " and ";
-  dumpPartSQL(sql,filters);
+//   sql << " WHERE ";
+//   dumpPartSQL(sql,predicates);
+//   if (predicates.size()&&filters.size())
+//     sql << " and ";
+//   dumpPartSQL(sql,filters);
 
-  sql << ";";
+//   sql << ";";
 
-  return sql.str();
-}
+//   return sql.str();
+// }
 //---------------------------------------------------------------------------
 QueryInfo::QueryInfo(string rawQuery) { parseQuery(rawQuery); }
 //---------------------------------------------------------------------------

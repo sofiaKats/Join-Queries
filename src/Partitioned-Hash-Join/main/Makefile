@@ -1,5 +1,5 @@
 EXEC = program
-OBJS = Main.o ../partition-phase/Partition.o ../partition-phase/PartitionedHashJoin.o Parser.o ../hopscotch/src/Index.o ../hopscotch/src/Hashtable.o
+OBJS = main.o ../partition-phase/Partition.o ../partition-phase/PartitionedHashJoin.o ../hopscotch/src/Index.o ../hopscotch/src/Hashtable.o ../Relation/Relation.cpp Parsing/Operators.o Parsing/Parser.o Parsing/Joiner.o
 CFLAGS = -std=c++11 -Wno-unused-parameter -g -w
 
 $(EXEC): $(OBJS)
@@ -8,4 +8,4 @@ $(EXEC): $(OBJS)
 run:
 	./$(EXEC)
 clean:
-	rm -rf ./$(EXEC) *.o ../partition-phase/*.o ../hopscotch/src/*.o
+	rm -rf ./$(EXEC) *.o ../partition-phase/*.o ../hopscotch/src/*.o ./Parsing/*.o

@@ -3,8 +3,7 @@
 #include <cstdint>
 #include <set>
 #include "Operators.hpp"
-#include "../Relation/Relation.hpp"
-#include "Parser.hpp"
+
 //---------------------------------------------------------------------------
 class Joiner {
 

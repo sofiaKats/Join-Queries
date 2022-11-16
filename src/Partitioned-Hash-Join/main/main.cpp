@@ -1,6 +1,6 @@
 #include <iostream>
-#include "Joiner.hpp"
-#include "Parser.hpp"
+#include "./Parsing/Joiner.hpp"
+#include "./Parsing/Parser.hpp"
 
 using namespace std;
 //---------------------------------------------------------------------------
@@ -15,12 +15,14 @@ int main(int argc, char* argv[]) {
       joiner.addRelation(line.c_str());
    }
 
+   cout << "No more Relations!" << endl;
+
    // Preparation phase (not timed)
    // Build histograms, indexes,...
 
    QueryInfo i;
    while (getline(cin, line)) {
-     cout << line<<endl;
+      cout << line<<endl;
       if (line == "F") continue; // End of a batch
       i.parseQuery(line);
       //cout << joiner.join(i);
