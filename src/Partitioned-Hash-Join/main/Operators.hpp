@@ -7,7 +7,7 @@
 #include <unordered_set>
 #include <vector>
 #include <set>
-#include "Relation.hpp"
+#include "../Relation/Relation.hpp"
 #include "Parser.hpp"
 //---------------------------------------------------------------------------
 namespace std {
