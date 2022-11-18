@@ -12,22 +12,22 @@ void Relation::loadRelation(const char* fileName)
 {
   int fd = open(fileName, O_RDONLY);
   if (fd==-1) {
-    throw "* cannot open file";
+    throw runtime_error("* cannot open file");
   }
   // Obtain file size
   struct stat sb;
   if (fstat(fd,&sb)==-1){
-    throw "* fstat";
+    throw runtime_error("* fstat");
   }
 
   auto length=sb.st_size;
 
   if (length<16) {
-    throw "* file does not contain a valid header";
+    throw runtime_error("* file does not contain a valid header");
   }
   char* addr=static_cast<char*>(mmap(nullptr,length,PROT_READ,MAP_PRIVATE,fd,0u));
   if (addr==MAP_FAILED) {
-    throw "* cannot mmap file";
+    throw runtime_error("* cannot mmap file");
   }
 
   this->size=*reinterpret_cast<uint64_t*>(addr);
@@ -53,12 +53,7 @@ Relation::Relation(const char* fileName) : ownsMemory(false)
   // Constructor that loads relation from disk
 {
   cout << "- loading relation..." << endl;
-  try{
-    loadRelation(fileName);
-  }
-  catch(const char* exc){
-    cout << exc << endl;
-  }
+  loadRelation(fileName);
 }
 //---------------------------------------------------------------------------
 Relation::~Relation()

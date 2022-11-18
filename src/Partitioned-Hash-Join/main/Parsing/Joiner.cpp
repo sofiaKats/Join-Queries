@@ -21,8 +21,9 @@ Relation& Joiner::getRelation(unsigned relationId)
 // Loads a relation from disk
 {
   if (relationId >= relations.size()) {
-    cerr << "Relation with id: " << relationId << " does not exist" << endl;
-    throw;
+    char error[256];
+    sprintf(error, "* relation with id: %d does not exist", relationId);
+    throw runtime_error(error);
   }
   return relations[relationId];
 }
@@ -32,11 +33,12 @@ unique_ptr<Operator> Joiner::addScan(set<unsigned>& usedRelations,SelectInfo& in
 {
   usedRelations.emplace(info.binding);
   vector<FilterInfo> filters;
-    for (auto& f : query.filters) {
-      if (f.filterColumn.binding==info.binding) {
-        filters.emplace_back(f);
-      }
+  for (auto& f : query.filters) {
+    if (f.filterColumn.binding==info.binding) {
+      filters.emplace_back(f);
     }
+  }
+
   return filters.size()?make_unique<FilterScan>(getRelation(info.relId),filters):make_unique<Scan>(getRelation(info.relId),info.binding);
 }
 //---------------------------------------------------------------------------
@@ -58,11 +60,8 @@ static QueryGraphProvides analyzeInputOfJoin(set<unsigned>& usedRelations,Select
 string Joiner::join(QueryInfo& query)
   // Executes a join query
 {
-  //cerr << query.dumpText() << endl;
   set<unsigned> usedRelations;
 
-  // We always start with the first join predicate and append the other joins to it (--> left-deep join trees)
-  // You might want to choose a smarter join ordering ...
   auto& firstJoin=query.predicates[0];
   auto left=addScan(usedRelations,firstJoin.left,query);
   auto right=addScan(usedRelations,firstJoin.right,query);
@@ -72,6 +71,7 @@ string Joiner::join(QueryInfo& query)
     auto& pInfo=query.predicates[i];
     auto& leftInfo=pInfo.left; auto& rightInfo=pInfo.right;
     unique_ptr<Operator> left, right;
+
     switch(analyzeInputOfJoin(usedRelations,leftInfo,rightInfo)) {
       case QueryGraphProvides::Left:
         left=move(root);
@@ -98,7 +98,6 @@ string Joiner::join(QueryInfo& query)
 
   Checksum checkSum(move(root),query.selections);
   checkSum.run();
-
 
   stringstream out;
   auto& results=checkSum.checkSums;
