@@ -136,6 +136,19 @@ void QueryInfo::clear()
   selections.clear();
 }
 //---------------------------------------------------------------------------
+static string wrapRelationName(uint64_t id)
+  // Wraps relation id into quotes to be a SQL compliant string
+{
+  return "\""+to_string(id)+"\"";
+}
+//---------------------------------------------------------------------------
+string SelectInfo::dumpSQL(bool addSUM)
+  // Appends a selection info to the stream
+{
+  auto innerPart=wrapRelationName(binding)+".c"+to_string(colId);
+  return addSUM?"SUM("+innerPart+")":innerPart;
+}
+//---------------------------------------------------------------------------
 string SelectInfo::dumpText()
   // Dump text format
 {
@@ -148,10 +161,94 @@ string FilterInfo::dumpText()
   return filterColumn.dumpText()+static_cast<char>(comparison)+to_string(constant);
 }
 //---------------------------------------------------------------------------
+string FilterInfo::dumpSQL()
+  // Dump text format
+{
+  return filterColumn.dumpSQL()+static_cast<char>(comparison)+to_string(constant);
+}
+//---------------------------------------------------------------------------
 string PredicateInfo::dumpText()
   // Dump text format
 {
   return left.dumpText()+'='+right.dumpText();
 }
 //---------------------------------------------------------------------------
+string PredicateInfo::dumpSQL()
+  // Dump text format
+{
+  return left.dumpSQL()+'='+right.dumpSQL();
+}
+//---------------------------------------------------------------------------
+template <typename T>
+static void dumpPart(stringstream& ss,vector<T> elements)
+{
+  for (unsigned i=0;i<elements.size();++i) {
+    ss << elements[i].dumpText();
+    if (i<elements.size()-1)
+      ss << T::delimiter;
+  }
+}
+//---------------------------------------------------------------------------
+template <typename T>
+static void dumpPartSQL(stringstream& ss,vector<T> elements)
+{
+  for (unsigned i=0;i<elements.size();++i) {
+    ss << elements[i].dumpSQL();
+    if (i<elements.size()-1)
+      ss << T::delimiterSQL;
+  }
+}
+//---------------------------------------------------------------------------
+string QueryInfo::dumpText()
+  // Dump text format
+{
+  stringstream text;
+  // Relations
+  for (unsigned i=0;i<relationIds.size();++i) {
+    text << relationIds[i];
+    if (i<relationIds.size()-1)
+      text << " ";
+  }
+  text << "|";
+
+  dumpPart(text,predicates);
+  if (predicates.size()&&filters.size())
+    text << PredicateInfo::delimiter;
+  dumpPart(text,filters);
+  text << "|";
+  dumpPart(text,selections);
+
+  return text.str();
+}
+//---------------------------------------------------------------------------
+string QueryInfo::dumpSQL()
+  // Dump SQL
+{
+  stringstream sql;
+  sql << "SELECT ";
+  for (unsigned i=0;i<selections.size();++i) {
+    sql << selections[i].dumpSQL(true);
+    if (i<selections.size()-1)
+      sql << ", ";
+  }
+
+  sql << " FROM ";
+  for (unsigned i=0;i<relationIds.size();++i) {
+    sql << "r" << relationIds[i] << " " << wrapRelationName(i);
+    if (i<relationIds.size()-1)
+      sql << ", ";
+  }
+
+  sql << " WHERE ";
+  dumpPartSQL(sql,predicates);
+  if (predicates.size()&&filters.size())
+    sql << " and ";
+  dumpPartSQL(sql,filters);
+
+  sql << ";";
+
+  return sql.str();
+}
+//---------------------------------------------------------------------------
 QueryInfo::QueryInfo(string rawQuery) { parseQuery(rawQuery); }
+//---------------------------------------------------------------------------

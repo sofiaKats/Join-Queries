@@ -7,21 +7,23 @@ using namespace std;
 int main(int argc, char* argv[]) {
 
    Joiner joiner;
-   // Read join relations
    string line;
+
+   cout << ">>> Insert Relations:" << endl;
 
    while (getline(cin, line)) {
       if (line == "Done") break;
       joiner.addRelation(line.c_str());
    }
 
-   cout << "No more Relations!" << endl;
-
    // Preparation phase (not timed)
    // Build histograms, indexes,...
+   cout << joiner.getRelation(0).size<<endl;
+
+   cout << ">>> Insert Queries:" << endl;
 
    QueryInfo i;
-   line = "3 0 1|0.2=1.0&0.1=2.0&0.2=0.1|1.2 0.1";
+   line = "3 0 1|0.2=1.0&0.1=2.0&0.2>3000|1.2 0.1";
    i.parseQuery(line);
    // while (getline(cin, line)) {
    //    cout << line<<endl;
@@ -29,13 +31,8 @@ int main(int argc, char* argv[]) {
    //    i.parseQuery(line);
    //    //cout << joiner.join(i);
    // }
-   //cout << i.predicates[1].left<<endl;
-   //cout << i.predicates[1].right<<endl;
    //cout << i.predicates[0].left.relId<<endl;
    //cout << i.predicates[0].right.relId<<endl;
    cout << i.filters[0].filterColumn.relId<<endl;
-
-   //cout << i.filters[1].constant<<endl;
-
    return 0;
 }
