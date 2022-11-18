@@ -11,20 +11,22 @@ int main(int argc, char* argv[]) {
 
    cout << ">>> Insert Relations:" << endl;
 
+   const string workspace = "./workloads/small/";
+
    while (getline(cin, line)) {
       if (line == "Done") break;
-      joiner.addRelation(line.c_str());
+      joiner.addRelation((workspace + line).c_str());
    }
 
    // Preparation phase (not timed)
    // Build histograms, indexes,...
-   cout << joiner.getRelation(0).size<<endl;
 
    cout << ">>> Insert Queries:" << endl;
 
    QueryInfo i;
    line = "3 0 1|0.2=1.0&0.1=2.0&0.2>3000|1.2 0.1";
    i.parseQuery(line);
+   joiner.join(i);
    // while (getline(cin, line)) {
    //    cout << line<<endl;
    //    if (line == "F") continue; // End of a batch
