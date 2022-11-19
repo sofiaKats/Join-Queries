@@ -23,6 +23,8 @@ typedef struct Column {
   Column(uint32_t size){
     tuples = new Tuple[size];
     num_tuples = size;
+    for (int i = 0; i < size; i++)
+      tuples[i].key = i;
   }
   ~Column(){
     delete[] tuples;

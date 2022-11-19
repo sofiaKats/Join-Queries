@@ -27,7 +27,6 @@ class Operator {
   /// The tmp results
   std::vector<std::vector<uint64_t>> tmpResults;
 
-
   public:
   /// Require a column and add it to results
   virtual bool require(SelectInfo info) = 0;
@@ -102,7 +101,6 @@ class Join : public Operator {
   std::unordered_set<SelectInfo> requestedColumns;
   /// Left/right columns that have been requested
   std::vector<SelectInfo> requestedColumnsLeft,requestedColumnsRight;
-
 
   /// The entire input data of left and right
   std::vector<uint64_t*> leftInputData,rightInputData;

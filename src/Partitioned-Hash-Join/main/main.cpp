@@ -32,7 +32,19 @@ int main(int argc, char* argv[]) {
      QueryInfo i;
      line = "3 0 1|0.2=1.0&0.1=2.0&0.2>3000|1.2 0.1";
      i.parseQuery(line);
-     joiner.join(i);
+
+     //--- Testing ---
+
+     //string results = joiner.joinTest(i);
+
+     //return 0;
+     //---------------
+
+     string results = joiner.join(i);
+
+     if (results != "")
+      cout << "\n--- Join Results ---\n\n" << results << endl;
+
      // while (getline(cin, line)) {
      //    cout << line<<endl;
      //    if (line == "F") continue; // End of a batch
@@ -41,11 +53,11 @@ int main(int argc, char* argv[]) {
      // }
      //cout << i.predicates[0].left.relId<<endl;
      //cout << i.predicates[0].right.relId<<endl;
-     cout << i.filters[0].filterColumn.relId<<endl;
+
      return 0;
    }
    catch (const exception& e){
      cout << e.what() << endl;
+     return 1;
    }
-
 }

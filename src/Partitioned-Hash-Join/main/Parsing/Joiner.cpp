@@ -8,6 +8,9 @@
 #include <sstream>
 #include <vector>
 #include "Parser.hpp"
+#include "../../partition-phase/PartitionedHashJoin.h"
+#include "../../partition-phase/Structures.h"
+
 //---------------------------------------------------------------------------
 using namespace std;
 //---------------------------------------------------------------------------
@@ -38,7 +41,6 @@ unique_ptr<Operator> Joiner::addScan(set<unsigned>& usedRelations,SelectInfo& in
       filters.emplace_back(f);
     }
   }
-
   return filters.size()?make_unique<FilterScan>(getRelation(info.relId),filters):make_unique<Scan>(getRelation(info.relId),info.binding);
 }
 //---------------------------------------------------------------------------
@@ -55,6 +57,19 @@ static QueryGraphProvides analyzeInputOfJoin(set<unsigned>& usedRelations,Select
   if (usedLeft&&usedRight)
     return QueryGraphProvides::Both;
   return QueryGraphProvides::None;
+}
+//---------------------------------------------------------------------------
+string Joiner::joinTest(QueryInfo& query)
+  // Executes a join query
+{
+  int relId = query.predicates[0].left.binding;
+  int colId = query.predicates[0].left.colId;
+  relId = query.predicates[0].right.binding;
+  colId = query.predicates[0].right.colId;
+
+  //unique_ptr<Operator>&& right = query.predicates[0].right;
+  //unique_ptr<Operator> root=make_unique<PartitionedHashJoin>();
+
 }
 //---------------------------------------------------------------------------
 string Joiner::join(QueryInfo& query)
@@ -95,7 +110,6 @@ string Joiner::join(QueryInfo& query)
         break;
     };
   }
-
   Checksum checkSum(move(root),query.selections);
   checkSum.run();
 
@@ -109,4 +123,3 @@ string Joiner::join(QueryInfo& query)
   out << "\n";
   return out.str();
 }
-//---------------------------------------------------------------------------
