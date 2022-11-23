@@ -5,13 +5,16 @@
 
 class PartitionedHashJoin {
 private:
-  Column* relR;
-  Column* relS;
+  Relation* relR;
+  Relation* relS;
+  RowIds* rowsR;
+  RowIds* rowsS;
+
   void Merge(Part*, Part*, int, int);
   int ExistsInPrefix(int, PrefixSum*);
 
 public:
-  PartitionedHashJoin(Column*, Column*);
+  PartitionedHashJoin(Relation& RowIds& ,Relation&, RowIds&);
   void Solve();
   int PartitionRec(Part*, Column*, int = MAX_PASSES, int = N, int = 0, int = 0, int = -1);
   void BuildHashtables(Part*);

@@ -83,3 +83,22 @@ typedef struct Part{
     delete rel;
   }
 } Part;
+
+typedef struct RowIds{
+  uint32_t* arr;
+  uint32_t size;
+  RowIds(uint32_t size){
+    this->size = size;
+    arr = new uint32_t[size];
+  }
+} RowIds;
+
+
+typedef struct UsedRelations{
+  RowIds** relations;
+  uint32_t size;
+  UsedRelations(uint32_t size){
+    this->size = size;
+    relations = new RowIds*[size];
+  }
+} UsedRelations;

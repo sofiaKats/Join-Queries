@@ -2,7 +2,7 @@
 
 #define L2CACHE 256000
 
-PartitionedHashJoin::PartitionedHashJoin(Column* relR, Column* relS){
+PartitionedHashJoin::PartitionedHashJoin(Relation& relR int colR, RowIds& rowsR, Relation& relS int colS, RowIds& rowsS){
   this->relR = relR;
   this->relS = relS;
 }
