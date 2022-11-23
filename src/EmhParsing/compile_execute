@@ -13,4 +13,4 @@ fi
 
 # execute code
 echo "Executing..";
-./program $1
+./parser

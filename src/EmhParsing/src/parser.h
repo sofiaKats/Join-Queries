@@ -13,6 +13,15 @@ using namespace std;
 
 class Predicates {
     char predicate[15]; // store each predicate to later check if it is filter predicate or join predicate
+    int relation_index_1;// represents the relation BEFORE the operation of the predicate
+    int column_1;        // represents the column BEFORE the operation of the predicate
+    char operation;      // represents the operation to be done in the particular predicate
+    bool relation_after_operation; // flag to check if there is a relation after the operation of the predicate
+    // can be used to speed up the filter process of the relations
+    bool number_after_operation; // flag to check if there is a number after the operation of the predicate
+    int number;      // the number filter after the operation if it exists    
+    int relation_index_2; // the relation after the operation if it exists
+    int column_2;  // the column after the operation if it exists
 public:
     Predicates();
     ~Predicates();

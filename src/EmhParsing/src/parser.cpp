@@ -130,12 +130,54 @@ void Projection::separateRelationFromColumn(void){
 }
 
 /********************************* PREDICATES FUNCTIONS *********************************/
-Predicates::Predicates() {memset(predicate, '\0', sizeof(predicate));}
+Predicates::Predicates()
+:number(0), relation_index_1(-1), relation_index_2(-1), column_1(-1), column_2(-1), relation_after_operation(false), number_after_operation(false), operation('x')
+{memset(predicate, '\0', sizeof(predicate));}
 
 Predicates::~Predicates() {}
 
-void Predicates::setPredicates(char* prdct) { strcpy(predicate, prdct); 
-cout << "SEPARATED PREDICATES: ";
-for(int i=0; i<15; i++) cout << predicate[i] ;
-cout << endl;
+void Predicates::setPredicates(char* prdct) { 
+    strcpy(predicate, prdct); 
+    // cout << "SEPARATED PREDICATES: ";
+    // for(int i=0; i<15; i++) cout << predicate[i] ;
+    cout << endl;
+    // convert char to int
+    relation_index_1 = predicate[0] - '0';
+    column_1 = predicate[2] - '0';
+    cout << "relation1: " << relation_index_1 << " column1: " << column_1;
+
+    // when small.work has > or < it's an operation with a number
+    if(predicate[3] == '>' || predicate[3] == '<') {
+        operation = predicate[3];
+        number_after_operation = true;
+        // since the number is stored one by one digit on the array we have to recreate it
+        int decimal = 1;
+        for(int i=14; i>3; i--) {
+            if(predicate[i] != '\0') {
+                number += (predicate[i] - '0') * decimal;
+                decimal*=10;
+            }
+        }
+        cout << " operation: " << operation << " number: " << number << endl;
+    }else if(predicate[3] == '=') {
+        operation = predicate[3];
+        // if the 5th index is not '.' (dot character), it's a number not a relation
+        if(predicate[5] != '.') {
+            number_after_operation = true;
+            // since the number is stored one by one digit on the array we have to recreate it
+            int decimal = 1;
+            for(int i=14; i>3; i--) {
+                if(predicate[i] != '\0') {
+                    number += (predicate[i] - '0') * decimal;
+                    decimal*=10;
+                }
+            }
+            cout << " operation: " << operation << " number: " << number << endl;
+        }else if(predicate[5] == '.') {
+            relation_after_operation = true;
+            relation_index_2 = predicate[4] - '0';
+            column_2 = predicate[6] - '0';
+            cout << " operation: " << operation << " relation2: " << relation_index_2 << " column2: " << column_2 << endl;
+        }
+    }
 }
