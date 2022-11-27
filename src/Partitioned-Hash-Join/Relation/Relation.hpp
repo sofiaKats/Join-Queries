@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
-#include <string>
-#include <vector>
+#include <unistd.h>
+
 
 using RelationId = unsigned;
 //---------------------------------------------------------------------------
@@ -17,8 +17,7 @@ class Relation {
   uint64_t size;
   uint64_t numColumns;
   /// The join column containing the keys
-  std::vector<uint64_t*> columns;
-  uint64_t** columnsArr;
+  uint64_t** columns;
   /// Constructor using mmap
   Relation(const char* fileName);
   /// Delete copy constructor

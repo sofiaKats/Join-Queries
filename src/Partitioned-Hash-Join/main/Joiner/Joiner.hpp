@@ -8,7 +8,8 @@ class Joiner {
 
   public:
   /// The relations that might be joined
-  std::vector<Relation> relations;
+  Relation** relations;
+  int size;
   /// Add relation
   void AddRelation(const char* fileName);
   /// Get relation
@@ -17,5 +18,7 @@ class Joiner {
   RelColumn* GetRelationCol(unsigned, unsigned);
   /// Joins a given set of relations
   string Join(QueryInfo& i);
+  /// constructor
+  Joiner(int size);
 };
 //---------------------------------------------------------------------------

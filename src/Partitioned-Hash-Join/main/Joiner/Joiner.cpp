@@ -1,42 +1,42 @@
 #include "Joiner.hpp"
 
+Joiner::Joiner(int size){
+  this->size = size;
+  relations = new Relation*[size]{NULL};
+}
+
 void Joiner::AddRelation(const char* fileName)
 // Loads a relation from disk
 {
-  relations.emplace_back(fileName);
+  for (int i = 0; i < size; i++)
+  if (relations[i] == NULL){
+    relations[i] = new Relation(fileName);
+    return;
+  }
 }
 //---------------------------------------------------------------------------
 Relation& Joiner::GetRelation(unsigned relationId)
 // Loads a relation from disk
 {
-  if (relationId >= relations.size()) {
+  if (relationId >= size) {
     char error[256];
     sprintf(error, "* relation with id: %d does not exist", relationId);
     throw runtime_error(error);
   }
-  return relations[relationId];
+  return *relations[relationId];
 }
 
 RelColumn* Joiner::GetRelationCol(unsigned relationId, unsigned colId){
-    uint64_t* column = GetRelation(relationId).columnsArr[colId];
-    return NULL;
+    Relation& rel = GetRelation(relationId);
+    RelColumn* relColumn = new RelColumn(rel.size);
+    for (int i = 0; i < rel.size; i++){
+      relColumn->tuples[i].key = i;
+      relColumn->tuples[i].payload = rel.columns[colId][i];
+      cout << relColumn->tuples[i].key << " " << relColumn->tuples[i].payload << endl;
+    }
+    return relColumn;
 }
-
-enum QueryGraphProvides {  Left, Right, Both, None };
-//---------------------------------------------------------------------------
-static QueryGraphProvides analyzeInputOfJoin(set<unsigned>& usedRelations,SelectInfo& leftInfo,SelectInfo& rightInfo)
-  // Analyzes inputs of join
-{
-  bool usedLeft=usedRelations.count(leftInfo.binding);
-  bool usedRight=usedRelations.count(rightInfo.binding);
-
-  if (usedLeft^usedRight)
-    return usedLeft?QueryGraphProvides::Left:QueryGraphProvides::Right;
-  if (usedLeft&&usedRight)
-    return QueryGraphProvides::Both;
-  return QueryGraphProvides::None;
-}
-//---------------------------------------------------------------------------
+//-----------------------------------------------------------------------
 string Joiner::Join(QueryInfo& query)
   // Executes a join query
 { //"3 0 1|0.2=1.0&0.1=2.0&0.2>3000|1.2 0.1";
