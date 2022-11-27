@@ -62,13 +62,17 @@ static QueryGraphProvides analyzeInputOfJoin(set<unsigned>& usedRelations,Select
 string Joiner::joinTest(QueryInfo& query)
   // Executes a join query
 { //"3 0 1|0.2=1.0&0.1=2.0&0.2>3000|1.2 0.1";
+
   int relId = query.predicates[0].left.relId;
   int colId = query.predicates[0].left.colId;
   relId = query.predicates[0].right.binding;
   colId = query.predicates[0].right.colId;
 
+
+  
+
   //unique_ptr<Operator>&& right = query.predicates[0].right;
-  //unique_ptr<Operator> root=make_unique<PartitionedHashJoin>();
+  unique_ptr<Operator> root=make_unique<PartitionedHashJoin>(relations[relIdR], );
 
 }
 //---------------------------------------------------------------------------

@@ -19,8 +19,6 @@ class Relation {
   /// The join column containing the keys
   std::vector<uint64_t*> columns;
   uint64_t** columnsArr;
-  /// Constructor without mmap
-  Relation(uint64_t size,std::vector<uint64_t*>&& columns) : ownsMemory(true), size(size), columns(columns) {}
   /// Constructor using mmap
   Relation(const char* fileName);
   /// Delete copy constructor

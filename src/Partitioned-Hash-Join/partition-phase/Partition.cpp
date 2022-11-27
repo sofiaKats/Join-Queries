@@ -1,6 +1,6 @@
 #include "Partition.h"
 
-Partition::Partition(Column* rel, int n, int from, int to){
+Partition::Partition(RelColumn* rel, int n, int from, int to){
   this->n = n;
   this->rel = rel;
   this->startIndex = from;
@@ -17,7 +17,7 @@ Part* Partition::BuildPartitionedTable(){
   Hist* hist = CreateHistogram();
 
   parted->prefixSum = CreatePrefixSum(hist);
-  parted->rel = new Column(endIndex - startIndex);
+  parted->rel = new RelColumn(endIndex - startIndex);
 
   for (int i = startIndex; i < endIndex; i++){
     int hash = Hash(rel->tuples[i].payload, n);

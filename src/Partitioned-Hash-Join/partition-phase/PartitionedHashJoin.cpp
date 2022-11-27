@@ -2,20 +2,20 @@
 
 #define L2CACHE 256000
 
-PartitionedHashJoin::PartitionedHashJoin(Relation& relR int colR, RowIds& rowsR, Relation& relS int colS, RowIds& rowsS){
+PartitionedHashJoin::PartitionedHashJoin(RelColumn* relR, RelColumn* relS){
   this->relR = relR;
   this->relS = relS;
 }
 
 void PartitionedHashJoin::Solve(){
   Part* partitionedR = new Part();
-  partitionedR->rel = new Column(relR->num_tuples);
+  partitionedR->rel = new RelColumn(relR->num_tuples);
   int passCount = PartitionRec(partitionedR, relR);
   //ONLY FOR RELATION R
   BuildHashtables(partitionedR);
 
   Part* partitionedS = new Part();
-  partitionedS->rel = new Column(relS->num_tuples);
+  partitionedS->rel = new RelColumn(relS->num_tuples);
   PartitionRec(partitionedS, relS, passCount);
 
   //PrintPart(partitionedR, true);
@@ -55,7 +55,7 @@ void PartitionedHashJoin::Solve(){
    }
 }
 
-int PartitionedHashJoin::PartitionRec(Part* finalPart, Column* rel, int maxPasses, int n, int passNum, int from, int to){
+int PartitionedHashJoin::PartitionRec(Part* finalPart, RelColumn* rel, int maxPasses, int n, int passNum, int from, int to){
   passNum++;
   n++;
   int passCount = 0;
@@ -155,7 +155,7 @@ void PartitionedHashJoin::PrintHashtables(Part* part){
   }
 }
 
-void PartitionedHashJoin::PrintRelation(Column* rel){
+void PartitionedHashJoin::PrintRelation(RelColumn* rel){
   cout << "\n----- Relation Table -----\n";
   for (int i = 0 ; i < rel->num_tuples; i++){
     cout << rel->tuples[i].payload << endl;

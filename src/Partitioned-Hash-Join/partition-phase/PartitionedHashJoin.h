@@ -5,22 +5,19 @@
 
 class PartitionedHashJoin {
 private:
-  Relation* relR;
-  Relation* relS;
-  RowIds* rowsR;
-  RowIds* rowsS;
-
+  RelColumn* relR;
+  RelColumn* relS;
   void Merge(Part*, Part*, int, int);
   int ExistsInPrefix(int, PrefixSum*);
 
 public:
-  PartitionedHashJoin(Relation& RowIds& ,Relation&, RowIds&);
+  PartitionedHashJoin(RelColumn*, RelColumn*);
   void Solve();
-  int PartitionRec(Part*, Column*, int = MAX_PASSES, int = N, int = 0, int = 0, int = -1);
+  int PartitionRec(Part*, RelColumn*, int = MAX_PASSES, int = N, int = 0, int = 0, int = -1);
   void BuildHashtables(Part*);
   void Join(Part*, Part*);
   void PrintHashtables(Part*);
-  void PrintRelation(Column*);
+  void PrintRelation(RelColumn*);
   void PrintPrefix(PrefixSum*);
   void PrintPart(Part*, bool = false);
 };

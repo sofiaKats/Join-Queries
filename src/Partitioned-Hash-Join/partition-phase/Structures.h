@@ -1,7 +1,5 @@
 #pragma once
-
 #include <iostream>
-#include <cstdint>
 #include "../Relation/Relation.hpp"
 #include "../hopscotch/src/Hashtable.h"
 
@@ -12,24 +10,20 @@ typedef struct Tuple {
   int32_t payload = 0;
 } Tuple;
 
-/**
-* Type definition for a relation.
-* It consists of an array of tuples and a size of the relation.
-*/
-typedef struct Column {
+typedef struct RelColumn {
   Tuple* tuples;
   uint32_t num_tuples;
 
-  Column(uint32_t size){
+  RelColumn(uint32_t size){
     tuples = new Tuple[size];
     num_tuples = size;
     for (int i = 0; i < size; i++)
       tuples[i].key = i;
   }
-  ~Column(){
+  ~RelColumn(){
     delete[] tuples;
   }
-} Column;
+} RelColumn;
 
 typedef struct Hist{
   uint32_t length;
@@ -66,7 +60,7 @@ typedef struct PrefixSum{
 } PrefixSum;
 
 typedef struct Part{
-  Column* rel = NULL;
+  RelColumn* rel = NULL;
   PrefixSum* prefixSum = NULL;
   Hashtable** hashtables = NULL;
   ~Part(){
@@ -92,7 +86,6 @@ typedef struct RowIds{
     arr = new uint32_t[size];
   }
 } RowIds;
-
 
 typedef struct UsedRelations{
   RowIds** relations;

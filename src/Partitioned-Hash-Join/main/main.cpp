@@ -1,5 +1,5 @@
 #include <iostream>
-#include "./Parsing/Joiner.hpp"
+#include "./Joiner/Joiner.hpp"
 #include "./Parsing/Parser.hpp"
 
 using namespace std;
@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
      while (getline(cin, line)) {
         if (line == "Done") break;
         try{
-          joiner.addRelation((workspace + line).c_str());
+          joiner.AddRelation((workspace + line).c_str());
         }
         catch(const exception& e){
           cout << e.what() << endl;
@@ -33,14 +33,7 @@ int main(int argc, char* argv[]) {
      line = "3 0 1|0.2=1.0&0.1=2.0&0.2>3000|1.2 0.1";
      i.parseQuery(line);
 
-     //--- Testing ---
-
-     //string results = joiner.joinTest(i);
-
-     //return 0;
-     //---------------
-
-     string results = joiner.join(i);
+     string results = joiner.Join(i);
 
      if (results != "")
       cout << "\n--- Join Results ---\n\n" << results << endl;
