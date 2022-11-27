@@ -30,9 +30,8 @@ RelColumn* Joiner::GetRelationCol(unsigned relationId, unsigned colId){
     Relation& rel = GetRelation(relationId);
     RelColumn* relColumn = new RelColumn(rel.size);
     for (int i = 0; i < rel.size; i++){
-      relColumn->tuples[i].key = i;
       relColumn->tuples[i].payload = rel.columns[colId][i];
-      cout << relColumn->tuples[i].key << " " << relColumn->tuples[i].payload << endl;
+      //cout << relColumn->tuples[i].key << " " << relColumn->tuples[i].payload << endl;
     }
     return relColumn;
 }
@@ -40,10 +39,11 @@ RelColumn* Joiner::GetRelationCol(unsigned relationId, unsigned colId){
 string Joiner::Join(QueryInfo& query)
   // Executes a join query
 { //"3 0 1|0.2=1.0&0.1=2.0&0.2>3000|1.2 0.1";
-  GetRelationCol(query.predicates[0].left.relId, query.predicates[0].left.colId);
+  RelColumn* relR = GetRelationCol(query.predicates[0].left.relId, query.predicates[0].left.colId);
+  RelColumn* relS = GetRelationCol(query.predicates[0].right.relId, query.predicates[0].right.colId);
 
-
-
+  PartitionedHashJoin* phj = new PartitionedHashJoin(relR, relS);
+  phj->Solve();
   /*Checksum checkSum(move(root),query.selections);
   checkSum.run();
 
@@ -56,4 +56,5 @@ string Joiner::Join(QueryInfo& query)
   }
   out << "\n";
   return out.str();*/
+  return "- result -\n";
 }

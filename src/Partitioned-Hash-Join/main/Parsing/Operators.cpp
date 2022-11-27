@@ -4,17 +4,6 @@
 //---------------------------------------------------------------------------
 using namespace std;
 //---------------------------------------------------------------------------
-bool Scan::require(SelectInfo info)
-  // Require a column and add it to results
-{
-  if (info.binding!=relationBinding)
-    return false;
-  assert(info.colId<relation.columns.size());
-  resultColumns.push_back(relation.columns[info.colId]);
-  select2ResultColId[info]=resultColumns.size()-1;
-  return true;
-}
-//---------------------------------------------------------------------------
 void Scan::run()
   // Run
 {
@@ -26,22 +15,6 @@ vector<uint64_t*> Scan::getResults()
   // Get materialized results
 {
   return resultColumns;
-}
-//---------------------------------------------------------------------------
-bool FilterScan::require(SelectInfo info)
-  // Require a column and add it to results
-{
-  if (info.binding!=relationBinding)
-    return false;
-  assert(info.colId<relation.columns.size());
-  if (select2ResultColId.find(info)==select2ResultColId.end()) {
-    // Add to results
-    inputData.push_back(relation.columns[info.colId]);
-    tmpResults.emplace_back();
-    unsigned colId=tmpResults.size()-1;
-    select2ResultColId[info]=colId;
-  }
-  return true;
 }
 //---------------------------------------------------------------------------
 void FilterScan::copy2Result(uint64_t id)

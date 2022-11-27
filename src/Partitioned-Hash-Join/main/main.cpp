@@ -5,8 +5,6 @@
 // TO DO
 // REMOVE STRING STL
 
-using namespace std;
-//---------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
 
   Joiner* joiner;
@@ -15,15 +13,18 @@ int main(int argc, char* argv[]) {
 
   cout << "--- Insert num of files ---\n";
   getline(cin, line);
-  joiner = new Joiner(stoi(line));
+  int filesCount = stoi(line);
+  joiner = new Joiner(filesCount);
 
   cout << ">>> Insert Relations:" << endl;
 
   try{
-    while (getline(cin, line)) {
+    while (filesCount){
+      getline(cin, line);
       if (line == "Done") break;
       try{
         joiner->AddRelation((workspace + line).c_str());
+        filesCount--;
       }
       catch(const exception& e){
         cout << e.what() << endl;
