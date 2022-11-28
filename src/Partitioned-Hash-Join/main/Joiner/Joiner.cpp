@@ -48,19 +48,20 @@ RelColumn* Joiner::GetUsedRelation(unsigned relationId, unsigned colId){
   return relColumn;
 }
 //-----------------------------------------------------------------------
-string Joiner::Join(QueryInfo& query)
+string Joiner::Join(Query* query)
   // Executes a join query
 {
-  UsedRelations* usedRelations = new UsedRelations(query.relationIds.size(), 1000);
-  RelColumn* relR = GetRelationCol(query.predicates[0].left.relId, query.predicates[0].left.colId);
-  RelColumn* relS = GetRelationCol(query.predicates[0].right.relId, query.predicates[0].right.colId);
+  UsedRelations* usedRelations = new UsedRelations(query->number_of_relations, 1000);
+
+  RelColumn* relR = GetRelationCol((unsigned)query->prdcts[0]->relation_index_left,(unsigned) query->prdcts[0]->column_left);
+  RelColumn* relS = GetRelationCol((unsigned)query->prdcts[0]->relation_index_right,(unsigned) query->prdcts[0]->column_right);
 
   PartitionedHashJoin* phj = new PartitionedHashJoin(relR, relS);
-  phj->Solve();
+  phj->Solve(*usedRelations);
 
-  for (unsigned i=1; i<query.predicates.size(); ++i){
-    //GetUsedRelation();
-  }
+  // for (unsigned i=1; i<query.predicates.size(); ++i){
+  //   //GetUsedRelation();
+  // }
 
   /*Checksum checkSum(move(root),query.selections);
   checkSum.run();

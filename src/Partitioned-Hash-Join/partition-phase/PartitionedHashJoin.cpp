@@ -7,7 +7,7 @@ PartitionedHashJoin::PartitionedHashJoin(RelColumn* relR, RelColumn* relS){
   this->relS = relS;
 }
 
-void PartitionedHashJoin::Solve(){
+void PartitionedHashJoin::Solve(UsedRelations& usedRelations){
   Part* partitionedR = new Part();
   partitionedR->rel = new RelColumn(relR->id, relR->num_tuples);
   int passCount = PartitionRec(partitionedR, relR);
@@ -21,7 +21,7 @@ void PartitionedHashJoin::Solve(){
   //PrintPart(partitionedR, true);
   //PrintPart(partitionedS, false);
 
-  Join(partitionedR, partitionedS);
+  Join(usedRelations, partitionedR, partitionedS);
 
   delete partitionedR;
   delete partitionedS;
@@ -137,7 +137,6 @@ void PartitionedHashJoin::Join(UsedRelations& usedRelations, Part* p1, Part* p2)
     }
     //else cout << "------- No tuples in Relation R for partition hash " << hash << " -------" << endl;
   }
-  return NULL;
 }
 
 int PartitionedHashJoin::ExistsInPrefix(int hash, PrefixSum* prefixSum){

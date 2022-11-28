@@ -69,7 +69,7 @@ Query* Parser::OpenFileAndParse() {
 
 /********************************* QUERY FUNCTIONS *********************************/
 
-Query::Query() {
+Query::Query(): number_of_relations(0) {
     for(int i=0 ;i<5; i++) relation[i] = NULL;
     projections = new Projection*[3]; //each query has maximum of 3 columns to sum
     for (int i = 0 ; i < 3; i++) projections[i] = new Projection();
@@ -97,6 +97,7 @@ int Query::ParseRelations(char* relations) {
 
     for(int i=0; i<5; i++)  {
         if(relation[i] != NULL) {
+            number_of_relations++;
             cout << "relation[" << i << "]: " << relation[i] << endl;
         }
     }

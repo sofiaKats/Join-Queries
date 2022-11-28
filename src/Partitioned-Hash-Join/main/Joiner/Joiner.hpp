@@ -2,6 +2,7 @@
 #include "../Parsing/Operators.hpp"
 #include "../../partition-phase/PartitionedHashJoin.h"
 #include "../../partition-phase/Structures.h"
+#include "../../Parser/src/parser.h"
 
 //---------------------------------------------------------------------------
 class Joiner {
@@ -21,7 +22,7 @@ class Joiner {
   /// Get relation column from filtered relation
   RelColumn* GetUsedRelation(uint32_t, uint32_t);
   /// Joins a given set of relations
-  string Join(QueryInfo& i);
+  string Join(Query* query);
   /// constructor
   Joiner(uint32_t, uint32_t);
   ~Joiner();

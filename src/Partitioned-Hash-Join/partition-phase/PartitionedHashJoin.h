@@ -12,7 +12,7 @@ private:
 
 public:
   PartitionedHashJoin(RelColumn*, RelColumn*);
-  void Solve();
+  void Solve(UsedRelations&);
   int PartitionRec(Part*, RelColumn*, int = MAX_PASSES, int = N, int = 0, int = 0, int = -1);
   void BuildHashtables(Part*);
   void Join(UsedRelations&, Part*, Part*);

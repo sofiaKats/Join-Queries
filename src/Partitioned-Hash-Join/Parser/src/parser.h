@@ -48,6 +48,7 @@ public:
 class Query {
 public:
     char* relation[5]; // the relations that are to be used in the particular query
+    int number_of_relations;
     Predicates** prdcts;
     Projection** projections; // each object holds the relation and column to be SUMMED from part 3 of query 
     Query();
