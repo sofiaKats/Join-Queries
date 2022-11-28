@@ -11,10 +11,12 @@ typedef struct Tuple {
 } Tuple;
 
 typedef struct RelColumn {
+  int id;
   Tuple* tuples;
   uint32_t num_tuples;
 
-  RelColumn(uint32_t size){
+  RelColumn(int id, uint32_t size){
+    this->id = id;
     tuples = new Tuple[size];
     num_tuples = size;
     for (int i = 0; i < size; i++)

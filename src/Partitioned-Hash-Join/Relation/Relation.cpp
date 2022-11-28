@@ -47,7 +47,6 @@ void Relation::loadRelation(const char* fileName)
   }
   cout << "- done!\n";
   close(fd);
-  munmap(addr, length);
 }
 //---------------------------------------------------------------------------
 Relation::Relation(const char* fileName) : ownsMemory(false)

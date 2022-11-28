@@ -32,5 +32,5 @@ public:
     ~Hashtable();
     void add(int, int);
     void print_hashtable();
-    void contains(Tuple2*); 
+    Tuple2* contains(Tuple2*);
 };

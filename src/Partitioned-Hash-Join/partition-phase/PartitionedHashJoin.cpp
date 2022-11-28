@@ -9,13 +9,13 @@ PartitionedHashJoin::PartitionedHashJoin(RelColumn* relR, RelColumn* relS){
 
 void PartitionedHashJoin::Solve(){
   Part* partitionedR = new Part();
-  partitionedR->rel = new RelColumn(relR->num_tuples);
+  partitionedR->rel = new RelColumn(relR->id, relR->num_tuples);
   int passCount = PartitionRec(partitionedR, relR);
   //ONLY FOR RELATION R
   BuildHashtables(partitionedR);
 
   Part* partitionedS = new Part();
-  partitionedS->rel = new RelColumn(relS->num_tuples);
+  partitionedS->rel = new RelColumn(relS->id, relS->num_tuples);
   PartitionRec(partitionedS, relS, passCount);
 
   //PrintPart(partitionedR, true);
@@ -110,7 +110,7 @@ void PartitionedHashJoin::BuildHashtables(Part* part){
   }
 }
 
-void PartitionedHashJoin::Join(Part* p1, Part* p2){
+void PartitionedHashJoin::Join(UsedRelations& usedRelations, Part* p1, Part* p2){
   cout << "\n------- JOINING RELATIONS -------\n\n";
   int hashtablesIndex = 0;
 
@@ -119,7 +119,6 @@ void PartitionedHashJoin::Join(Part* p1, Part* p2){
     if (p2->prefixSum->arr[i][0] == -1) break;
 
     int hash = p2->prefixSum->arr[i][0];
-    //cout << "P2 tuple with partition hash: " << hash << endl;
 
     //if hash value exists in relation R
     hashtablesIndex = ExistsInPrefix(hash, p1->prefixSum);
@@ -128,12 +127,17 @@ void PartitionedHashJoin::Join(Part* p1, Part* p2){
       //For every tuple in this partition
       for (int j = p2->prefixSum->arr[i][1]; j < p2->prefixSum->arr[i+1][1]; j++){
         Tuple2* tuple2 = new Tuple2(p2->rel->tuples[j].key, p2->rel->tuples[j].payload);
-        p1->hashtables[hashtablesIndex]->contains(tuple2);
+        Tuple2* match = p1->hashtables[hashtablesIndex]->contains(tuple2);
+        if (match != NULL){
+          cout << "Matched rows " << match->key << " " << match->payload << endl;
+          //usedRelations.matchRow[0]
+        }
         delete tuple2;
       }
     }
     //else cout << "------- No tuples in Relation R for partition hash " << hash << " -------" << endl;
   }
+  return NULL;
 }
 
 int PartitionedHashJoin::ExistsInPrefix(int hash, PrefixSum* prefixSum){

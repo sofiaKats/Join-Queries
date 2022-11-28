@@ -247,7 +247,7 @@ int Hashtable::findNeighborPosByK(int currPos, int k){
     return (currPos + k + table_size)%table_size;
 }
 
-void Hashtable::contains(Tuple2* tuple){
+Tuple2* Hashtable::contains(Tuple2* tuple){
     //find hash value and neighborhood
     int nei = H;
     int payload2 = tuple->payload;
@@ -255,14 +255,15 @@ void Hashtable::contains(Tuple2* tuple){
 
     int currentBucket = hashhop;
 
-    for (int loops = 0; loops < nei ; loops++){
+    for (int loops = 0; loops < nei; loops++){
         if (hashtable[hashhop]->get_bitmap_index(loops) == 1){
-        int payload1 = hashtable[currentBucket]->getTuple()->payload;
+          int payload1 = hashtable[currentBucket]->getTuple()->payload;
 
-        if (payload1 == payload2){
-            cout << "------- Match: " << payload2 << " RowId R: " << hashtable[currentBucket]->getTuple()->key << " RowId S: " << tuple->key << " -------\n";
-        }
+          if (payload1 == payload2){
+              return new Tuple2(hashtable[currentBucket]->getTuple()->key, tuple->key);
+          }
         }
         currentBucket = findNeighborPosByK(currentBucket, 1);
     }
+    return NULL;
 }

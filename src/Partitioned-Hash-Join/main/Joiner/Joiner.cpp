@@ -30,7 +30,7 @@ Relation& Joiner::GetRelation(unsigned relationId)
 
 RelColumn* Joiner::GetRelationCol(unsigned relationId, unsigned colId){
     Relation& rel = GetRelation(relationId);
-    RelColumn* relColumn = new RelColumn(rel.size);
+    RelColumn* relColumn = new RelColumn(relationId, rel.size);
     for (int i = 0; i < rel.size; i++){
       relColumn->tuples[i].payload = rel.columns[colId][i];
       //cout << relColumn->tuples[i].key << " " << relColumn->tuples[i].payload << endl;
@@ -40,7 +40,7 @@ RelColumn* Joiner::GetRelationCol(unsigned relationId, unsigned colId){
 
 RelColumn* Joiner::GetUsedRelation(unsigned relationId, unsigned colId){
   Relation& rel = GetRelation(relationId);
-  RelColumn* relColumn = new RelColumn(usedRelations->size);
+  RelColumn* relColumn = new RelColumn(relationId, usedRelations->size);
   for (int i = 0; i < rel.size; i++){
     relColumn->tuples[i].payload = rel.columns[colId][i];
     //cout << relColumn->tuples[i].key << " " << relColumn->tuples[i].payload << endl;
@@ -51,6 +51,7 @@ RelColumn* Joiner::GetUsedRelation(unsigned relationId, unsigned colId){
 string Joiner::Join(QueryInfo& query)
   // Executes a join query
 {
+  UsedRelations* usedRelations = new UsedRelations(query.relationIds.size(), 1000);
   RelColumn* relR = GetRelationCol(query.predicates[0].left.relId, query.predicates[0].left.colId);
   RelColumn* relS = GetRelationCol(query.predicates[0].right.relId, query.predicates[0].right.colId);
 
