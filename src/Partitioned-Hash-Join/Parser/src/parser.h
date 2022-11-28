@@ -12,17 +12,17 @@ using namespace std;
 // up to 4 predicates and up to 3 projections
 
 class Predicates {
+public:
     char predicate[15]; // store each predicate to later check if it is filter predicate or join predicate
-    int relation_index_1;// represents the relation BEFORE the operation of the predicate
-    int column_1;        // represents the column BEFORE the operation of the predicate
+    int relation_index_left;// represents the relation BEFORE the operation of the predicate
+    int column_left;        // represents the column BEFORE the operation of the predicate
     char operation;      // represents the operation to be done in the particular predicate
     bool relation_after_operation; // flag to check if there is a relation after the operation of the predicate
     // can be used to speed up the filter process of the relations
     bool number_after_operation; // flag to check if there is a number after the operation of the predicate
     int number;      // the number filter after the operation if it exists    
-    int relation_index_2; // the relation after the operation if it exists
-    int column_2;  // the column after the operation if it exists
-public:
+    int relation_index_right; // the relation after the operation if it exists
+    int column_right;  // the column after the operation if it exists
     Predicates();
     ~Predicates();
     void setPredicates(char* prdct);
@@ -46,10 +46,10 @@ public:
 };
 
 class Query {
+public:
     char* relation[5]; // the relations that are to be used in the particular query
     Predicates** prdcts;
     Projection** projections; // each object holds the relation and column to be SUMMED from part 3 of query 
-public:
     Query();
     ~Query();
     int ParseRelations(char* relations); // parses first part of query to find the relations of the query
@@ -62,5 +62,5 @@ class Parser {
 public:
     Parser();
     ~Parser();
-    void OpenFileAndParse(); //opens small.work and reads the file line by line, extracting queries
+    Query* OpenFileAndParse(); //opens small.work and reads the file line by line, extracting queries
 };
