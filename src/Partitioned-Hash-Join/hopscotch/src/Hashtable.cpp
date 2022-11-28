@@ -94,7 +94,7 @@ void Hashtable::add_value(int pos, int value, int hash_value, Tuple2* tuple){
     hashtable[pos]->set_value(value);
     hashtable[pos]->set_has_value(true);
 
-    hashtable[pos]->setTuple(tuple); 
+    hashtable[pos]->setTuple(tuple);
 
     //update bitmaps
     int indx;
@@ -144,9 +144,8 @@ void Hashtable::resize(){
         if (hashtable_old[i]->get_has_value())  {
             add(hashtable_old[i]->getTuple()->payload, hashtable_old[i]->getTuple()->key);
         }
+        delete hashtable_old[i];
     }
-
-    for (int i=0; i<table_size_old; i++) delete hashtable_old[i];
     delete [] hashtable_old;
 }
 
@@ -161,7 +160,6 @@ bool Hashtable::checkBitmapFull(int index){
 
 void Hashtable::add(int payload, int value){
     Tuple2* tuple = new Tuple2(value, payload);
-
 
     if (checkHashtableFull()) resize();
     int hashed_payload = hash(payload);

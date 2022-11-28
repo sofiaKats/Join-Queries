@@ -78,20 +78,31 @@ typedef struct Part{
   }
 } Part;
 
-typedef struct RowIds{
+typedef struct MatchRow{
   uint32_t* arr;
   uint32_t size;
-  RowIds(uint32_t size){
+  MatchRow(uint32_t size){
     this->size = size;
     arr = new uint32_t[size];
   }
-} RowIds;
+} MatchRow;
 
 typedef struct UsedRelations{
-  RowIds** relations;
+  MatchRow** matchRow;
   uint32_t size;
-  UsedRelations(uint32_t size){
+  uint32_t rowSize;
+  UsedRelations(uint32_t size, uint32_t rowSize){
     this->size = size;
-    relations = new RowIds*[size];
+    this->rowSize = rowSize;
+    matchRow = new MatchRow*[size];
+    for (int i = 0; i < size; i++){
+      matchRow[i] = new MatchRow(rowSize);
+    }
+  }
+  ~UsedRelations(){
+    for (int i = 0; i < size; i++){
+      delete matchRow[i];
+    }
+    delete[] matchRow;
   }
 } UsedRelations;

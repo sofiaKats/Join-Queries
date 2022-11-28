@@ -1,7 +1,9 @@
 #include "Joiner.hpp"
 
-Joiner::Joiner(int size){
+Joiner::Joiner(uint32_t size, uint32_t rowSize){
   this->size = size;
+  this->rowSize = rowSize;
+  //->usedRelations = rowSize;
   relations = new Relation*[size]{NULL};
 }
 
@@ -35,15 +37,30 @@ RelColumn* Joiner::GetRelationCol(unsigned relationId, unsigned colId){
     }
     return relColumn;
 }
+
+RelColumn* Joiner::GetUsedRelation(unsigned relationId, unsigned colId){
+  Relation& rel = GetRelation(relationId);
+  RelColumn* relColumn = new RelColumn(usedRelations->size);
+  for (int i = 0; i < rel.size; i++){
+    relColumn->tuples[i].payload = rel.columns[colId][i];
+    //cout << relColumn->tuples[i].key << " " << relColumn->tuples[i].payload << endl;
+  }
+  return relColumn;
+}
 //-----------------------------------------------------------------------
 string Joiner::Join(QueryInfo& query)
   // Executes a join query
-{ //"3 0 1|0.2=1.0&0.1=2.0&0.2>3000|1.2 0.1";
+{
   RelColumn* relR = GetRelationCol(query.predicates[0].left.relId, query.predicates[0].left.colId);
   RelColumn* relS = GetRelationCol(query.predicates[0].right.relId, query.predicates[0].right.colId);
 
   PartitionedHashJoin* phj = new PartitionedHashJoin(relR, relS);
   phj->Solve();
+
+  for (unsigned i=1; i<query.predicates.size(); ++i){
+    //GetUsedRelation();
+  }
+
   /*Checksum checkSum(move(root),query.selections);
   checkSum.run();
 
@@ -57,4 +74,11 @@ string Joiner::Join(QueryInfo& query)
   out << "\n";
   return out.str();*/
   return "- result -\n";
+}
+
+Joiner::~Joiner(){
+  for (int i = 0; i<size; i++){
+    delete relations[i];
+  }
+  delete[] relations;
 }

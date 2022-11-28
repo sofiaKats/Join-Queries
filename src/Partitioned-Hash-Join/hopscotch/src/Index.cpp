@@ -6,15 +6,16 @@ using namespace std;
 
 Index::Index(int H) : has_value(false)
 {
-    bitmap = new int[H];
+    bitmap = new int[H]{0};
     // initializing bitmap with 0s
-    for (int i=0; i<H; i++) bitmap[i] = 0;
     this->H = H;
 }
 
 Index::~Index()
 {
     delete [] bitmap;
+    if (has_value)
+      delete tuple;
 }
 
 void Index::set_bitmap_index_to_1(const int index) { bitmap[index] = 1;}

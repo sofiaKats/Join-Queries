@@ -47,6 +47,7 @@ void Relation::loadRelation(const char* fileName)
   }
   cout << "- done!\n";
   close(fd);
+  munmap(addr, length);
 }
 //---------------------------------------------------------------------------
 Relation::Relation(const char* fileName) : ownsMemory(false)
@@ -59,5 +60,8 @@ Relation::Relation(const char* fileName) : ownsMemory(false)
 Relation::~Relation()
   // Destructor
 {
-  
+  //for (int i = 0; i<size; i++){
+  //  delete[] columns[i];
+  //}
+  delete[] columns;
 }

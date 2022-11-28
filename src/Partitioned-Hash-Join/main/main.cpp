@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
 
   cout << "--- Insert num of files ---\n";
   scanf("%d", &filesCount);
-  joiner = new Joiner(filesCount);
+  joiner = new Joiner(filesCount, 20000);
 
   cout << ">>> Insert Relations:" << endl;
 
@@ -38,7 +38,8 @@ int main(int argc, char* argv[]) {
     cout << ">>> Insert Queries:" << endl;
 
     QueryInfo i;
-    string line2 = "3 0 1|0.2=1.0&0.1=2.0&0.2>3000|1.2 0.1";
+    //string line2 = "3 0 1|0.2=1.0&0.1=2.0&0.2>3000|1.2 0.1";
+    string line2 = "0 1 |0.2=1.0&0.2>3000|1.2 0.1";
     i.parseQuery(line2);
 
     string results = joiner->Join(i);
@@ -55,10 +56,13 @@ int main(int argc, char* argv[]) {
     //cout << i.predicates[0].left.relId<<endl;
     //cout << i.predicates[0].right.relId<<endl;
 
+    delete joiner;
+
     return 0;
   }
   catch (const exception& e){
     cout << e.what() << endl;
+    delete joiner;
     return 1;
   }
 }
