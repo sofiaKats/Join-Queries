@@ -8,22 +8,23 @@
 int main(int argc, char* argv[]) {
 
   Joiner* joiner;
-  string line;
-  const string workspace = "./workloads/small/";
+  char input[20], line[50];
+  memset(input, '\0', 20); memset(line, '\0', 50);
+  int filesCount;
 
   cout << "--- Insert num of files ---\n";
-  getline(cin, line);
-  int filesCount = stoi(line);
+  scanf("%d", &filesCount);
   joiner = new Joiner(filesCount);
 
   cout << ">>> Insert Relations:" << endl;
 
   try{
     while (filesCount){
-      getline(cin, line);
-      if (line == "Done") break;
+      scanf("%s", input);
+      if (!strcmp(input, "Done")) break;
       try{
-        joiner->AddRelation((workspace + line).c_str());
+        sprintf(line, "./workloads/small/%s", input);
+        joiner->AddRelation(line);
         filesCount--;
       }
       catch(const exception& e){
@@ -37,8 +38,8 @@ int main(int argc, char* argv[]) {
     cout << ">>> Insert Queries:" << endl;
 
     QueryInfo i;
-    line = "3 0 1|0.2=1.0&0.1=2.0&0.2>3000|1.2 0.1";
-    i.parseQuery(line);
+    string line2 = "3 0 1|0.2=1.0&0.1=2.0&0.2>3000|1.2 0.1";
+    i.parseQuery(line2);
 
     string results = joiner->Join(i);
 
