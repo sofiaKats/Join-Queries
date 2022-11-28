@@ -20,7 +20,7 @@ CFLAGS = -std=c++11 -Wno-unused-parameter -g -w
 EXE_PROG = ./program
 
 # .o files needed
-OBJS_PROG = main.o ../partition-phase/Partition.o ../partition-phase/PartitionedHashJoin.o ../hopscotch/src/Index.o ../hopscotch/src/Hashtable.o ../Relation/Relation.o Parsing/Operators.o Parsing/Parser.o Joiner/Joiner.o
+OBJS_PROG = main.o ../partition-phase/Partition.o ../partition-phase/PartitionedHashJoin.o ../hopscotch/src/Index.o ../hopscotch/src/Hashtable.o ../Relation/Relation.o Parsing/Operators.o Parsing/Parser.o Joiner/Joiner.o ../Parser/src/parser.o
 
 # Build executables
 all: $(EXE_PROG)

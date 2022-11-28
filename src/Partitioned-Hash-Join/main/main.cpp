@@ -1,6 +1,7 @@
 #include <iostream>
 #include "./Joiner/Joiner.hpp"
 #include "./Parsing/Parser.hpp"
+// #include "../Parser/src/parser.h"
 
 // TO DO
 // REMOVE STRING STL
@@ -37,15 +38,19 @@ int main(int argc, char* argv[]) {
 
     cout << ">>> Insert Queries:" << endl;
 
-    QueryInfo i;
-    //string line2 = "3 0 1|0.2=1.0&0.1=2.0&0.2>3000|1.2 0.1";
-    string line2 = "0 1 |0.2=1.0&0.2>3000|1.2 0.1";
-    i.parseQuery(line2);
-
-    string results = joiner->Join(i);
-
-    if (results != "")
+    Parser parser;
+    Query* query = new Query();
+    query = parser.OpenFileAndParse();
+    string results = joiner->Join(query);
     cout << "\n--- Join Results ---\n\n" << results << endl;
+    // QueryInfo i;
+    // string line2 = "0 1 |0.2=1.0&0.2>3000|1.2 0.1";
+    // i.parseQuery(line2);
+
+    // string results = joiner->Join(i);
+
+    // if (results != "")
+    // cout << "\n--- Join Results ---\n\n" << results << endl;
 
     // while (getline(cin, line)) {
     //    cout << line<<endl;
