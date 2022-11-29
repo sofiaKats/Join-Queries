@@ -48,16 +48,19 @@ RelColumn* Joiner::GetUsedRelation(unsigned relationId, unsigned colId){
   return relColumn;
 }
 //-----------------------------------------------------------------------
-string Joiner::Join(Query* query)
+string Joiner::Join(Query& query)
   // Executes a join query
 {
-  UsedRelations* usedRelations = new UsedRelations(query->number_of_relations, 1000);
+  UsedRelations* usedRelations = new UsedRelations(2000, query.number_of_relations);
 
-  RelColumn* relR = GetRelationCol((unsigned)query->prdcts[0]->relation_index_left,(unsigned) query->prdcts[0]->column_left);
-  RelColumn* relS = GetRelationCol((unsigned)query->prdcts[0]->relation_index_right,(unsigned) query->prdcts[0]->column_right);
+  RelColumn* relR = GetRelationCol((unsigned)query.prdcts[0]->relation_index_left,(unsigned) query.prdcts[0]->column_left);
+  RelColumn* relS = GetRelationCol((unsigned)query.prdcts[0]->relation_index_right,(unsigned) query.prdcts[0]->column_right);
 
   PartitionedHashJoin* phj = new PartitionedHashJoin(relR, relS);
   phj->Solve(*usedRelations);
+
+  for (int i=0; i<usedRelations->activeSize; i++)
+    cout << "Matched rows " << usedRelations->matchRows[i]->arr[0] << " " << usedRelations->matchRows[i]->arr[1] << endl;
 
   // for (unsigned i=1; i<query.predicates.size(); ++i){
   //   //GetUsedRelation();
@@ -75,6 +78,11 @@ string Joiner::Join(Query* query)
   }
   out << "\n";
   return out.str();*/
+
+  delete usedRelations;
+  delete relR;
+  delete relS;
+  delete phj;
   return "- result -\n";
 }
 

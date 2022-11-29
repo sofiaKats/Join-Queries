@@ -22,7 +22,7 @@ class Joiner {
   /// Get relation column from filtered relation
   RelColumn* GetUsedRelation(uint32_t, uint32_t);
   /// Joins a given set of relations
-  string Join(Query* query);
+  string Join(Query& query);
   /// constructor
   Joiner(uint32_t, uint32_t);
   ~Joiner();

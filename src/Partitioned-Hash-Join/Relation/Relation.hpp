@@ -13,8 +13,9 @@ class Relation {
   void loadRelation(const char* fileName);
 
   public:
-  /// The number of tuples/columns
+  /// The number of rows
   uint64_t size;
+  /// The number of tuples/columns
   uint64_t numColumns;
   /// The join column containing the keys
   uint64_t** columns;

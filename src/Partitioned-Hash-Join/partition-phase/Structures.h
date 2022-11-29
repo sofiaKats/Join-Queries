@@ -87,24 +87,26 @@ typedef struct MatchRow{
     this->size = size;
     arr = new uint32_t[size];
   }
+  ~MatchRow(){
+    delete[] arr;
+  }
 } MatchRow;
 
 typedef struct UsedRelations{
-  MatchRow** matchRow;
+  MatchRow** matchRows;
   uint32_t size;
   uint32_t rowSize;
+  uint32_t activeSize = 0;
   UsedRelations(uint32_t size, uint32_t rowSize){
     this->size = size;
     this->rowSize = rowSize;
-    matchRow = new MatchRow*[size];
-    for (int i = 0; i < size; i++){
-      matchRow[i] = new MatchRow(rowSize);
-    }
+    matchRows = new MatchRow*[size]{NULL};
+    //for (int i = 0; i < size; i++)
+      //matchRows[i] = new MatchRow(rowSize);
   }
   ~UsedRelations(){
-    for (int i = 0; i < size; i++){
-      delete matchRow[i];
-    }
-    delete[] matchRow;
+    for (int i = 0; i < activeSize; i++)
+      delete matchRows[i];
+    delete[] matchRows;
   }
 } UsedRelations;

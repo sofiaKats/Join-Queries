@@ -113,6 +113,8 @@ void PartitionedHashJoin::BuildHashtables(Part* part){
 void PartitionedHashJoin::Join(UsedRelations& usedRelations, Part* p1, Part* p2){
   cout << "\n------- JOINING RELATIONS -------\n\n";
   int hashtablesIndex = 0;
+  uint32_t c = 0;
+  bool firstJoin = usedRelations.matchRows[0] == NULL;
 
   //For every partition table
   for (int i = 0; i < p2->prefixSum->length; i++){
@@ -128,15 +130,25 @@ void PartitionedHashJoin::Join(UsedRelations& usedRelations, Part* p1, Part* p2)
       for (int j = p2->prefixSum->arr[i][1]; j < p2->prefixSum->arr[i+1][1]; j++){
         Tuple2* tuple2 = new Tuple2(p2->rel->tuples[j].key, p2->rel->tuples[j].payload);
         Tuple2* match = p1->hashtables[hashtablesIndex]->contains(tuple2);
-        if (match != NULL){
-          cout << "Matched rows " << match->key << " " << match->payload << endl;
-          //usedRelations.matchRow[0]
-        }
         delete tuple2;
+
+        if (match != NULL){
+          //cout << "Matched rows " << match->key << " " << match->payload << endl;
+
+          if (firstJoin){ //first join
+            //rel -> id must be the binding
+            usedRelations.matchRows[c] = new MatchRow(usedRelations.rowSize);
+            usedRelations.matchRows[c]->arr[p1->rel->id] = match->key;
+            usedRelations.matchRows[c++]->arr[p2->rel->id] = match->payload;
+          }else{
+
+          }
+        }
+        delete match;
       }
     }
-    //else cout << "------- No tuples in Relation R for partition hash " << hash << " -------" << endl;
   }
+  usedRelations.activeSize = c;
 }
 
 int PartitionedHashJoin::ExistsInPrefix(int hash, PrefixSum* prefixSum){
