@@ -20,12 +20,13 @@ CFLAGS = -std=c++11 -Wno-unused-parameter -g -w
 EXE_PROG = ./program
 
 # .o files needed
-OBJS_PROG = main.o ../partition-phase/Partition.o ../partition-phase/PartitionedHashJoin.o ../hopscotch/src/Index.o ../hopscotch/src/Hashtable.o ../Relation/Relation.o Parsing/Operators.o Parsing/Parser.o Joiner/Joiner.o ../Parser/src/parser.o
+OBJS_PROG = main.o ../partition-phase/Partition.o ../partition-phase/PartitionedHashJoin.o ../hopscotch/src/Index.o ../hopscotch/src/Hashtable.o ../Relation/Relation.o Joiner/Joiner.o ../Parser/src/parser.o
+OBJS = ./obj/*
 
 # Build executables
 all: $(EXE_PROG)
-	mkdir -p $(BLD)
-	mv -f $(OBJS_PROG) $(BLD)
+#	mkdir -p $(BLD)
+#	mv -f $(OBJS_PROG) $(BLD)
 
 $(EXE_PROG): $(OBJS_PROG)
 	$(CC) $(CFLAGS) $(OBJS_PROG) -o $(EXE_PROG)
@@ -33,6 +34,7 @@ $(EXE_PROG): $(OBJS_PROG)
 # Delete executable & object files
 clean:
 	rm -f $(EXE_PROG)
+	rm -rf $(OBJS_PROG)
 	rm -rf $(BLD)
 
 # Clean and compile

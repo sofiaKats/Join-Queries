@@ -81,11 +81,11 @@ typedef struct Part{
 } Part;
 
 typedef struct MatchRow{
-  uint32_t* arr;
+  int32_t* arr;
   uint32_t size;
   MatchRow(uint32_t size){
     this->size = size;
-    arr = new uint32_t[size];
+    arr = new int32_t[size]{-1};
   }
   ~MatchRow(){
     delete[] arr;

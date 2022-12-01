@@ -1,5 +1,4 @@
 #pragma once
-#include "../Parsing/Operators.hpp"
 #include "../../partition-phase/PartitionedHashJoin.h"
 #include "../../partition-phase/Structures.h"
 #include "../../Parser/src/parser.h"
@@ -16,13 +15,15 @@ class Joiner {
   /// Add relation
   void AddRelation(const char* fileName);
   /// Get relation
-  Relation& GetRelation(uint32_t id);
+  Relation& GetRelation(unsigned id);
   /// Get relation column
-  RelColumn* GetRelationCol(uint32_t, uint32_t);
+  RelColumn* GetRelationCol(unsigned, unsigned);
   /// Get relation column from filtered relation
-  RelColumn* GetUsedRelation(uint32_t, uint32_t);
+  RelColumn* GetUsedRelation(unsigned, unsigned);
   /// Joins a given set of relations
   string Join(Query& query);
+  /// Checksum
+  uint64_t Checksum(unsigned, unsigned);
   /// constructor
   Joiner(uint32_t, uint32_t);
   ~Joiner();
