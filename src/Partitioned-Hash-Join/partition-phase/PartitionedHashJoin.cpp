@@ -135,14 +135,48 @@ void PartitionedHashJoin::Join(UsedRelations& usedRelations, Part* p1, Part* p2)
         if (matches->tuples[0] != NULL){
           //cout << "Matched rows " << match->key << " " << match->payload << endl;
           if (firstJoin){ /// First Join
-            //rel -> id must be the binding
-            for (int i=0; i<matches->activeSize; i++){
+            //rel->id must be the binding
+            for (uint32_t i=0; i<matches->activeSize; i++){
               usedRelations.matchRows[c] = new MatchRow(usedRelations.rowSize);
               usedRelations.matchRows[c]->arr[p1->rel->id] = matches->tuples[i]->key;
               usedRelations.matchRows[c++]->arr[p2->rel->id] = matches->tuples[i]->payload;
             }
           }else{
-
+            if (usedRelations.matchRows[0]->arr[p1->rel->id] != -1){
+              for (uint32_t i=0; i<usedRelations.size; i++){ /// For each entry from usedRelations
+                if (usedRelations.matchRows[i] == NULL) continue;
+                bool del = true;
+                uint32_t rowid = usedRelations.matchRows[i]->arr[p1->rel->id];
+                for (uint32_t i=0; i<matches->activeSize; i++){ /// Check if exists in new match table
+                  if (rowid == matches->tuples[i]->key){
+                    del = false;
+                    break;
+                  }
+                }
+                if (del){
+                  delete usedRelations.matchRows[i];
+                  usedRelations.activeSize--;
+                }
+              }
+            }
+            else if (usedRelations.matchRows[0]->arr[p2->rel->id] != -1){
+              for (uint32_t i=0; i<usedRelations.size; i++){ /// For each entry from usedRelations
+                if (usedRelations.matchRows[i] == NULL) continue;
+                bool del = true;
+                uint32_t rowid = usedRelations.matchRows[i]->arr[p2->rel->id];
+                for (uint32_t i=0; i<matches->activeSize; i++){ /// Check if exists in new match table
+                  if (rowid == matches->tuples[i]->key){
+                    del = false;
+                    break;
+                  }
+                }
+                if (del){
+                  delete usedRelations.matchRows[i];
+                  usedRelations.activeSize--;
+                }
+              }
+            }
+            matches->tuples[i]->key;
           }
         }
         delete matches;

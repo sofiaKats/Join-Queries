@@ -4,7 +4,7 @@
 // CHANGE 1 TO 50!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 Parser::Parser() { queries = new Query*[1]; }
 
-Parser::~Parser() { 
+Parser::~Parser() {
     for (int i = 0 ; i < 1 ; i++) delete queries[i];
     delete [] queries;
 }
@@ -21,9 +21,9 @@ Query* Parser::OpenFileAndParse() {
     // // we store each one of these 3 parts onto an array.
     // char* parts[3];
 
-    // while ((read = getline(&line, &len, fp)) != -1) { 
+    // while ((read = getline(&line, &len, fp)) != -1) {
     //     if(!strcmp(line, "F\n")) continue; // A batch of queries ended (we'll see what to do with this info)
-        
+
     //     queries[q_no++] = new Query();
     //     counter=0;
     //     // finding each one of the 3 parts
@@ -44,7 +44,7 @@ Query* Parser::OpenFileAndParse() {
     // fclose(fp);
     // if (line) free(line); // doesnt work without free(even with delete, memory leaks)
 
-    char line[50] = "0 1 |0.2=1.0&0.2>3000|1.2 0.1";
+    char line[50] = "0 1 2|0.2=1.0&0.1>2.1|1.2 0.1";
     char* parts[3];
     const char pipe_[2] = "|"; char *token; int counter; int q_no = 0; // query number
     queries[q_no++] = new Query();
@@ -117,11 +117,11 @@ int Query::ParsePredicates(char* predicates) {
 }
 
 void Query::ParseProjections(char* projection) {
-    cout << "Projections: " << projection << endl; 
-    const char space[2] = " "; char *token; int index=0; 
+    cout << "Projections: " << projection << endl;
+    const char space[2] = " "; char *token; int index=0;
 
     token = strtok(projection, space);
-    while( token != NULL ) { 
+    while( token != NULL ) {
         projections[index++]->setRelation_Column_Pair(token);
         projections[index-1]->separateRelationFromColumn(); // store relation and column to be summed
         token = strtok(NULL, space); // find next relation-column pair
@@ -159,8 +159,8 @@ Predicates::Predicates()
 
 Predicates::~Predicates() {}
 
-void Predicates::setPredicates(char* prdct) { 
-    strcpy(predicate, prdct); 
+void Predicates::setPredicates(char* prdct) {
+    strcpy(predicate, prdct);
     // cout << "SEPARATED PREDICATES: ";
     // for(int i=0; i<15; i++) cout << predicate[i] ;
     cout << endl;

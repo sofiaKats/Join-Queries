@@ -68,13 +68,19 @@ string Joiner::Join(Query& query)
 
   //for (int i=0; i<usedRelations->activeSize; i++)
     //cout << "Matched rows " << usedRelations->matchRows[i]->arr[0] << " " << usedRelations->matchRows[i]->arr[1] << endl;
+  cout <<  "left: " << (unsigned)query.prdcts[1]->relation_index_left << "." << (unsigned)query.prdcts[1]->column_left <<endl;
+  cout << "right: " << (unsigned)query.prdcts[1]->relation_index_right << "." << (unsigned)query.prdcts[1]->column_right <<endl;
+  relR = GetUsedRelation((unsigned)query.prdcts[1]->relation_index_left, (unsigned)query.prdcts[1]->column_left);
+  relS = GetUsedRelation((unsigned)query.prdcts[1]->relation_index_right, (unsigned)query.prdcts[1]->column_right);
+  phj = new PartitionedHashJoin(relR, relS);
+  phj->Solve(*usedRelations);
 
   ///Other Joins
-  relR = GetUsedRelation(0, 1);
+  /*relR = GetUsedRelation(0, 1);
   for (int i=0; i<relR->num_tuples; i++)
     cout << relR->tuples[i].payload << endl;
 
-  delete relR;
+  delete relR;*/
 
   /*for (unsigned i=1; i<query.prdcts.size(); ++i){
     relR = GetUsedRelation((unsigned)query.prdcts[i]->relation_index_left, (unsigned)query.prdcts[i]->column_left);
@@ -105,8 +111,10 @@ string Joiner::Join(Query& query)
 uint64_t Joiner::Checksum(unsigned relationId, unsigned colId){
   uint64_t sum = 0;
   Relation& rel = GetRelation(relationId);
-  for (int i = 0; i < usedRelations->activeSize; i++)
+  for (int i = 0; i < usedRelations->size; i++){
+    if (usedRelations->matchRows[i] == NULL) continue;
     sum += rel.columns[colId][usedRelations->matchRows[i]->arr[relationId]];
+  }
   return sum;
 }
 
