@@ -90,7 +90,7 @@ int Hashtable::find_empty_index(int i){
     return j;
 }
 
-void Hashtable::add_value(int pos, int value, int hash_value, Tuple2* tuple){
+void Hashtable::add_value(int pos, int value, int hash_value, Tuple* tuple){
     hashtable[pos]->set_value(value);
     hashtable[pos]->set_has_value(true);
 
@@ -159,7 +159,7 @@ bool Hashtable::checkBitmapFull(int index){
 }
 
 void Hashtable::add(int payload, int value){
-    Tuple2* tuple = new Tuple2(value, payload);
+    Tuple* tuple = new Tuple(value, payload);
 
     if (checkHashtableFull()) resize();
     int hashed_payload = hash(payload);
@@ -177,7 +177,7 @@ void Hashtable::add(int payload, int value){
     }
 }
 
-bool Hashtable::insert(int hashed_payload, int value, Tuple2* tuple){
+bool Hashtable::insert(int hashed_payload, int value, Tuple* tuple){
     int pos = findPos(hashed_payload);
     if (pos == -1) return false;
 
@@ -199,7 +199,7 @@ int Hashtable::slideLeft(int hashed_payload, int emptyPos){
     return emptyPos;
 }
 
-int Hashtable::swapEmpty(int emptyPos, int swapNeighborPos, int value, int hashed_payload, Tuple2* tuple){
+int Hashtable::swapEmpty(int emptyPos, int swapNeighborPos, int value, int hashed_payload, Tuple* tuple){
     add_value(emptyPos, value, hashed_payload, tuple);
     remove_value(swapNeighborPos, hashed_payload);
     emptyPos = swapNeighborPos;
@@ -247,12 +247,12 @@ int Hashtable::findNeighborPosByK(int currPos, int k){
     return (currPos + k + table_size)%table_size;
 }
 
-Tuple2* Hashtable::contains(Tuple2* tuple){
+Matches* Hashtable::contains(Tuple* tuple){
     //find hash value and neighborhood
     int nei = H;
+    Matches* matches = new Matches(nei);
     int payload2 = tuple->payload;
     int hashhop = hash(payload2);
-
     int currentBucket = hashhop;
 
     for (int loops = 0; loops < nei; loops++){
@@ -260,10 +260,11 @@ Tuple2* Hashtable::contains(Tuple2* tuple){
           int payload1 = hashtable[currentBucket]->getTuple()->payload;
 
           if (payload1 == payload2){
-              return new Tuple2(hashtable[currentBucket]->getTuple()->key, tuple->key);
+            matches->tuples[matches->activeSize] = new Tuple(hashtable[currentBucket]->getTuple()->key, tuple->key);
+            matches->activeSize++;
           }
         }
         currentBucket = findNeighborPosByK(currentBucket, 1);
     }
-    return NULL;
+    return matches;
 }

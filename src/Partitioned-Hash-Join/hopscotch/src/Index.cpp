@@ -51,6 +51,6 @@ int temp_find_hash(int value, int** mock_data){
     return -1;
 }
 
-Tuple2* Index::getTuple(){ return tuple;}
+Tuple* Index::getTuple(){ return tuple;}
 
-void Index::setTuple(Tuple2* t) {this->tuple = t;}
+void Index::setTuple(Tuple* t) {this->tuple = t;}

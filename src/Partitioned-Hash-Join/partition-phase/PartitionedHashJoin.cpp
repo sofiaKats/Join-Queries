@@ -128,23 +128,24 @@ void PartitionedHashJoin::Join(UsedRelations& usedRelations, Part* p1, Part* p2)
     if (hashtablesIndex != -1){
       //For every tuple in this partition
       for (int j = p2->prefixSum->arr[i][1]; j < p2->prefixSum->arr[i+1][1]; j++){
-        Tuple2* tuple2 = new Tuple2(p2->rel->tuples[j].key, p2->rel->tuples[j].payload);
-        Tuple2* match = p1->hashtables[hashtablesIndex]->contains(tuple2);
-        delete tuple2;
+        Tuple* tuple = new Tuple(p2->rel->tuples[j].key, p2->rel->tuples[j].payload);
+        Matches* matches = p1->hashtables[hashtablesIndex]->contains(tuple);
+        delete tuple;
 
-        if (match != NULL){
+        if (matches->tuples[0] != NULL){
           //cout << "Matched rows " << match->key << " " << match->payload << endl;
-
-          if (firstJoin){ //first join
+          if (firstJoin){ /// First Join
             //rel -> id must be the binding
-            usedRelations.matchRows[c] = new MatchRow(usedRelations.rowSize);
-            usedRelations.matchRows[c]->arr[p1->rel->id] = match->key;
-            usedRelations.matchRows[c++]->arr[p2->rel->id] = match->payload;
+            for (int i=0; i<matches->activeSize; i++){
+              usedRelations.matchRows[c] = new MatchRow(usedRelations.rowSize);
+              usedRelations.matchRows[c]->arr[p1->rel->id] = matches->tuples[i]->key;
+              usedRelations.matchRows[c++]->arr[p2->rel->id] = matches->tuples[i]->payload;
+            }
           }else{
 
           }
         }
-        delete match;
+        delete matches;
       }
     }
   }

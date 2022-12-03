@@ -84,7 +84,7 @@ string Joiner::Join(Query& query)
   }*/
 
   return to_string(Checksum(0,1));
-  
+
   /*
   stringstream out;
   auto& results=checkSum.checkSums;
