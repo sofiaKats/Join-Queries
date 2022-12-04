@@ -32,6 +32,7 @@ RelColumn* Joiner::GetRelationCol(unsigned relationId, unsigned colId){
     Relation& rel = GetRelation(relationId);
     RelColumn* relColumn = new RelColumn(relationId, rel.size);
     for (int i = 0; i < rel.size; i++){
+      relColumn->tuples[i].key = i;
       relColumn->tuples[i].payload = rel.columns[colId][i];
     }
     return relColumn;
@@ -45,6 +46,7 @@ RelColumn* Joiner::GetUsedRelation(unsigned relationId, unsigned colId){
   Relation& rel = GetRelation(relationId);
   RelColumn* relColumn = new RelColumn(relationId, usedRelations->activeSize);
   for (int i = 0; i < usedRelations->activeSize; i++){
+    relColumn->tuples[i].key = usedRelations->matchRows[i]->arr[relationId];
     relColumn->tuples[i].payload = rel.columns[colId][usedRelations->matchRows[i]->arr[relationId]];
   }
   return relColumn;
@@ -58,7 +60,6 @@ string Joiner::Join(Query& query)
   ///First Join
   RelColumn* relR = GetRelationCol((unsigned)query.prdcts[0]->relation_index_left,(unsigned)query.prdcts[0]->column_left);
   RelColumn* relS = GetRelationCol((unsigned)query.prdcts[0]->relation_index_right,(unsigned)query.prdcts[0]->column_right);
-
   PartitionedHashJoin* phj = new PartitionedHashJoin(relR, relS);
   phj->Solve(*usedRelations);
 
@@ -66,21 +67,19 @@ string Joiner::Join(Query& query)
   delete relR;
   delete relS;
 
-  //for (int i=0; i<usedRelations->activeSize; i++)
+  //for (int i=0; i<20; i++)
     //cout << "Matched rows " << usedRelations->matchRows[i]->arr[0] << " " << usedRelations->matchRows[i]->arr[1] << endl;
-  cout <<  "left: " << (unsigned)query.prdcts[1]->relation_index_left << "." << (unsigned)query.prdcts[1]->column_left <<endl;
-  cout << "right: " << (unsigned)query.prdcts[1]->relation_index_right << "." << (unsigned)query.prdcts[1]->column_right <<endl;
+
+  ///Other Joins
   relR = GetUsedRelation((unsigned)query.prdcts[1]->relation_index_left, (unsigned)query.prdcts[1]->column_left);
   relS = GetUsedRelation((unsigned)query.prdcts[1]->relation_index_right, (unsigned)query.prdcts[1]->column_right);
   phj = new PartitionedHashJoin(relR, relS);
   phj->Solve(*usedRelations);
 
-  ///Other Joins
-  /*relR = GetUsedRelation(0, 1);
-  for (int i=0; i<relR->num_tuples; i++)
-    cout << relR->tuples[i].payload << endl;
+  //for (int i=0; i<relR->num_tuples; i++)
+    //cout << relR->tuples[i].key<< endl;
 
-  delete relR;*/
+  delete relR;
 
   /*for (unsigned i=1; i<query.prdcts.size(); ++i){
     relR = GetUsedRelation((unsigned)query.prdcts[i]->relation_index_left, (unsigned)query.prdcts[i]->column_left);

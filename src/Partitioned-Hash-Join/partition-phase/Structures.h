@@ -14,8 +14,6 @@ typedef struct RelColumn {
     this->id = id;
     tuples = new Tuple[size];
     num_tuples = size;
-    for (int i = 0; i < size; i++)
-      tuples[i].key = i;
   }
   ~RelColumn(){
     delete[] tuples;
@@ -81,6 +79,8 @@ typedef struct MatchRow{
   MatchRow(uint32_t size){
     this->size = size;
     arr = new int32_t[size]{-1};
+    for (int i =0; i<size; i++)
+      arr[i] = -1;
   }
   ~MatchRow(){
     delete[] arr;
@@ -95,12 +95,12 @@ typedef struct UsedRelations{
   UsedRelations(uint32_t size, uint32_t rowSize){
     this->size = size;
     this->rowSize = rowSize;
-    matchRows = new MatchRow*[size]{NULL};
+    matchRows = new MatchRow*[size]{};
     //for (int i = 0; i < size; i++)
       //matchRows[i] = new MatchRow(rowSize);
   }
   ~UsedRelations(){
-    for (int i = 0; i < activeSize; i++)
+    for (int i = 0; i < size; i++)
       delete matchRows[i];
     delete[] matchRows;
   }

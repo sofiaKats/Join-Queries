@@ -18,7 +18,7 @@ typedef struct Matches {
   uint32_t activeSize = 0;
   Matches(uint32_t size){
     this->size = size;
-    tuples = new Tuple*[size]{NULL};
+    tuples = new Tuple*[size]{};
   }
   ~Matches(){
     for (int i=0; i<size; i++)
