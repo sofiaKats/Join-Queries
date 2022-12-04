@@ -42,7 +42,8 @@ RelColumn* Joiner::GetRelationCol(unsigned relationId, unsigned colId){
 }
 
 RelColumn* Joiner::GetUsedRelation(unsigned relationId, unsigned colId){
-  if (usedRelations->matchRows[0] == NULL || usedRelations->matchRows[0]->arr[relationId] == -1){
+  if (usedRelations->matchRows[0] == NULL) return GetRelationCol(relationId, colId);
+  if (usedRelations->matchRows[0]->arr[relationId] == -1){
     //relation does not exist in usedRelations
     return GetRelationCol(relationId, colId);
   }
@@ -68,7 +69,6 @@ void Joiner::UpdateUsedRelations(Matches* matches, int relRid, int relSid){
     updateURFirst(matches, relRid, relSid);
     return;
   }
-  cout << "NOT HERE!";
   
   for (uint32_t i=0; i < usedRelations->size; i++){ /// Find First Not null entry in usedRelations
     if (usedRelations->matchRows[i] == NULL) continue;
@@ -81,6 +81,7 @@ void Joiner::UpdateUsedRelations(Matches* matches, int relRid, int relSid){
 
     //CASE 2.1: Only one of the Relations has been joined before, the Relation R.
     if ((usedRelations->matchRows[i]->arr[relRid] != -1) && (usedRelations->matchRows[i]->arr[relSid] == -1)){
+      cout << "HERE" << endl;
       updateURonlyR(matches, relRid, relSid);
       return;
     }
@@ -209,17 +210,18 @@ string Joiner::Join(Query& query)
   RelColumn* relS = GetRelationCol((unsigned)query.prdcts[0]->relation_index_right,(unsigned)query.prdcts[0]->column_right);
   PartitionedHashJoin* phj = new PartitionedHashJoin(relR, relS);
   UpdateUsedRelations(phj->Solve(),(unsigned)query.prdcts[0]->relation_index_left, (unsigned)query.prdcts[0]->relation_index_right);
-  printUsedRelations();
+  //printUsedRelations();
 
   delete phj;
   delete relR;
   delete relS;
 
-  // ///Second Join
-  // relR = GetUsedRelation((unsigned)query.prdcts[1]->relation_index_left, (unsigned)query.prdcts[1]->column_left);
-  // relS = GetUsedRelation((unsigned)query.prdcts[1]->relation_index_right, (unsigned)query.prdcts[1]->column_right);
-  // phj = new PartitionedHashJoin(relR, relS);
-  // UpdateUsedRelations(phj->Solve(), (unsigned)query.prdcts[1]->relation_index_left, (unsigned)query.prdcts[1]->relation_index_right);
+  ///Second Join
+  relR = GetUsedRelation((unsigned)query.prdcts[1]->relation_index_left, (unsigned)query.prdcts[1]->column_left);
+  relS = GetUsedRelation((unsigned)query.prdcts[1]->relation_index_right, (unsigned)query.prdcts[1]->column_right);
+  phj = new PartitionedHashJoin(relR, relS);
+  UpdateUsedRelations(phj->Solve(), (unsigned)query.prdcts[1]->relation_index_left, (unsigned)query.prdcts[1]->relation_index_right);
+  printUsedRelations();
 
   // delete phj;
   // delete relR;
@@ -274,15 +276,15 @@ Joiner::~Joiner(){
 }
 
 void Joiner::printUsedRelations(){
-  for (int i=0; i<usedRelations->activeSize; i++){
+  for (int i=0; i<usedRelations->size; i++){
     if (usedRelations->matchRows[i] != nullptr) {
       for (int j = 0; j < usedRelations->matchRows[i]->size; j++) {
         cout << usedRelations->matchRows[i]->arr[j] << " ";
       }
       cout << endl;
     }
-    if (i == 10) {
-      break;
-    }
+    // if (i == 10) {
+    //   break;
+    // }
   }
 }
