@@ -7,7 +7,7 @@ PartitionedHashJoin::PartitionedHashJoin(RelColumn* relR, RelColumn* relS){
   this->relS = relS;
 }
 
-void PartitionedHashJoin::Solve(UsedRelations& usedRelations){
+Matches* PartitionedHashJoin::Solve(){
   Part* partitionedR = new Part();
   partitionedR->rel = new RelColumn(relR->id, relR->num_tuples);
   int passCount = PartitionRec(partitionedR, relR);
@@ -21,10 +21,11 @@ void PartitionedHashJoin::Solve(UsedRelations& usedRelations){
   //PrintPart(partitionedR, true);
   //PrintPart(partitionedS, false);
 
-  Join(usedRelations, partitionedR, partitionedS);
+  Matches* matches = Join(partitionedR, partitionedS);
 
   delete partitionedR;
   delete partitionedS;
+  return matches;
 }
 
  void PartitionedHashJoin::Merge(Part* destPart, Part* part, int from, int n){
@@ -110,11 +111,11 @@ void PartitionedHashJoin::BuildHashtables(Part* part){
   }
 }
 
-void PartitionedHashJoin::Join(UsedRelations& usedRelations, Part* p1, Part* p2){
+Matches* PartitionedHashJoin::Join(Part* p1, Part* p2){
   cout << "\n------- JOINING RELATIONS -------\n\n";
   int hashtablesIndex = 0;
+  Matches* final = new Matches(p2->rel->num_tuples * 8); //TODO GetH of hashtable
   uint32_t c = 0;
-  bool firstJoin = usedRelations.matchRows[0] == NULL;
 
   //For every partition table
   for (int i = 0; i < p2->prefixSum->length; i++){
@@ -130,66 +131,12 @@ void PartitionedHashJoin::Join(UsedRelations& usedRelations, Part* p1, Part* p2)
       for (int j = p2->prefixSum->arr[i][1]; j < p2->prefixSum->arr[i+1][1]; j++){
         Tuple* tuple = new Tuple(p2->rel->tuples[j].key, p2->rel->tuples[j].payload);
         Matches* matches = p1->hashtables[hashtablesIndex]->contains(tuple);
+        //TODO build final table match by match
         delete tuple;
-
-        if (matches->tuples[0] != NULL){
-          //cout << "Matched rows " << match->key << " " << match->payload << endl;
-          if (firstJoin){ /// First Join
-            cout << "first\n";
-
-            //rel->id must be the binding
-            for (uint32_t i=0; i<matches->activeSize; i++){
-              usedRelations.matchRows[c] = new MatchRow(usedRelations.rowSize);
-              usedRelations.matchRows[c]->arr[p1->rel->id] = matches->tuples[i]->key;
-              usedRelations.matchRows[c++]->arr[p2->rel->id] = matches->tuples[i]->payload;
-            }
-          }else{
-            cout << "left\n";
-            if (usedRelations.matchRows[0]->arr[p1->rel->id] != -1){
-              for (uint32_t i=0; i<usedRelations.size; i++){ /// For each entry from usedRelations
-                if (usedRelations.matchRows[i] == NULL) continue;
-                bool del = true;
-                uint32_t rowid = usedRelations.matchRows[i]->arr[p1->rel->id];
-                for (uint32_t i=0; i<matches->activeSize; i++){ /// Check if exists in new match table
-                  if (rowid == matches->tuples[i]->key){
-                    del = false;
-                    break;
-                  }
-                }
-                if (del){
-                  delete usedRelations.matchRows[i];
-                  usedRelations.matchRows[i] = NULL;
-                  usedRelations.activeSize--;
-                }
-              }
-            }
-            else if (usedRelations.matchRows[0]->arr[p2->rel->id] != -1){
-              cout << "right\n";
-
-              for (uint32_t i=0; i<usedRelations.size; i++){ /// For each entry from usedRelations
-                if (usedRelations.matchRows[i] == NULL) continue;
-                bool del = true;
-                uint32_t rowid = usedRelations.matchRows[i]->arr[p2->rel->id];
-                for (uint32_t i=0; i<matches->activeSize; i++){ /// Check if exists in new match table
-                  if (rowid == matches->tuples[i]->payload){
-                    del = false;
-                    break;
-                  }
-                }
-                if (del){
-                  delete usedRelations.matchRows[i];
-                  usedRelations.matchRows[i] = NULL;
-                  usedRelations.activeSize--;
-                }
-              }
-            }
-          }
-        }
-        delete matches;
       }
     }
   }
-  usedRelations.activeSize = c;
+  return final;
 }
 
 int PartitionedHashJoin::ExistsInPrefix(int hash, PrefixSum* prefixSum){

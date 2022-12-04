@@ -12,10 +12,10 @@ private:
 
 public:
   PartitionedHashJoin(RelColumn*, RelColumn*);
-  void Solve(UsedRelations&);
+  Matches* Solve();
   int PartitionRec(Part*, RelColumn*, int = MAX_PASSES, int = N, int = 0, int = 0, int = -1);
   void BuildHashtables(Part*);
-  void Join(UsedRelations&, Part*, Part*);
+  Matches* Join(Part*, Part*);
   void PrintHashtables(Part*);
   void PrintRelation(RelColumn*);
   void PrintPrefix(PrefixSum*);

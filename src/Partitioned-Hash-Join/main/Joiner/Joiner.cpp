@@ -52,6 +52,65 @@ RelColumn* Joiner::GetUsedRelation(unsigned relationId, unsigned colId){
   return relColumn;
 }
 //-----------------------------------------------------------------------
+void Joiner::UpdateUsedRelations(UsedRelations& usedRelations, Matches* matches){
+
+  if (matches == NULL){
+    // TODO implement (clears out usedRelations)
+    return;
+  }
+  if (firstJoin){ /// First Join
+    uint32_t c = 0;
+    firstJoin = false;
+    cout << "first\n";
+    //rel->id must be the binding
+    for (uint32_t i=0; i<matches->activeSize; i++){
+      usedRelations.matchRows[c] = new MatchRow(usedRelations.rowSize);
+      usedRelations.matchRows[c]->arr[p1->rel->id] = matches->tuples[i]->key;
+      usedRelations.matchRows[c++]->arr[p2->rel->id] = matches->tuples[i]->payload;
+    }
+  }else{
+    cout << "left\n";
+    if (usedRelations.matchRows[0]->arr[p1->rel->id] != -1){
+      for (uint32_t i=0; i<usedRelations.size; i++){ /// For each entry from usedRelations
+        if (usedRelations.matchRows[i] == NULL) continue;
+        bool del = true;
+        uint32_t rowid = usedRelations.matchRows[i]->arr[p1->rel->id];
+        for (uint32_t i=0; i<matches->activeSize; i++){ /// Check if exists in new match table
+          if (rowid == matches->tuples[i]->key){
+            del = false;
+            break;
+          }
+        }
+        if (del){
+          delete usedRelations.matchRows[i];
+          usedRelations.matchRows[i] = NULL;
+          usedRelations.activeSize--;
+        }
+      }
+    }
+    else if (usedRelations.matchRows[0]->arr[p2->rel->id] != -1){
+      cout << "right\n";
+
+      for (uint32_t i=0; i<usedRelations.size; i++){ /// For each entry from usedRelations
+        if (usedRelations.matchRows[i] == NULL) continue;
+        bool del = true;
+        uint32_t rowid = usedRelations.matchRows[i]->arr[p2->rel->id];
+        for (uint32_t i=0; i<matches->activeSize; i++){ /// Check if exists in new match table
+          if (rowid == matches->tuples[i]->payload){
+            del = false;
+            break;
+          }
+        }
+        if (del){
+          delete usedRelations.matchRows[i];
+          usedRelations.matchRows[i] = NULL;
+          usedRelations.activeSize--;
+        }
+      }
+    }
+  }
+}
+//-----------------------------------------------------------------------
 string Joiner::Join(Query& query)
   // Executes a join query
 {
@@ -61,7 +120,8 @@ string Joiner::Join(Query& query)
   RelColumn* relR = GetRelationCol((unsigned)query.prdcts[0]->relation_index_left,(unsigned)query.prdcts[0]->column_left);
   RelColumn* relS = GetRelationCol((unsigned)query.prdcts[0]->relation_index_right,(unsigned)query.prdcts[0]->column_right);
   PartitionedHashJoin* phj = new PartitionedHashJoin(relR, relS);
-  phj->Solve(*usedRelations);
+  UpdateUsedRelations(*usedRelations, phj->Solve());
+
 
   delete phj;
   delete relR;

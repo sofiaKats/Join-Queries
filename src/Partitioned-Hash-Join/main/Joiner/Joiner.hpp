@@ -5,8 +5,9 @@
 
 //---------------------------------------------------------------------------
 class Joiner {
-
-  public:
+private:
+  bool firstJoin = true;
+public:
   /// The relations that might be joined
   Relation** relations;
   UsedRelations* usedRelations;
@@ -21,7 +22,10 @@ class Joiner {
   /// Get relation column from filtered relation
   RelColumn* GetUsedRelation(unsigned, unsigned);
   /// Joins a given set of relations
-  string Join(Query& query);
+  string Join(Query&);
+
+  void UpdateUsedRelations(UsedRelations&);
+
   /// Checksum
   uint64_t Checksum(unsigned, unsigned);
   /// constructor
