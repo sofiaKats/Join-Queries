@@ -9,6 +9,8 @@ class Relation {
   private:
   /// Owns memory (false if it was mmaped)
   bool ownsMemory;
+  ///id 
+  int id;
   /// Loads data from a file
   void loadRelation(const char* fileName);
 
@@ -20,11 +22,13 @@ class Relation {
   /// The join column containing the keys
   uint64_t** columns;
   /// Constructor using mmap
-  Relation(const char* fileName);
+  Relation(const char* fileName, int id);
   /// Delete copy constructor
   Relation(const Relation& other)=delete;
   /// Move constructor
   Relation(Relation&& other)=default;
   /// The destructor
   ~Relation();
+  
+  int getId();
 };

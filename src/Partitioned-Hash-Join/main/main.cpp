@@ -1,4 +1,5 @@
 #include <iostream>
+#include "inttypes.h"
 #include "./Joiner/Joiner.hpp"
 
 int main(int argc, char* argv[]) {
@@ -9,7 +10,7 @@ int main(int argc, char* argv[]) {
   int filesCount;
 
   cout << "--- Insert num of files ---\n";
-  scanf("%d", &filesCount);
+  scanf("%d" SCNd32, &filesCount);
   joiner = new Joiner(filesCount, 20000);
 
   cout << ">>> Insert Relations:" << endl;

@@ -16,6 +16,12 @@ typedef struct Matches {
   Tuple** tuples;
   uint32_t size;
   uint32_t activeSize = 0;
+
+  //In case Matches is used as the final Join array of 2 Relations, we save the id of the tuple[0] Relation
+  // and the id of the tuple[1] Relation
+
+  uint32_t relRid;
+  uint32_t relSid;
   Matches(uint32_t size){
     this->size = size;
     tuples = new Tuple*[size]{};
@@ -26,6 +32,7 @@ typedef struct Matches {
     delete[] tuples;
   }
 } Matches;
+
 
 // each index of the hopscoth table has a value and a corresponding bitmap
 class Index

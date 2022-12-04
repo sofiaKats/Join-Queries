@@ -25,6 +25,7 @@ Matches* PartitionedHashJoin::Solve(){
 
   delete partitionedR;
   delete partitionedS;
+
   return matches;
 }
 
@@ -114,7 +115,12 @@ void PartitionedHashJoin::BuildHashtables(Part* part){
 Matches* PartitionedHashJoin::Join(Part* p1, Part* p2){
   cout << "\n------- JOINING RELATIONS -------\n\n";
   int hashtablesIndex = 0;
+
+  //Build Final tavle of Joined queries of 2 relations
   Matches* final = new Matches(p2->rel->num_tuples * 8); //TODO GetH of hashtable
+  // final->relRid = p1->rel->id;
+  // final->relSid = p2->rel->id;
+
   uint32_t c = 0;
 
   //For every partition table
@@ -127,11 +133,18 @@ Matches* PartitionedHashJoin::Join(Part* p1, Part* p2){
     hashtablesIndex = ExistsInPrefix(hash, p1->prefixSum);
 
     if (hashtablesIndex != -1){
+
       //For every tuple in this partition
       for (int j = p2->prefixSum->arr[i][1]; j < p2->prefixSum->arr[i+1][1]; j++){
         Tuple* tuple = new Tuple(p2->rel->tuples[j].key, p2->rel->tuples[j].payload);
         Matches* matches = p1->hashtables[hashtablesIndex]->contains(tuple);
         //TODO build final table match by match
+
+        for (int k = 0; k<matches->activeSize; k++){
+          final->tuples[final->activeSize] = new Tuple(matches->tuples[k]->key, matches->tuples[k]->payload);
+          final->activeSize++;
+        }
+        delete matches;
         delete tuple;
       }
     }

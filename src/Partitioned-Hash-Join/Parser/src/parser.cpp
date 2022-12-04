@@ -44,7 +44,7 @@ Query* Parser::OpenFileAndParse() {
     // fclose(fp);
     // if (line) free(line); // doesnt work without free(even with delete, memory leaks)
 
-    char line[50] = "0 1 2|0.2=1.0&0.1=2.1|1.2 0.1";
+    char line[50] = "0 1 2|0.2=1.0&0.1>2.1|1.2 0.1";
     char* parts[3];
     const char pipe_[2] = "|"; char *token; int counter; int q_no = 0; // query number
     queries[q_no++] = new Query();

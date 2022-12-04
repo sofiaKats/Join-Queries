@@ -7,6 +7,10 @@
 class Joiner {
 private:
   bool firstJoin = true;
+  void updateURFirst(Matches*, int, int);
+  void updateURonlyR(Matches*, int, int);
+  void updateURonlyS(Matches*, int, int);
+
 public:
   /// The relations that might be joined
   Relation** relations;
@@ -24,7 +28,8 @@ public:
   /// Joins a given set of relations
   string Join(Query&);
 
-  void UpdateUsedRelations(UsedRelations&);
+  void UpdateUsedRelations(Matches*, int, int);
+  void printUsedRelations();
 
   /// Checksum
   uint64_t Checksum(unsigned, unsigned);
