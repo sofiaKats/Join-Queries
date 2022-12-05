@@ -161,6 +161,7 @@ void Joiner::updateURonlyR(Matches* matches, int relUR, int relNew){
     uint32_t rowid = usedRelations->matchRows[i]->arr[relUR];
     for (uint32_t i=0; i<matches->activeSize; i++){ /// Check if exists in new match table
       if (rowid == matches->tuples[i]->key){
+        //cout << rowid << " " <<  matches->tuples[i]->payload << endl;
         del = false;
         break;
       }
@@ -172,6 +173,7 @@ void Joiner::updateURonlyR(Matches* matches, int relUR, int relNew){
     }
     else {
       usedRelations->matchRows[i]->arr[relNew] = matches->tuples[i]->payload;
+      //cout << usedRelations->matchRows[i]->arr[0] << " " << usedRelations->matchRows[i]->arr[1] << endl;
     }
   }
 }
@@ -220,7 +222,11 @@ string Joiner::Join(Query& query)
   relR = GetUsedRelation((unsigned)query.prdcts[1]->relation_index_left, (unsigned)query.prdcts[1]->column_left);
   relS = GetUsedRelation((unsigned)query.prdcts[1]->relation_index_right, (unsigned)query.prdcts[1]->column_right);
   phj = new PartitionedHashJoin(relR, relS);
-  UpdateUsedRelations(phj->Solve(), (unsigned)query.prdcts[1]->relation_index_left, (unsigned)query.prdcts[1]->relation_index_right);
+  Matches* m = phj->Solve();
+  // for (int i =0; i< m->activeSize;i++){
+  //   cout << m->tuples[i]->key << " " << m->tuples[i]->payload << endl;
+  // }
+  UpdateUsedRelations(m, (unsigned)query.prdcts[1]->relation_index_left, (unsigned)query.prdcts[1]->relation_index_right);
   printUsedRelations();
 
   // delete phj;
