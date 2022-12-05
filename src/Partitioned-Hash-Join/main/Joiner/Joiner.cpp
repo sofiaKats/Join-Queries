@@ -62,106 +62,54 @@ void Joiner::UpdateUsedRelations(Matches* matches, int relRid, int relSid){
     // TODO implement (clears out usedRelations)
     return;
   }
-
-  if (firstJoin){                                   /// First Join
-    cout << "FIRST!" << endl;
+  if (firstJoin){ /// First Join
     firstJoin = false;
     updateURFirst(matches, relRid, relSid);
     return;
   }
-  
-  for (uint32_t i=0; i < usedRelations->size; i++){ /// Find First Not null entry in usedRelations
-    if (usedRelations->matchRows[i] == NULL) continue;
 
-    //CASE 1: This can't happen techincally.
-    if ((usedRelations->matchRows[i]->arr[relRid] == -1) && (usedRelations->matchRows[i]->arr[relSid] == -1)){
-      //updateURFirst(matches, relRid, relSid);
-      return;
-    }
+  int relRVal;
+  int relSVal;
+  for (uint32_t i=0; i<usedRelations->size; i++){ /// Find first not null entry in usedRelations
+    if (usedRelations->matchRows[i] != NULL){
+      relRVal = usedRelations->matchRows[i]->arr[relRid];
+      relSVal = usedRelations->matchRows[i]->arr[relSid];
+    } break;
+  }
 
-    //CASE 2.1: Only one of the Relations has been joined before, the Relation R.
-    if ((usedRelations->matchRows[i]->arr[relRid] != -1) && (usedRelations->matchRows[i]->arr[relSid] == -1)){
-      cout << "HERE" << endl;
-      updateURonlyR(matches, relRid, relSid);
-      return;
-    }
-
-    //CASE 2.2: Only one of the Relations has been joined before, the Relation S.
-    if ((usedRelations->matchRows[i]->arr[relRid] == -1) && (usedRelations->matchRows[i]->arr[relSid] != -1)){
-      updateURonlyS(matches, relSid, relRid);
-      return;
-    }
-
-    //CASE 3: Both of the Relations have been joined before.
-    if ((usedRelations->matchRows[i]->arr[relRid] != -1) && (usedRelations->matchRows[i]->arr[relSid] != -1)){
-      return;
-    }
+  // CASE 2.1: Only one of the Relations has been joined before, the Relation R.
+  // Or both
+  if (relRVal != -1){
+    cout << "[UpdateUR] Left or Both" << endl;
+    updateURonlyR(matches, relRid, relSid);
+  }
+  // CASE 2.2: Only one of the Relations has been joined before, the Relation S.
+  else if (relSVal != -1){
+    cout << "[UpdateUR] Right" << endl;
+    updateURonlyS(matches, relSid, relRid);
   }
 }
-/*
-    cout << "left\n";
-    if (usedRelations.matchRows[0]->arr[p1->rel->id] != -1){
-      for (uint32_t i=0; i<usedRelations.size; i++){ /// For each entry from usedRelations
-        if (usedRelations.matchRows[i] == NULL) continue;
-        bool del = true;
-        uint32_t rowid = usedRelations.matchRows[i]->arr[p1->rel->id];
-        for (uint32_t i=0; i<matches->activeSize; i++){ /// Check if exists in new match table
-          if (rowid == matches->tuples[i]->key){
-            del = false;
-            break;
-          }
-        }
-        if (del){
-          delete usedRelations.matchRows[i];
-          usedRelations.matchRows[i] = NULL;
-          usedRelations.activeSize--;
-        }
-      }
-    }
-    else if (usedRelations.matchRows[0]->arr[p2->rel->id] != -1){
-      cout << "right\n";
-
-      for (uint32_t i=0; i<usedRelations.size; i++){ /// For each entry from usedRelations
-        if (usedRelations.matchRows[i] == NULL) continue;
-        bool del = true;
-        uint32_t rowid = usedRelations.matchRows[i]->arr[p2->rel->id];
-        for (uint32_t i=0; i<matches->activeSize; i++){ /// Check if exists in new match table
-          if (rowid == matches->tuples[i]->payload){
-            del = false;
-            break;
-          }
-        }
-        if (del){
-          delete usedRelations.matchRows[i];
-          usedRelations.matchRows[i] = NULL;
-          usedRelations.activeSize--;
-        }
-      }
-    }
-  }
-}
-*/
 
 void Joiner::updateURFirst(Matches* matches, int relRid, int relSid){
-  uint32_t c = 0;
-  
-  for (uint32_t i=0; i<matches->activeSize; i++){
-    usedRelations->matchRows[c] = new MatchRow(usedRelations->rowSize);
-    usedRelations->matchRows[c]->arr[relRid] = matches->tuples[i]->key;
-    usedRelations->matchRows[c++]->arr[relSid] = matches->tuples[i]->payload;
-    usedRelations->activeSize++;
+  uint32_t i;
+  for (i=0; i<matches->activeSize; i++){
+    usedRelations->matchRows[i] = new MatchRow(usedRelations->rowSize);
+    usedRelations->matchRows[i]->arr[relRid] = matches->tuples[i]->key;
+    usedRelations->matchRows[i]->arr[relSid] = matches->tuples[i]->payload;
   }
+  usedRelations->activeSize = i;
 }
 
 void Joiner::updateURonlyR(Matches* matches, int relUR, int relNew){
-  for (uint32_t i=0; i < usedRelations->size; i++){ /// For each entry from usedRelations
+  for (uint32_t i=0; i<usedRelations->size; i++){ /// For each entry from usedRelations
     if (usedRelations->matchRows[i] == NULL) continue;
 
     bool del = true;
     uint32_t rowid = usedRelations->matchRows[i]->arr[relUR];
-    for (uint32_t i=0; i<matches->activeSize; i++){ /// Check if exists in new match table
-      if (rowid == matches->tuples[i]->key){
-        //cout << rowid << " " <<  matches->tuples[i]->payload << endl;
+    for (uint32_t j=0; j<matches->activeSize; j++){ /// Check if exists in new match table
+      if (rowid == matches->tuples[j]->key){
+        //cout << rowid<<":"<<matches->tuples[j]->payload<<endl;
+        usedRelations->matchRows[i]->arr[relNew] = matches->tuples[j]->payload;
         del = false;
         break;
       }
@@ -170,10 +118,6 @@ void Joiner::updateURonlyR(Matches* matches, int relUR, int relNew){
       delete usedRelations->matchRows[i];
       usedRelations->matchRows[i] = NULL;
       usedRelations->activeSize--;
-    }
-    else {
-      usedRelations->matchRows[i]->arr[relNew] = matches->tuples[i]->payload;
-      //cout << usedRelations->matchRows[i]->arr[0] << " " << usedRelations->matchRows[i]->arr[1] << endl;
     }
   }
 }
@@ -184,8 +128,9 @@ void Joiner::updateURonlyS(Matches* matches, int relUR, int relNew){
 
     bool del = true;
     uint32_t rowid = usedRelations->matchRows[i]->arr[relUR];
-    for (uint32_t i=0; i<matches->activeSize; i++){ /// Check if exists in new match table
-      if (rowid == matches->tuples[i]->payload){
+    for (uint32_t j=0; j<matches->activeSize; j++){ /// Check if exists in new match table
+      if (rowid == matches->tuples[j]->payload){
+        usedRelations->matchRows[i]->arr[relNew] = matches->tuples[j]->key;
         del = false;
         break;
       }
@@ -194,9 +139,6 @@ void Joiner::updateURonlyS(Matches* matches, int relUR, int relNew){
       delete usedRelations->matchRows[i];
       usedRelations->matchRows[i] = NULL;
       usedRelations->activeSize--;
-    }
-    else {
-      usedRelations->matchRows[i]->arr[relNew] = matches->tuples[i]->key;
     }
   }
 }
@@ -213,19 +155,18 @@ string Joiner::Join(Query& query)
   PartitionedHashJoin* phj = new PartitionedHashJoin(relR, relS);
   UpdateUsedRelations(phj->Solve(),(unsigned)query.prdcts[0]->relation_index_left, (unsigned)query.prdcts[0]->relation_index_right);
   //printUsedRelations();
-
   delete phj;
   delete relR;
   delete relS;
-
   ///Second Join
   relR = GetUsedRelation((unsigned)query.prdcts[1]->relation_index_left, (unsigned)query.prdcts[1]->column_left);
   relS = GetUsedRelation((unsigned)query.prdcts[1]->relation_index_right, (unsigned)query.prdcts[1]->column_right);
+  //for (int i=0; i<20; i++){
+     //cout << relS->tuples[i].payload << endl;
+  //}
   phj = new PartitionedHashJoin(relR, relS);
   Matches* m = phj->Solve();
-  // for (int i =0; i< m->activeSize;i++){
-  //   cout << m->tuples[i]->key << " " << m->tuples[i]->payload << endl;
-  // }
+
   UpdateUsedRelations(m, (unsigned)query.prdcts[1]->relation_index_left, (unsigned)query.prdcts[1]->relation_index_right);
   printUsedRelations();
 

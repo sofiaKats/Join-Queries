@@ -116,12 +116,8 @@ Matches* PartitionedHashJoin::Join(Part* p1, Part* p2){
   cout << "\n------- JOINING RELATIONS -------\n\n";
   int hashtablesIndex = 0;
 
-  //Build Final tavle of Joined queries of 2 relations
+  /// Build final array of tuples containing matching rowids
   Matches* final = new Matches(p2->rel->num_tuples * 8); //TODO GetH of hashtable
-  // final->relRid = p1->rel->id;
-  // final->relSid = p2->rel->id;
-
-  uint32_t c = 0;
 
   //For every partition table
   for (int i = 0; i < p2->prefixSum->length; i++){
@@ -140,7 +136,7 @@ Matches* PartitionedHashJoin::Join(Part* p1, Part* p2){
         Matches* matches = p1->hashtables[hashtablesIndex]->contains(tuple);
         //TODO build final table match by match
 
-        for (int k = 0; k<matches->activeSize; k++){
+        for (int k = 0; k < matches->activeSize; k++){
           final->tuples[final->activeSize] = new Tuple(matches->tuples[k]->key, matches->tuples[k]->payload);
           final->activeSize++;
         }

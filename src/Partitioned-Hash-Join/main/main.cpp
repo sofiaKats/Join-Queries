@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
   int filesCount;
 
   cout << "--- Insert num of files ---\n";
-  scanf("%d" SCNd32, &filesCount);
+  scanf("%" SCNd32, &filesCount);
   joiner = new Joiner(filesCount, 20000);
 
   cout << ">>> Insert Relations:" << endl;
