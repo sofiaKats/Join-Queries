@@ -171,9 +171,7 @@ string Joiner::Join(Query& query)
     if (isFilterJoin(query.prdcts[i]->operation)) {
       cout << "Filter!"; 
       RelColumn* relR = GetUsedRelation((unsigned)query.prdcts[i]->relation_index_left, (unsigned)query.prdcts[i]->column_left);
-      int n = query.prdcts[i]->number_after_operation;
-      cout << "N is " << endl;
-      updateURself_Filter((unsigned)query.prdcts[i]->relation_index_left, filterJoin(relR, query.prdcts[i]->operation, query.prdcts[i]->number_after_operation));
+      updateURself_Filter((unsigned)query.prdcts[i]->relation_index_left, filterJoin(relR, query.prdcts[i]->operation, query.prdcts[i]->number));
       continue;
     }
     RelColumn* relR = GetUsedRelation((unsigned)query.prdcts[i]->relation_index_left, (unsigned)query.prdcts[i]->column_left);
@@ -259,7 +257,8 @@ bool Joiner::isSelfJoin(unsigned int relR, unsigned int relS){
 }
 
 void Joiner::updateURself_Filter(int relId, SingleCol* sc){
-  cout << "[UpdateUR] Self Join" << endl;
+  cout << "[UpdateUR] Self/ Filter Join" << endl;
+  cout << "sc size i s" << sc->activeSize << endl;
   if (firstJoin){
     firstJoin = false;
     for (int i = 0; i < sc->activeSize; i++){
@@ -287,7 +286,6 @@ void Joiner::updateURself_Filter(int relId, SingleCol* sc){
       usedRelations->activeSize--;
     }    
   } 
-  cout << "[UpdateUR] Self Join done!" << endl; 
 }
 
 SingleCol* Joiner::selfJoin(RelColumn* relR, RelColumn* relS){
