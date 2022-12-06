@@ -10,6 +10,11 @@ private:
   void updateURFirst(Matches*, int, int);
   void updateURonlyR(Matches*, int, int);
   void updateURonlyS(Matches*, int, int);
+  void updateURselfJoin(int, SingleCol*);
+
+
+  bool isSelfJoin(unsigned int, unsigned int);
+  SingleCol* selfJoin(RelColumn*, RelColumn*);
 
 public:
   /// The relations that might be joined
@@ -29,6 +34,7 @@ public:
   string Join(Query&);
 
   void UpdateUsedRelations(Matches*, int, int);
+  
   void printUsedRelations();
 
   /// Checksum

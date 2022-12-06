@@ -105,3 +105,16 @@ typedef struct UsedRelations{
     delete[] matchRows;
   }
 } UsedRelations;
+
+typedef struct SingleCol{
+  uint32_t size;
+  uint32_t activeSize = 0;
+  uint32_t* arr;
+  SingleCol(uint32_t s){
+    size = s;
+    arr = new uint32_t[size];
+  }
+  ~SingleCol(){
+    delete[] arr;
+  }
+}SingleCol;
