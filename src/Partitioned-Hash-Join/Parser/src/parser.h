@@ -47,15 +47,21 @@ public:
 
 class Query {
 public:
-    char* relation[5]; // the relations that are to be used in the particular query
+    char* relation[15]; // the relations that are to be used in the particular query
     int number_of_relations;
     Predicates** prdcts;
     Projection** projections; // each object holds the relation and column to be SUMMED from part 3 of query 
+    int number_of_projections;
+    int number_of_predicates;
+    int priority_predicates[15];// index 0:highest priority, index 15: lowest priority, each index holds the index of the
+    // predicate from the prdcts array (assuming that the only filter of all the predicates is stored in index:5 of prdcts array
+    // it will be priority_predicates[0] = 5)
     Query();
     ~Query();
     int ParseRelations(char* relations); // parses first part of query to find the relations of the query
     int ParsePredicates(char* predicates); // parses second part of query to find predicates of the query
     void ParseProjections(char* projection); // parses third part of query to find projections of query
+    void PredicatePriority(void); // out of the predicates this function finds what to do first(1. filters, 2. self join, 3. other joins)
 };
 
 class Parser {
@@ -63,5 +69,5 @@ class Parser {
 public:
     Parser();
     ~Parser();
-    Query* OpenFileAndParse(); //opens small.work and reads the file line by line, extracting queries
+    void OpenFileAndParse(); //opens small.work and reads the file line by line, extracting queries
 };

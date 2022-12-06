@@ -9,7 +9,7 @@ Parser::~Parser() {
     delete [] queries;
 }
 
-Query* Parser::OpenFileAndParse() {
+void Parser::OpenFileAndParse() {
     // FILE *fp;
     // char *line = NULL; size_t len = 0; ssize_t read;
     // const char pipe_[2] = "|"; char *token; int counter; int q_no = 0; // query number
@@ -44,7 +44,7 @@ Query* Parser::OpenFileAndParse() {
     // fclose(fp);
     // if (line) free(line); // doesnt work without free(even with delete, memory leaks)
 
-    char line[50] = "0 1 2|0.1=1.0&0.0=2.1&1.0=1.1|1.2 0.1";
+    char line[50] = "0 1 2|0.1=1.0&0.0=2.1&1.0=1.1&1.0>200|1.2 0.1";
     char* parts[3];
     const char pipe_[2] = "|"; char *token; int counter; int q_no = 0; // query number
     queries[q_no++] = new Query();
@@ -63,25 +63,30 @@ Query* Parser::OpenFileAndParse() {
         if(queries[q_no-1]->ParsePredicates(parts[1]) == IS_FINISHED)
             queries[q_no-1]->ParseProjections(parts[2]);
     }
-
-    return queries[q_no-1];
+    queries[q_no-1]->PredicatePriority();
 }
 
 /********************************* QUERY FUNCTIONS *********************************/
 
-Query::Query(): number_of_relations(0) {
-    for(int i=0 ;i<5; i++) relation[i] = NULL;
-    projections = new Projection*[3]; //each query has maximum of 3 columns to sum
-    for (int i = 0 ; i < 3; i++) projections[i] = new Projection();
+Query::Query(): number_of_relations(0), number_of_projections(0), number_of_predicates(0){
+    for(int i=0 ;i<15; i++) relation[i] = NULL;
+    for(int i=0; i<15; i++) priority_predicates[i] = -1;
+    projections = new Projection*[15]; //each query has maximum of 3 columns to sum
+    for (int i = 0 ; i < 15; i++) projections[i] = new Projection();
 
-    prdcts = new Predicates*[4];// each query has maximum of 4 predicates
-    for(int i=0; i<4; i++) prdcts[i] = new Predicates();
+    prdcts = new Predicates*[15];// each query has maximum of 4 predicates
+    for(int i=0; i<15; i++) prdcts[i] = new Predicates();
+
+    // priority_predicates = new Predicates*[15];
+    // for(int i=0; i<15; i++) priority_predicates[i] = new Predicates();
 }
 
 Query::~Query() {
-    for (int i = 0 ; i < 4; i++) delete prdcts[i];
+    // for (int i = 0 ; i < 15; i++) delete priority_predicates[i];
+    // delete [] priority_predicates;
+    for (int i = 0 ; i < 15; i++) delete prdcts[i];
     delete [] prdcts;
-    for (int i = 0 ; i < 3; i++) delete projections[i];
+    for (int i = 0 ; i < 15; i++) delete projections[i];
     delete [] projections;
 }
 
@@ -95,7 +100,7 @@ int Query::ParseRelations(char* relations) {
         token = strtok(NULL, space);
     }
 
-    for(int i=0; i<5; i++)  {
+    for(int i=0; i<15; i++)  {
         if(relation[i] != NULL) {
             number_of_relations++;
             cout << "relation[" << i << "]: " << relation[i] << endl;
@@ -111,8 +116,10 @@ int Query::ParsePredicates(char* predicates) {
     token = strtok(predicates, and_);
     while( token != NULL ) { /* walk through other tokens */
         prdcts[index++]->setPredicates(token);
+        number_of_predicates++;
         token = strtok(NULL, and_);
     }
+    cout << "number of predicates: " << number_of_predicates << endl;
     return IS_FINISHED;
 }
 
@@ -122,11 +129,45 @@ void Query::ParseProjections(char* projection) {
 
     token = strtok(projection, space);
     while( token != NULL ) {
+        number_of_projections++;
         projections[index++]->setRelation_Column_Pair(token);
         projections[index-1]->separateRelationFromColumn(); // store relation and column to be summed
         token = strtok(NULL, space); // find next relation-column pair
     }
+    cout << "number of projections: "<< number_of_projections << endl;
 }
+
+void Query::PredicatePriority(void) {
+    int priority_index = 0;
+    // filters first
+    for(int i=0; i<number_of_predicates; i++) {
+        // operation is a filter
+        if(prdcts[i]->number_after_operation == true)
+            //store index of prdct array in priority array
+            priority_predicates[priority_index++] = i;
+        
+    }
+    //then self joins
+    for(int i=0; i<number_of_predicates; i++) {
+        if(prdcts[i]->relation_after_operation == true) {
+            //if its a self join, the priority is higher
+            if(prdcts[i]->relation_index_left == prdcts[i]->relation_index_right)
+                priority_predicates[priority_index++] = i;
+        }
+    }
+    // then the rest of the joins
+    for(int i=0; i<number_of_predicates; i++) {
+        if(prdcts[i]->relation_after_operation == true) {
+            // it's a join with another relation, have to find which joins to do first
+            // so that every join is somehow related to the next one
+                priority_predicates[priority_index++] = i;
+        }
+    }
+
+    for(int i=0; i<number_of_predicates; i++) 
+        cout << "predicate priority " << i << ": " << prdcts[priority_predicates[i]]->predicate << endl;
+}
+
 
 /********************************* PROJECTION FUNCTIONS *********************************/
 Projection::Projection(int relation, int column)
@@ -196,6 +237,7 @@ void Predicates::setPredicates(char* prdct) {
                 }
             }
             cout << " operation: " << operation << " number: " << number << endl;
+        // if the 5th index is '.' (dot character), it's a number not a relation   
         }else if(predicate[5] == '.') {
             relation_after_operation = true;
             relation_index_right = predicate[4] - '0';
