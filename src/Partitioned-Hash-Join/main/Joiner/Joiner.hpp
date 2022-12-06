@@ -10,11 +10,15 @@ private:
   void updateURFirst(Matches*, int, int);
   void updateURonlyR(Matches*, int, int);
   void updateURonlyS(Matches*, int, int);
-  void updateURselfJoin(int, SingleCol*);
+  void updateURself_Filter(int, SingleCol*);
 
 
   bool isSelfJoin(unsigned int, unsigned int);
+  bool isFilterJoin(char);
+
   SingleCol* selfJoin(RelColumn*, RelColumn*);
+  SingleCol* filterJoin(RelColumn*, char, int);
+
   int getFirstURrow();
 
 public:
