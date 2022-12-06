@@ -9,7 +9,7 @@ Parser::~Parser() {
     delete [] queries;
 }
 
-void Parser::OpenFileAndParse() {
+Query* Parser::OpenFileAndParse() {
     // FILE *fp;
     // char *line = NULL; size_t len = 0; ssize_t read;
     // const char pipe_[2] = "|"; char *token; int counter; int q_no = 0; // query number
@@ -64,6 +64,8 @@ void Parser::OpenFileAndParse() {
             queries[q_no-1]->ParseProjections(parts[2]);
     }
     queries[q_no-1]->PredicatePriority();
+
+    return queries[q_no-1];
 }
 
 /********************************* QUERY FUNCTIONS *********************************/

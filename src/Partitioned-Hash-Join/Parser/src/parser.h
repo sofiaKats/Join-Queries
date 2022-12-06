@@ -69,5 +69,5 @@ class Parser {
 public:
     Parser();
     ~Parser();
-    void OpenFileAndParse(); //opens small.work and reads the file line by line, extracting queries
+    Query* OpenFileAndParse(); //opens small.work and reads the file line by line, extracting queries
 };
