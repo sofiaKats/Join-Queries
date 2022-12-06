@@ -44,12 +44,6 @@ bool Index::is_bitmap_full() {
     return true;
 }
 
-int temp_find_hash(int value, int** mock_data){
-    for (int i=0; i<11; i++){
-        if (mock_data[i][0] == value) return mock_data[i][1];
-    }
-    return -1;
-}
 
 Tuple* Index::getTuple(){ return tuple;}
 

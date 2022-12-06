@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
     //cout << i.predicates[0].left.relId<<endl;
     //cout << i.predicates[0].right.relId<<endl;
 
-    delete joiner;
+    //delete joiner;
 
     return 0;
   }

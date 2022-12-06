@@ -117,7 +117,7 @@ Matches* PartitionedHashJoin::Join(Part* p1, Part* p2){
   int hashtablesIndex = 0;
 
   /// Build final array of tuples containing matching rowids
-  Matches* final = new Matches(p2->rel->num_tuples * 8); //TODO GetH of hashtable
+  Matches* final = new Matches(p2->rel->num_tuples * 16); //TODO GetH of hashtable
 
   //For every partition table
   for (int i = 0; i < p2->prefixSum->length; i++){

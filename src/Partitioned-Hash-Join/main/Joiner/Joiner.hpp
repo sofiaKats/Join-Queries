@@ -15,6 +15,7 @@ private:
 
   bool isSelfJoin(unsigned int, unsigned int);
   SingleCol* selfJoin(RelColumn*, RelColumn*);
+  int getFirstURrow();
 
 public:
   /// The relations that might be joined

@@ -54,4 +54,3 @@ public:
     bool is_bitmap_full(); //returns true if full, false if not full
 };
 
-int temp_find_hash(int, int**);
