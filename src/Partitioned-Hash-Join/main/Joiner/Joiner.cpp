@@ -49,7 +49,7 @@ RelColumn* Joiner::GetUsedRelation(unsigned relationId, unsigned colId){
     //relation does not exist in usedRelations
     return GetRelationCol(relationId, colId);
   }
-  cout << "First not null Row is " << notNUllRow << endl;
+  //cout << "First not null Row is " << notNUllRow << endl;
   Relation& rel = GetRelation(relationId);
   RelColumn* relColumn = new RelColumn(relationId, usedRelations->activeSize);
   //changed sth here!!!!!!!!!!!!!!!!!!!!!!!
@@ -74,7 +74,6 @@ void Joiner::UpdateUsedRelations(Matches* matches, int relRid, int relSid){
     firstJoin = false;
     cout << "[UpdateUR] First Join" << endl;
     updateURFirst(matches, relRid, relSid);
-    //cout << "[UpdateUR] First Join done!" << endl;
     return;
   }
 
@@ -191,7 +190,7 @@ string Joiner::Join(Query& query)
     delete relS;    
   }
 
-  printUsedRelations();
+  //printUsedRelations();
 
 
   // /*for (unsigned i=1; i<query.prdcts.size(); ++i){
@@ -258,7 +257,6 @@ bool Joiner::isSelfJoin(unsigned int relR, unsigned int relS){
 
 void Joiner::updateURself_Filter(int relId, SingleCol* sc){
   cout << "[UpdateUR] Self/ Filter Join" << endl;
-  cout << "sc size i s" << sc->activeSize << endl;
   if (firstJoin){
     firstJoin = false;
     for (int i = 0; i < sc->activeSize; i++){
