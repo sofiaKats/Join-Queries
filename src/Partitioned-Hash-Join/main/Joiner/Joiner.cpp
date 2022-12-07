@@ -55,8 +55,8 @@ RelColumn* Joiner::GetUsedRelation(unsigned relationId, unsigned colId){
   //changed sth here!!!!!!!!!!!!!!!!!!!!!!!
   int relCol_cnt = 0;
   for (int i = 0; i < usedRelations->size; i++){
-    if (usedRelations->matchRows[i] == NULL) continue;    
-    
+    if (usedRelations->matchRows[i] == NULL) continue;
+
     relColumn->tuples[relCol_cnt].key = usedRelations->matchRows[i]->arr[relationId];
     relColumn->tuples[relCol_cnt].payload = rel.columns[colId][usedRelations->matchRows[i]->arr[relationId]];
     relCol_cnt++;
@@ -65,7 +65,7 @@ RelColumn* Joiner::GetUsedRelation(unsigned relationId, unsigned colId){
 }
 //-----------------------------------------------------------------------
 void Joiner::UpdateUsedRelations(Matches* matches, int relRid, int relSid){
-
+  //TODO: unify all update UR functions
   if (matches == NULL){
     // TODO implement (clears out usedRelations)
     return;
@@ -76,31 +76,25 @@ void Joiner::UpdateUsedRelations(Matches* matches, int relRid, int relSid){
     updateURFirst(matches, relRid, relSid);
     return;
   }
-
-  int relRVal;
-  int relSVal;
-  for (uint32_t i=0; i<usedRelations->size; i++){ /// Find first not null entry in usedRelations
-    if (usedRelations->matchRows[i] != NULL){
-      relRVal = usedRelations->matchRows[i]->arr[relRid];
-      relSVal = usedRelations->matchRows[i]->arr[relSid];
-    } break;
+  if (usedRelations->activeSize == 0){
+    //TODO: no matces, stop query and print NULL
+    //Check after every UR update
+    return;
   }
-
+  int i = getFirstURrow();
   // CASE 2.1: Only one of the Relations has been joined before, the Relation R.
   // Or both
-  if (relRVal != -1){
+  if (usedRelations->matchRows[i]->arr[relRid] != -1){
     cout << "[UpdateUR] Left or Both" << endl;
     updateURonlyR(matches, relRid, relSid);
-    //cout << "[UpdateUR] Left or Both done!" << endl;
     return;
   }
   // CASE 2.2: Only one of the Relations has been joined before, the Relation S.
-  if (relSVal != -1){
+  if (usedRelations->matchRows[i]->arr[relSid] != -1){
     cout << "[UpdateUR] Right" << endl;
     updateURonlyS(matches, relSid, relRid);
     return;
   }
-
 }
 
 void Joiner::updateURFirst(Matches* matches, int relRid, int relSid){
@@ -114,7 +108,7 @@ void Joiner::updateURFirst(Matches* matches, int relRid, int relSid){
 }
 
 void Joiner::updateURonlyR(Matches* matches, int relUR, int relNew){
-  int deleteions = 0;
+  int deletions = 0;
   for (uint32_t i=0; i<usedRelations->size; i++){ /// For each entry from usedRelations
     if (usedRelations->matchRows[i] == NULL) continue;
 
@@ -129,7 +123,7 @@ void Joiner::updateURonlyR(Matches* matches, int relUR, int relNew){
       }
     }
     if (del){
-      deleteions ++;
+      deletions ++;
       delete usedRelations->matchRows[i];
       usedRelations->matchRows[i] = NULL;
       usedRelations->activeSize--;
@@ -162,13 +156,14 @@ void Joiner::updateURonlyS(Matches* matches, int relUR, int relNew){
 string Joiner::Join(Query& query)
   // Executes a join query
 {
+  cout << "\n\n--- Join Queries Start---\n\n";
   usedRelations = new UsedRelations(2000, query.number_of_relations);
 
   //TEMP OF 3 JOIN, this later will be query.prdcts->activeSize
   for (int i = 0; i < 3; i++){
     //CASE 1: Join is with filter e.g 1.0 > 3000
     if (isFilterJoin(query.prdcts[i]->operation)) {
-      cout << "Filter!"; 
+      cout << "Filter!";
       RelColumn* relR = GetUsedRelation((unsigned)query.prdcts[i]->relation_index_left, (unsigned)query.prdcts[i]->column_left);
       updateURself_Filter((unsigned)query.prdcts[i]->relation_index_left, filterJoin(relR, query.prdcts[i]->operation, query.prdcts[i]->number));
       continue;
@@ -187,7 +182,7 @@ string Joiner::Join(Query& query)
       delete phj;
     }
     delete relR;
-    delete relS;    
+    delete relS;
   }
 
   //printUsedRelations();
@@ -214,9 +209,9 @@ string Joiner::Join(Query& query)
   // return out.str();
   // */
 
-  //delete usedRelations;
+  delete usedRelations;
 
-  //return "- result -\n";
+  return "- result -\n";
 }
 
 uint64_t Joiner::Checksum(unsigned relationId, unsigned colId){
@@ -282,8 +277,8 @@ void Joiner::updateURself_Filter(int relId, SingleCol* sc){
       delete usedRelations->matchRows[i];
       usedRelations->matchRows[i] = NULL;
       usedRelations->activeSize--;
-    }    
-  } 
+    }
+  }
 }
 
 SingleCol* Joiner::selfJoin(RelColumn* relR, RelColumn* relS){
@@ -309,7 +304,7 @@ int Joiner::getFirstURrow(){
       return i;
     }
   }
-  if (i == usedRelations->size) return -1;
+  return -1;
 }
 
 bool Joiner::isFilterJoin(char operation){
@@ -334,5 +329,3 @@ SingleCol* Joiner::filterJoin(RelColumn* relR, char operation, int n){
   }
   return singleCol;
 }
-
-
