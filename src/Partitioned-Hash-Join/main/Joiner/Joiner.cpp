@@ -68,7 +68,7 @@ RelColumn* Joiner::GetUsedRelation(unsigned relationId, unsigned colId){
 void Joiner::updateUsedRelations(Matches* matches, int relRid, int relSid){
   //TODO: unify all update UR functions
   if (matches == NULL){
-    // TODO implement (clears out usedRelations)
+    clearUsedRelations();
     return;
   }
   if (firstJoin){ /// First Join
@@ -76,11 +76,6 @@ void Joiner::updateUsedRelations(Matches* matches, int relRid, int relSid){
     cout << "[UpdateUR] First Join" << endl;
     updateURFirst(matches, relRid, relSid);
     return;
-  }
-  if (usedRelations->activeSize == 0){
-    //TODO: no matces, stop query and print NULL
-    //Check after every UR update
-    //return;
   }
   int i = getFirstURrow();
   // CASE 2.1: Only one of the Relations has been joined before, the Relation R.
@@ -99,10 +94,6 @@ void Joiner::updateUsedRelations(Matches* matches, int relRid, int relSid){
 }
 
 void Joiner::updateURFirst(Matches* matches, int relRid, int relSid){
-  if (matches->activeSize == 0){ //NO matches clear UR
-    clearUsedRelations();
-    return;
-  }
   uint32_t i;
   for (i=0; i<matches->activeSize; i++){
     usedRelations->matchRows[i] = new MatchRow(usedRelations->rowSize);
@@ -113,10 +104,6 @@ void Joiner::updateURFirst(Matches* matches, int relRid, int relSid){
 }
 
 void Joiner::updateURonlyR(Matches* matches, int relUR, int relNew){
-  if (matches->activeSize == 0){ //NO matches clear UR
-    clearUsedRelations();
-    return;
-  }
   int deletions = 0;
   for (uint32_t i=0; i<usedRelations->size; i++){ /// For each entry from usedRelations
     if (usedRelations->matchRows[i] == NULL) continue;
@@ -141,10 +128,6 @@ void Joiner::updateURonlyR(Matches* matches, int relUR, int relNew){
 }
 
 void Joiner::updateURonlyS(Matches* matches, int relUR, int relNew){
-  if (matches->activeSize == 0){ //NO matches clear UR
-    clearUsedRelations();
-    return;
-  }
   for (uint32_t i=0; i < usedRelations->size; i++){ /// For each entry from usedRelations
     if (usedRelations->matchRows[i] == NULL) continue;
 
