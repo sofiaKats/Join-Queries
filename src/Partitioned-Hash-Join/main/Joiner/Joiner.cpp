@@ -186,8 +186,7 @@ string Joiner::Join(Query& query)
   //PrintUsedRelations();
 
   for (unsigned i=0; i<query.number_of_projections; ++i) {
-    uint64_t sum = Checksum(query.projections[i]->getRelationIndex(),query.projections[i]->getColumn());
-    cout << (sum == 0?NULL:to_string(sum)) << " ";
+    cout << Checksum(query.projections[i]->getRelationIndex(),query.projections[i]->getColumn()) << " ";
   }
   cout << "\n";
   delete usedRelations;
@@ -197,9 +196,11 @@ string Joiner::Join(Query& query)
 uint64_t Joiner::Checksum(unsigned relationId, unsigned colId){
   uint64_t sum = 0;
   Relation& rel = GetRelation(relationId);
-  for (int i = 0; i < usedRelations->size; i++){
+  for (int i=0; i<usedRelations->size; i++){
     if (usedRelations->matchRows[i] == NULL) continue;
-    sum += rel.columns[colId][usedRelations->matchRows[i]->arr[relationId]];
+    uint32_t idx = usedRelations->matchRows[i]->arr[relationId];
+    if (idx == -1) return 0;
+    sum += rel.columns[colId][idx];
   }
   return sum;
 }
