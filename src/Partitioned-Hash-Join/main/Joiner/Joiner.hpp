@@ -7,11 +7,12 @@
 class Joiner {
 private:
   bool firstJoin = true;
+  void updateUsedRelations(Matches*, int, int);
   void updateURFirst(Matches*, int, int);
   void updateURonlyR(Matches*, int, int);
   void updateURonlyS(Matches*, int, int);
   void updateURself_Filter(int, SingleCol*);
-
+  void clearUsedRelations();
 
   bool isSelfJoin(unsigned int, unsigned int);
   bool isFilterJoin(char);
@@ -37,11 +38,8 @@ public:
   RelColumn* GetUsedRelation(unsigned, unsigned);
   /// Joins a given set of relations
   string Join(Query&);
-
-  void UpdateUsedRelations(Matches*, int, int);
-  
-  void printUsedRelations();
-
+  /// Prints used relations table
+  void PrintUsedRelations();
   /// Checksum
   uint64_t Checksum(unsigned, unsigned);
   /// constructor

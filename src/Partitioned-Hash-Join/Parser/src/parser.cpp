@@ -44,7 +44,7 @@ Query* Parser::OpenFileAndParse() {
     // fclose(fp);
     // if (line) free(line); // doesnt work without free(even with delete, memory leaks)
 
-    char line[50] = "0 1 2|0.1=1.0&0.0=2.1&1.0=1.1&1.0>200|1.2 0.1";
+    char line[50] = "0 1 2|0.1=1.0&0.0=2.1&1.0=1.1&1.0>30000|1.2 0.1";
     char* parts[3];
     const char pipe_[2] = "|"; char *token; int counter; int q_no = 0; // query number
     queries[q_no++] = new Query();
@@ -147,7 +147,7 @@ void Query::PredicatePriority(void) {
         if(prdcts[i]->number_after_operation == true)
             //store index of prdct array in priority array
             priority_predicates[priority_index++] = i;
-        
+
     }
     //then self joins
     for(int i=0; i<number_of_predicates; i++) {
@@ -166,7 +166,7 @@ void Query::PredicatePriority(void) {
         }
     }
 
-    for(int i=0; i<number_of_predicates; i++) 
+    for(int i=0; i<number_of_predicates; i++)
         cout << "predicate priority " << i << ": " << prdcts[priority_predicates[i]]->predicate << endl;
 }
 
@@ -239,7 +239,7 @@ void Predicates::setPredicates(char* prdct) {
                 }
             }
             cout << " operation: " << operation << " number: " << number << endl;
-        // if the 5th index is '.' (dot character), it's a number not a relation   
+        // if the 5th index is '.' (dot character), it's a number not a relation
         }else if(predicate[5] == '.') {
             relation_after_operation = true;
             relation_index_right = predicate[4] - '0';
