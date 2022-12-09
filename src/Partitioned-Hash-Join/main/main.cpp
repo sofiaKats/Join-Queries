@@ -3,6 +3,7 @@
 #include "./Joiner/Joiner.hpp"
 
 int main(int argc, char* argv[]) {
+  srand(time(NULL));
 
   Joiner* joiner;
   char input[20], line[50];

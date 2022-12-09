@@ -9,10 +9,10 @@ Hashtable::Hashtable(int tableR_size){
     this->depth = findClosestPowerOf2(tableR_size);
     this->table_size = pow(2,depth);
     this->emptySpaces = table_size;
-    if (table_size < 16)  {
+    if (table_size < 32)  {
         H = table_size;
     }
-    else                        H = 16;
+    else                        H = 32;
 
     hashtable = new Index*[table_size];
     for (int i=0; i<table_size; i++)
@@ -91,7 +91,9 @@ int Hashtable::find_empty_index(int i){
 }
 
 void Hashtable::add_value(int pos, int value, int hash_value, Tuple* tuple){
-    hashtable[pos]->set_value(value);
+    //if (tuple->key == 470) {cout << "-----------------------------------pos, hash_value is " << pos << " " << hash(tuple->payload) << endl;}
+    //hash_value = hash(tuple->payload);
+    hashtable[pos]->set_value(tuple->key);
     hashtable[pos]->set_has_value(true);
 
     hashtable[pos]->setTuple(tuple);
@@ -100,9 +102,10 @@ void Hashtable::add_value(int pos, int value, int hash_value, Tuple* tuple){
     int indx;
     int loop = 0;
     for (int i = pos; i > pos- H; i--){
-        indx = (i+table_size) %table_size;
+        indx = (i + table_size) % table_size;
         if (hash_value == indx) {
             hashtable[indx]->set_bitmap_index_to_1(loop);
+            //if (tuple->key == 470) {cout << "<><><><><>pos is " << i << endl;}
         }
         else hashtable[indx]->set_bitmap_index_to_0(loop);
         loop++;
@@ -178,6 +181,7 @@ void Hashtable::add(int payload, int value){
 }
 
 bool Hashtable::insert(int hashed_payload, int value, Tuple* tuple){
+    //if (tuple->key == 470) cout << "hashedh [ayload is isert" << hashed_payload << endl;
     int pos = findPos(hashed_payload);
     if (pos == -1) return false;
 
@@ -200,6 +204,7 @@ int Hashtable::slideLeft(int hashed_payload, int emptyPos){
 }
 
 int Hashtable::swapEmpty(int emptyPos, int swapNeighborPos, int value, int hashed_payload, Tuple* tuple){
+    //if (tuple->key == 470) cout << "hashedh [ayload is " << hashed_payload << endl;
     add_value(emptyPos, value, hashed_payload, tuple);
     remove_value(swapNeighborPos, hashed_payload);
     emptyPos = swapNeighborPos;
@@ -229,7 +234,7 @@ int Hashtable::findSwapNeighbourPos(int emptyPos){
         swapNeighborPos = checkBucketBitmap(bucket, swapNeighborPos, changed, posLeftToCheckBitmaps);
 
         if (swapNeighborPos!=-1){
-            emptyPos = swapEmpty(emptyPos, swapNeighborPos, hashtable[swapNeighborPos]->get_value(), hash(hashtable[swapNeighborPos]->get_value()), hashtable[swapNeighborPos]->getTuple());
+            emptyPos = swapEmpty(emptyPos, swapNeighborPos, hashtable[swapNeighborPos]->getTuple()->key, hash(hashtable[swapNeighborPos]->getTuple()->payload), hashtable[swapNeighborPos]->getTuple());
             break;
         }
         bucket = findNeighborPosByK(bucket, 1);
@@ -248,23 +253,43 @@ int Hashtable::findNeighborPosByK(int currPos, int k){
 }
 
 Matches* Hashtable::contains(Tuple* tuple){
+    //if (tuple->payload == 3233) cout << "KEY IS " << tuple->key << endl;
     //find hash value and neighborhood
     int nei = H;
     Matches* matches = new Matches(nei);
     int payload2 = tuple->payload;
     int hashhop = hash(payload2);
+
+    // if (tuple->payload == 3233) {
+    //     cout << "hashhop is " << hashhop << endl;
+    //     for (int i = 0; i < nei; i++){
+    //         cout << hashtable[hashhop+i]->getTuple()->key << " ";
+    //     }
+    //     hashtable[hashhop]->print_bitmap();
+    // }    
     int currentBucket = hashhop;
 
     for (int loops = 0; loops < nei; loops++){
         if (hashtable[hashhop]->get_bitmap_index(loops) == 1){
-          int payload1 = hashtable[currentBucket]->getTuple()->payload;
 
-          if (payload1 == payload2){
-            matches->tuples[matches->activeSize] = new Tuple(hashtable[currentBucket]->getTuple()->key, tuple->key);
-            matches->activeSize++;
-          }
+            // if (tuple->payload == 3233){
+            //     cout << "hashtable_cuur " << matches->activeSize << endl;
+            // }
+
+            int payload1 = hashtable[currentBucket]->getTuple()->payload;
+            // if (tuple->payload == 3233){
+            //     cout << "hashtable_cuur " << hashtable[currentBucket]->getTuple()->key << endl;
+            // }
+
+            if (payload1 == payload2){
+                matches->tuples[matches->activeSize] = new Tuple(hashtable[currentBucket]->getTuple()->key, tuple->key);
+                matches->activeSize++;
+            }
         }
         currentBucket = findNeighborPosByK(currentBucket, 1);
     }
+    // if (tuple->payload == 3233){
+    //     cout << "Matches size is " << matches->activeSize << endl;
+    // }
     return matches;
 }
