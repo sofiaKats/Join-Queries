@@ -46,7 +46,7 @@ RelColumn* Joiner::GetRelationCol(unsigned relationId, unsigned colId){
 
 RelColumn* Joiner::GetUsedRelation(unsigned relationId, unsigned colId){
   int notNullRow = getFirstURrow();
-  if (notNullRow == -1 || usedRelations->matchRows[notNullRow]->arr[relationId] || firstJoin == true == -1)
+  if (notNullRow == -1 || usedRelations->matchRows[notNullRow]->arr[relationId] == -1 || firstJoin == true )
     return GetRelationCol(relationId, colId);
 
   Relation& rel = GetRelation(relationId);
@@ -54,8 +54,8 @@ RelColumn* Joiner::GetUsedRelation(unsigned relationId, unsigned colId){
   //changed sth here!!!!!!!!!!!!!!!!!!!!!!!
   int relCol_cnt = 0;
   for (int i=0; i<usedRelations->size; i++){
-    if (usedRelations->matchRows[i] == NULL)
-      continue;
+    if (usedRelations->matchRows[i] == NULL)  continue;
+
     uint32_t rowid = usedRelations->matchRows[i]->arr[relationId];
     relColumn->tuples[relCol_cnt].key = rowid;
     relColumn->tuples[relCol_cnt].payload = rel.columns[colId][rowid];
@@ -74,9 +74,8 @@ string Joiner::Join(Query& query)
   for (int i = 0; i < query.number_of_predicates; i++){
     /// Priority index
     int idx = query.priority_predicates[i];
-    //int idx = i;
     //CASE 1: Join is with filter e.g 1.0 > 3000
-    if(query.prdcts[idx]->number_after_operation){
+    if (query.prdcts[idx]->number_after_operation){
       RelColumn* relR = GetUsedRelation(query.prdcts[idx]->relation_index_left, query.prdcts[idx]->column_left);
       SingleCol* matches = filterJoin(relR, query.prdcts[idx]->operation, query.prdcts[idx]->number);
       if (firstJoin) usedRelations = new UsedRelations(matches->activeSize, query.number_of_relations);
@@ -106,7 +105,7 @@ string Joiner::Join(Query& query)
       delete relS;
     }
     if (usedRelations == NULL) return "NULL";
-    //PrintUsedRelations();
+    
     cout << usedRelations->activeSize << endl;
   }
   //cout << usedRelations->activeSize << endl;
@@ -162,7 +161,7 @@ void Joiner::updateUsedRelations(Matches* matches, int relRid, int relSid){
 
 void Joiner::updateURFirst(Matches* matches, int relRid, int relSid){
   uint32_t i;
-  for (i=0; i<matches->activeSize; i++){
+  for (i=0; i < matches->activeSize; i++){
     usedRelations->matchRows[i] = new MatchRow(usedRelations->rowSize);
     usedRelations->matchRows[i]->arr[relRid] = matches->tuples[i]->key;
     usedRelations->matchRows[i]->arr[relSid] = matches->tuples[i]->payload;
@@ -171,30 +170,34 @@ void Joiner::updateURFirst(Matches* matches, int relRid, int relSid){
 }
 
 void Joiner::updateURonlyR(Matches* matches, int relUR, int relNew){
-  int deletions = 0;
+  cout << "active size " << usedRelations->activeSize << endl;
+  UsedRelations* temp = new UsedRelations(2000, usedRelations->rowSize);
   for (uint32_t i=0; i<usedRelations->size; i++){ /// For each entry from usedRelations
     if (usedRelations->matchRows[i] == NULL) continue;
 
     bool del = true;
     uint32_t rowid = usedRelations->matchRows[i]->arr[relUR];
-    for (uint32_t j=0; j<matches->activeSize; j++){ /// Check if exists in new match table
+    for (uint32_t j=0; j < matches->activeSize; j++){ /// Check if exists in new match table
+
       if (rowid == matches->tuples[j]->key){
-        //cout << rowid<<":"<<matches->tuples[j]->payload<<endl;
         usedRelations->matchRows[i]->arr[relNew] = matches->tuples[j]->payload;
+        tempStoreDuplicatesR(j, temp, relNew, matches, rowid, i);
         del = false;
         break;
       }
     }
     if (del){
-      deletions ++;
       delete usedRelations->matchRows[i];
       usedRelations->matchRows[i] = NULL;
       usedRelations->activeSize--;
     }
   }
+  moveUR(temp);
+  //delete temp;
 }
 
 void Joiner::updateURonlyS(Matches* matches, int relUR, int relNew){
+  UsedRelations* temp = new UsedRelations(2000, usedRelations->rowSize);
   for (uint32_t i=0; i < usedRelations->size; i++){ /// For each entry from usedRelations
     if (usedRelations->matchRows[i] == NULL) continue;
 
@@ -203,6 +206,7 @@ void Joiner::updateURonlyS(Matches* matches, int relUR, int relNew){
     for (uint32_t j=0; j<matches->activeSize; j++){ /// Check if exists in new match table
       if (rowid == matches->tuples[j]->payload){
         usedRelations->matchRows[i]->arr[relNew] = matches->tuples[j]->key;
+        tempStoreDuplicatesS(j, temp, relNew, matches, rowid, i);
         del = false;
         break;
       }
@@ -213,6 +217,7 @@ void Joiner::updateURonlyS(Matches* matches, int relUR, int relNew){
       usedRelations->activeSize--;
     }
   }
+  moveUR(temp);
 }
 //-----------------------------------------------------------------------
 void Joiner::updateURself_Filter(int relId, SingleCol* sc){
@@ -267,8 +272,8 @@ bool Joiner::isSelfJoin(unsigned int relR, unsigned int relS){
 }
 int Joiner::getFirstURrow(){
   if (firstJoin) return -1;
-  for (uint32_t i = 0; i < usedRelations->size; i++){
-    if (usedRelations->matchRows[i] != NULL){
+  for (int i = 0; i < usedRelations->size; i++){
+    if (usedRelations->matchRows[i] != nullptr){
       return i;
     }
   }
@@ -335,3 +340,52 @@ Joiner::~Joiner(){
   }
   delete[] relations;
 }
+
+void Joiner::moveUR(UsedRelations* temp){
+  int prevJ = 0;
+  for (int i = 0; i < temp->activeSize; i++){
+    for (int j = prevJ; j < usedRelations->size; j++){
+      if (usedRelations->matchRows[j] == nullptr){
+        usedRelations->matchRows[j] = new MatchRow(usedRelations->rowSize);
+        usedRelations->matchRows[j] = temp->matchRows[i];
+        usedRelations->activeSize++;
+        break;
+      }
+      prevJ = j + 1;
+    }
+  }
+}
+
+void Joiner::tempStoreDuplicatesR(int j, UsedRelations* temp, int relNew, Matches* matches, int rowid, int i){
+  //cout << "J+1 is " << j+1 << "matches active size " << matches->activeSize << " rowid is " << rowid << " i is " << i << endl;
+
+  for (int k = j + 1; k < matches->activeSize; k++){
+    if (rowid == matches->tuples[k]->key){
+      //cout << "For rowid: " << rowid << " matches active size is " << matches->activeSize << endl;
+      temp->matchRows[temp->activeSize] = new MatchRow(usedRelations->rowSize);            
+
+      for (int p = 0; p < usedRelations->rowSize; p++){              
+        temp->matchRows[temp->activeSize]->arr[p] = usedRelations->matchRows[i]->arr[p];
+      }
+      temp->matchRows[temp->activeSize]->arr[relNew] = matches->tuples[k]->payload;
+      temp->activeSize++;
+    }
+  }
+}
+
+void Joiner::tempStoreDuplicatesS(int j, UsedRelations* temp, int relNew, Matches* matches, int rowid, int i){
+  for (int k = j + 1; k < matches->activeSize; k++){
+    if (rowid == matches->tuples[k]->payload){
+      //cout << "For rowid: " << rowid << " matches active size is " << matches->activeSize << endl;
+      temp->matchRows[temp->activeSize] = new MatchRow(usedRelations->rowSize);            
+
+      for (int p = 0; p < usedRelations->rowSize; p++){              
+        temp->matchRows[temp->activeSize]->arr[p] = usedRelations->matchRows[i]->arr[p];
+      }
+      temp->matchRows[temp->activeSize]->arr[relNew] = matches->tuples[k]->key;
+      temp->activeSize++;
+    }
+  }
+}
+
+

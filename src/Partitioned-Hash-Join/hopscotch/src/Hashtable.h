@@ -17,12 +17,12 @@ private:
     bool checkHashtableFull();
     bool checkBitmapFull(int);
     bool insert(int, int, Tuple*);
-    int findPos(int);
+    int findPos(int, int);
     int checkBucketBitmap(int, int&, bool&, int);
     int swapEmpty(int, int, int, int, Tuple*);
     int findSwapNeighbourPos(int);
     int slideLeft(int, int);
-    int find_empty_index(int);
+    int find_empty_index(int, int);
     void add_value(int, int, int, Tuple*);
     void remove_value(int, int);
     void resize();

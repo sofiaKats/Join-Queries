@@ -16,6 +16,7 @@ typedef struct Matches {
   Tuple** tuples;
   uint32_t size;
   uint32_t activeSize = 0;
+  uint32_t joinSize = 0;
 
   Matches(uint32_t size){
     this->size = size;

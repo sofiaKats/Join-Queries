@@ -22,6 +22,10 @@ private:
 
   int getFirstURrow();
 
+  void moveUR(UsedRelations*);
+  void tempStoreDuplicatesR(int, UsedRelations*, int, Matches*, int, int);
+  void tempStoreDuplicatesS(int, UsedRelations*, int, Matches*, int, int);
+
 public:
   /// The relations that might be joined
   Relation** relations;
