@@ -117,7 +117,8 @@ Matches* PartitionedHashJoin::Join(Part* p1, Part* p2){
   int hashtablesIndex = 0;
 
   /// Build final array of tuples containing matching rowids
-  Matches* final = new Matches(p2->rel->num_tuples * 32); //TODO GetH of hashtable
+  uint32_t matchesSize = (p1->rel->num_tuples > p2->rel->num_tuples ? p2->rel->num_tuples : p1->rel->num_tuples) * 32;
+  Matches* final = new Matches(matchesSize); //TODO GetH of hashtable
 
   //For every partition table
   for (int i = 0; i < p2->prefixSum->length; i++){
@@ -131,12 +132,11 @@ Matches* PartitionedHashJoin::Join(Part* p1, Part* p2){
     if (hashtablesIndex != -1){
 
       //For every tuple in this partition
-      for (int j = p2->prefixSum->arr[i][1]; j < p2->prefixSum->arr[i+1][1]; j++){
+      for (uint32_t j = p2->prefixSum->arr[i][1]; j < p2->prefixSum->arr[i+1][1]; j++){
         Tuple* tuple = new Tuple(p2->rel->tuples[j].key, p2->rel->tuples[j].payload);
         Matches* matches = p1->hashtables[hashtablesIndex]->contains(tuple);
-        //TODO build final table match by match
-
-        for (int k = 0; k < matches->activeSize; k++){
+        
+        for (uint32_t k = 0; k < matches->activeSize; k++){
           final->tuples[final->activeSize] = new Tuple(matches->tuples[k]->key, matches->tuples[k]->payload);
           final->activeSize++;
         }

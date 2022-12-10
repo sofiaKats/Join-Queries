@@ -3,7 +3,6 @@
 Joiner::Joiner(uint32_t size, uint32_t rowSize){
   this->size = size;
   this->rowSize = rowSize;
-  //->usedRelations = rowSize;
   relations = new Relation*[size]{};
   for (int i =0; i < size; i++){
     relations[i] = NULL;
@@ -36,7 +35,7 @@ RelColumn* Joiner::GetRelationCol(unsigned relationId, unsigned colId){
     RelColumn* relColumn = new RelColumn(relationId, rel.size);
     //TEMPORARY FOR DEBUGGING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     //for (int i = 0; i < rel.size; i++){
-    
+
     for (int i = 0; i < rel.size; i++){
       //i = rand()%(rel.size);
       relColumn->tuples[i].key = i;
@@ -70,23 +69,27 @@ string Joiner::Join(Query& query)
   // Executes a join query
 {
   cout << "\n\n--- Join Queries Start---\n\n";
-  usedRelations = new UsedRelations(100000, query.number_of_relations);
+  //usedRelations = new UsedRelations(100000, query.number_of_relations);
 
   for (int i = 0; i < query.number_of_predicates; i++){
     /// Priority index
     int idx = query.priority_predicates[i];
-    //int idx = i; 
+    //int idx = i;
     //CASE 1: Join is with filter e.g 1.0 > 3000
     if(query.prdcts[idx]->number_after_operation){
       RelColumn* relR = GetUsedRelation(query.prdcts[idx]->relation_index_left, query.prdcts[idx]->column_left);
-      updateURself_Filter(query.prdcts[idx]->relation_index_left, filterJoin(relR, query.prdcts[idx]->operation, query.prdcts[idx]->number));
+      SingleCol* matches = filterJoin(relR, query.prdcts[idx]->operation, query.prdcts[idx]->number);
+      if (firstJoin) usedRelations = new UsedRelations(matches->activeSize, query.number_of_relations);
+      updateURself_Filter(query.prdcts[idx]->relation_index_left, matches);
       delete relR;
     }
     //CASE 2: Join is self join e.g 1.0 = 1.2
     else if (isSelfJoin(query.prdcts[idx]->relation_index_left, query.prdcts[idx]->relation_index_right)){
       RelColumn* relR = GetUsedRelation(query.prdcts[idx]->relation_index_left, query.prdcts[idx]->column_left);
       RelColumn* relS = GetUsedRelation(query.prdcts[idx]->relation_index_right, query.prdcts[idx]->column_right);
-      updateURself_Filter(query.prdcts[idx]->relation_index_left, selfJoin(relR, relS));
+      SingleCol* matches = selfJoin(relR, relS);
+      if (firstJoin) usedRelations = new UsedRelations(matches->activeSize, query.number_of_relations);
+      updateURself_Filter(query.prdcts[idx]->relation_index_left, matches);
       delete relR;
       delete relS;
     }
@@ -95,7 +98,9 @@ string Joiner::Join(Query& query)
       RelColumn* relR = GetUsedRelation(query.prdcts[idx]->relation_index_left, query.prdcts[idx]->column_left);
       RelColumn* relS = GetUsedRelation(query.prdcts[idx]->relation_index_right, query.prdcts[idx]->column_right);
       PartitionedHashJoin* phj = new PartitionedHashJoin(relR, relS);
-      updateUsedRelations(phj->Solve(),query.prdcts[idx]->relation_index_left, query.prdcts[idx]->relation_index_right);
+      Matches* matches = phj->Solve();
+      if (firstJoin) usedRelations = new UsedRelations(matches->activeSize, query.number_of_relations);
+      updateUsedRelations(matches,query.prdcts[idx]->relation_index_left, query.prdcts[idx]->relation_index_right);
       delete phj;
       delete relR;
       delete relS;

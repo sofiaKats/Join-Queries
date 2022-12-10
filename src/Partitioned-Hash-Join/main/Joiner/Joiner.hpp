@@ -25,7 +25,7 @@ private:
 public:
   /// The relations that might be joined
   Relation** relations;
-  UsedRelations* usedRelations;
+  UsedRelations* usedRelations = NULL;
   uint32_t size;
   uint32_t rowSize;
   /// Add relation

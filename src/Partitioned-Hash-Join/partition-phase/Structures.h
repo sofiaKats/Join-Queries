@@ -110,8 +110,8 @@ typedef struct SingleCol{
   uint32_t size;
   uint32_t activeSize = 0;
   uint32_t* arr;
-  SingleCol(uint32_t s){
-    size = s;
+  SingleCol(uint32_t size){
+    this->size = size;
     arr = new uint32_t[size];
   }
   ~SingleCol(){
