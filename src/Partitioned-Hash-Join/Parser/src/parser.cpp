@@ -153,8 +153,8 @@ void Query::ParseProjections(char* projection) {
 
 void Query::ReplacePredicateIndexWithRelation(void) {
     for(int i=0; i<number_of_predicates; i++) {
-        prdcts[i]->relation_index_left = atoi(relation[prdcts[i]->relation_index_left]);
-        if(prdcts[i]->relation_after_operation == true) prdcts[i]->relation_index_right = atoi(relation[prdcts[i]->relation_index_right]);
+        prdcts[i]->relation_left = atoi(relation[prdcts[i]->binding_left]);
+        if(prdcts[i]->relation_after_operation == true) prdcts[i]->relation_right = atoi(relation[prdcts[i]->binding_right]);
     }
 }
 
@@ -173,7 +173,7 @@ void Query::PredicatePriority(void) {
     for(int i=0; i<number_of_predicates; i++) {
         if(prdcts[i]->relation_after_operation == true) {
             //if its a self join, the priority is higher
-            if(prdcts[i]->relation_index_left == prdcts[i]->relation_index_right) {
+            if(prdcts[i]->relation_left == prdcts[i]->relation_right) {
                 priority_predicates[priority_index++] = i;
                 prdcts[i]->self_join = true;
             }
@@ -183,15 +183,15 @@ void Query::PredicatePriority(void) {
     //add the rest of the joins
     for(int i=0; i<number_of_predicates; i++) {
         if(prdcts[i]->self_join == true || prdcts[i]->filter==true) continue;
-        if(prdcts[i]->relation_after_operation == true && prdcts[i]->relation_index_left != prdcts[i]->relation_index_right) {
+        if(prdcts[i]->relation_after_operation == true && prdcts[i]->relation_left != prdcts[i]->relation_right) {
             priority_predicates[priority_index++] = i; //assign first predicate we find
             prdcts[i]->simple_join = true;
         }
     }
 
     for(int i=0; i<number_of_predicates; i++)
-        cout << "predicate priority " << i << ": " << prdcts[priority_predicates[i]]->predicate << " left index: " << prdcts[priority_predicates[i]]->relation_index_left << " right index: "  << prdcts[priority_predicates[i]]->relation_index_right << " filter?: " << prdcts[priority_predicates[i]]->filter
-        << " self-join?: " << prdcts[priority_predicates[i]]->self_join << " simple-join?: " << prdcts[priority_predicates[i]]->simple_join << endl;
+        cout << "predicate priority " << i << ": " << prdcts[priority_predicates[i]]->predicate << " binding left: " << prdcts[priority_predicates[i]]->binding_left << " binding right: "  << prdcts[priority_predicates[i]]->binding_right << " relation left: " << prdcts[priority_predicates[i]]->relation_left << " relation right: " << prdcts[priority_predicates[i]]->relation_right
+        << " filter?: " << prdcts[priority_predicates[i]]->filter << " self-join?: " << prdcts[priority_predicates[i]]->self_join << " simple-join?: " << prdcts[priority_predicates[i]]->simple_join << endl;
 }
 
 
@@ -221,7 +221,7 @@ void Projection::separateRelationFromColumn(void){
 
 /********************************* PREDICATES FUNCTIONS *********************************/
 Predicates::Predicates()
-:number(0), relation_index_left(-1), relation_index_right(-1), column_left(-1), column_right(-1), relation_after_operation(false), number_after_operation(false), operation('x'), filter(false), self_join(false), simple_join(false)
+:number(0), binding_left(-1), binding_right(-1), column_left(-1), column_right(-1), relation_after_operation(false), number_after_operation(false), operation('x'), filter(false), self_join(false), simple_join(false), relation_left(-1), relation_right(-1)
 {memset(predicate, '\0', sizeof(predicate));}
 
 Predicates::~Predicates() {}
@@ -232,9 +232,9 @@ void Predicates::setPredicates(char* prdct) {
     // for(int i=0; i<15; i++) cout << predicate[i] ;
     cout << endl;
     // convert char to int
-    relation_index_left = predicate[0] - '0';
+    binding_left = predicate[0] - '0';
     column_left = predicate[2] - '0';
-    cout << "left relation: " << relation_index_left << " left column: " << column_left;
+    cout << "left relation: " << binding_left << " left column: " << column_left;
 
     // when small.work has > or < it's an operation with a number
     if(predicate[3] == '>' || predicate[3] == '<') {
@@ -266,9 +266,9 @@ void Predicates::setPredicates(char* prdct) {
         // if the 5th index is '.' (dot character), it's a number not a relation
         }else if(predicate[5] == '.') {
             relation_after_operation = true;
-            relation_index_right = predicate[4] - '0';
+            binding_right = predicate[4] - '0';
             column_right = predicate[6] - '0';
-            cout << " operation: " << operation << " right relation: " << relation_index_right << " right column: " << column_right << endl;
+            cout << " operation: " << operation << " right relation: " << binding_right << " right column: " << column_right << endl;
         }
     }
 }
