@@ -156,14 +156,17 @@ void Query::PredicatePriority(void) {
     for(int i=0; i<number_of_predicates; i++) {
         if(prdcts[i]->relation_after_operation == true) {
             //if its a self join, the priority is higher
-            if(prdcts[i]->relation_index_left == prdcts[i]->relation_index_right ||
-            atoi(relation[prdcts[i]->relation_index_left]) == atoi(relation[prdcts[i]->relation_index_right])) 
-            // ^ sometimes the same relation is used in the relation part. i.e  relations: 12 1 6 12
-            {
+            if(prdcts[i]->relation_index_left == prdcts[i]->relation_index_right) {
                 priority_predicates[priority_index++] = i;
                 prdcts[i]->self_join = true;
             }
-                
+
+            // ^ sometimes the same relation is used in the relation part. i.e  relations: 12 1 6 12)
+            if(atoi(relation[prdcts[i]->relation_index_left]) == atoi(relation[prdcts[i]->relation_index_right])) {
+                priority_predicates[priority_index++] = i;
+                prdcts[i]->self_join = true;
+                prdcts[i]->relation_index_right = prdcts[i]->relation_index_left;
+            }
         }
     }
     // then the rest of the joins
@@ -177,7 +180,7 @@ void Query::PredicatePriority(void) {
     }
 
     for(int i=0; i<number_of_predicates; i++)
-        cout << "predicate priority " << i << ": " << prdcts[priority_predicates[i]]->predicate << " filter?: " << prdcts[priority_predicates[i]]->filter
+        cout << "predicate priority " << i << ": " << prdcts[priority_predicates[i]]->predicate << " left index: " << prdcts[priority_predicates[i]]->relation_index_left << " right index: "  << prdcts[priority_predicates[i]]->relation_index_right << " filter?: " << prdcts[priority_predicates[i]]->filter
         << " self-join?: " << prdcts[priority_predicates[i]]->self_join << " simple-join?: " << prdcts[priority_predicates[i]]->simple_join << endl;
 }
 
