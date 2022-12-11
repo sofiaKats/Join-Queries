@@ -33,7 +33,6 @@ public:
   Relation** relations;
   UsedRelations* usedRelations = NULL;
   uint32_t size;
-  uint32_t rowSize;
   /// Add relation
   void AddRelation(const char* fileName);
   /// Get relation
@@ -48,8 +47,10 @@ public:
   void PrintUsedRelations();
   /// Checksum
   uint64_t Checksum(unsigned, unsigned);
+  /// Clear data related to previous join
+  void clearJoinSession();
   /// constructor
-  Joiner(uint32_t, uint32_t);
+  Joiner(uint32_t);
   ~Joiner();
 };
 //---------------------------------------------------------------------------

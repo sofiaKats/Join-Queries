@@ -45,15 +45,12 @@ void Relation::loadRelation(const char* fileName)
 
     addr+=size*sizeof(uint64_t);
   }
-  cout << "- done!\n";
   close(fd);
 }
 //---------------------------------------------------------------------------
 Relation::Relation(const char* fileName, int id) : ownsMemory(false)
   // Constructor that loads relation from disk
 {
-  cout << "- loading relation..." << endl;
-  
   loadRelation(fileName);
   this->id = id;
 }

@@ -1,10 +1,9 @@
 #include "Joiner.hpp"
 
-Joiner::Joiner(uint32_t size, uint32_t rowSize){
+Joiner::Joiner(uint32_t size){
   this->size = size;
-  this->rowSize = rowSize;
   relations = new Relation*[size]{};
-  for (int i =0; i < size; i++){
+  for (int i=0; i<size; i++){
     relations[i] = NULL;
   }
 }
@@ -46,6 +45,7 @@ RelColumn* Joiner::GetRelationCol(unsigned relationId, unsigned colId){
 
 RelColumn* Joiner::GetUsedRelation(unsigned relationId, unsigned colId){
   int notNullRow = getFirstURrow();
+  cout << "hi\n";
   if (notNullRow == -1 || usedRelations->matchRows[notNullRow]->arr[relationId] == -1 || firstJoin == true )
     return GetRelationCol(relationId, colId);
 
@@ -69,7 +69,6 @@ string Joiner::Join(Query& query)
   // Executes a join query
 {
   cout << "\n\n--- Join Queries Start---\n\n";
-  //usedRelations = new UsedRelations(100000, query.number_of_relations);
 
   for (int i = 0; i < query.number_of_predicates; i++){
     /// Priority index
@@ -82,6 +81,7 @@ string Joiner::Join(Query& query)
       if (firstJoin) usedRelations = new UsedRelations(matches->activeSize * 40, query.number_of_relations);
       updateURself_Filter(query.prdcts[idx]->relation_index_left, matches);
       delete relR;
+      delete matches;
     }
     //CASE 2: Join is self join e.g 1.0 = 1.2
     else if (query.prdcts[idx]->self_join){
@@ -92,11 +92,11 @@ string Joiner::Join(Query& query)
       if (firstJoin) usedRelations = new UsedRelations(matches->activeSize, query.number_of_relations);
       //for (int i = 0; i< matches->activeSize; i++) cout << matches->arr[i] << endl;
       updateURself_Filter(query.prdcts[idx]->relation_index_left, matches);
-      if (query.prdcts[idx]->relation_index_left!=query.prdcts[idx]->relation_index_left) 
+      if (query.prdcts[idx]->relation_index_left!=query.prdcts[idx]->relation_index_left)
         updateURself_Filter(query.prdcts[idx]->relation_index_right, matches);
-      
       delete relR;
       delete relS;
+      delete matches;
     }
     //CASE 3: Join is between 2 relationships e.g 1.0 = 2.1
     else {
@@ -106,13 +106,17 @@ string Joiner::Join(Query& query)
       Matches* matches = phj->Solve();
       //cout << "SIMPLE JOIN MATCHES ARE " << matches->activeSize << endl;
       if (firstJoin) usedRelations = new UsedRelations(matches->activeSize, query.number_of_relations);
-      updateUsedRelations(matches,query.prdcts[idx]->relation_index_left, query.prdcts[idx]->relation_index_right);
-      delete phj;
+      updateUsedRelations(matches, query.prdcts[idx]->relation_index_left, query.prdcts[idx]->relation_index_right);
       delete relR;
       delete relS;
+      delete phj;
+      delete matches;
     }
-    
-    if (usedRelations == NULL || usedRelations->activeSize == 0) return "NULL";
+
+    if (usedRelations == NULL || usedRelations->activeSize == 0){
+      clearJoinSession();
+      return "NULL";
+    }
     cout << "Active size of used relations is " << usedRelations->activeSize << endl;
   }
   //cout << usedRelations->activeSize << endl;
@@ -123,7 +127,7 @@ string Joiner::Join(Query& query)
     cout << Checksum(query.projections[i]->getRelationIndex(),query.projections[i]->getColumn()) << " ";
   }
   cout << "\n";
-  delete usedRelations;
+  clearJoinSession();
   return "";
 }
 
@@ -279,6 +283,7 @@ bool Joiner::isSelfJoin(unsigned int relR, unsigned int relS){
 }
 int Joiner::getFirstURrow(){
   if (firstJoin) return -1;
+  cout << "hiii\n";
   for (int i = 0; i < usedRelations->size; i++){
     if (usedRelations->matchRows[i] != nullptr){
       return i;
@@ -316,7 +321,6 @@ SingleCol* Joiner::filterJoin(RelColumn* rel, char operation, int n){
         singleCol->activeSize++;
       }
     }
-
   }
   return singleCol;
 }
@@ -334,6 +338,11 @@ void Joiner::PrintUsedRelations(){
     //   break;
     // }
   }
+}
+//-----------------------------------------------------------------------
+void Joiner::clearJoinSession(){
+  clearUsedRelations();
+  firstJoin = true;
 }
 //-----------------------------------------------------------------------
 void Joiner::clearUsedRelations(){
@@ -367,9 +376,9 @@ void Joiner::moveUR(UsedRelations* temp){
 void Joiner::tempStoreDuplicatesR(int j, UsedRelations* temp, int relNew, Matches* matches, uint32_t rowid, int i){
   for (int k = j + 1; k < matches->activeSize; k++){
     if (rowid == matches->tuples[k]->key){
-      temp->matchRows[temp->activeSize] = new MatchRow(usedRelations->rowSize);            
+      temp->matchRows[temp->activeSize] = new MatchRow(usedRelations->rowSize);
 
-      for (int p = 0; p < usedRelations->rowSize; p++){              
+      for (int p = 0; p < usedRelations->rowSize; p++){
         temp->matchRows[temp->activeSize]->arr[p] = usedRelations->matchRows[i]->arr[p];
       }
       temp->matchRows[temp->activeSize]->arr[relNew] = matches->tuples[k]->payload;
@@ -382,9 +391,9 @@ void Joiner::tempStoreDuplicatesS(int j, UsedRelations* temp, int relNew, Matche
   for (int k = j + 1; k < matches->activeSize; k++){
     if (rowid == matches->tuples[k]->payload){
       //cout << "For rowid: " << rowid << " matches active size is " << matches->activeSize << endl;
-      temp->matchRows[temp->activeSize] = new MatchRow(usedRelations->rowSize);            
+      temp->matchRows[temp->activeSize] = new MatchRow(usedRelations->rowSize);
 
-      for (int p = 0; p < usedRelations->rowSize; p++){              
+      for (int p = 0; p < usedRelations->rowSize; p++){
         temp->matchRows[temp->activeSize]->arr[p] = usedRelations->matchRows[i]->arr[p];
       }
       temp->matchRows[temp->activeSize]->arr[relNew] = matches->tuples[k]->key;
@@ -398,5 +407,3 @@ void Joiner::tempPrintMatches(Matches* matches){
     cout << matches->tuples[i]->key << " " << matches->tuples[i]->payload << endl;
   }
 }
-
-
