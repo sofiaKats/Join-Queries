@@ -38,8 +38,10 @@ public:
 class Projection {
 private:
     // holds the index of the relation we are going to use for the SUM
+    // binding relation
     int relation_index; // (ex. projections: 0.2 1.3, relation_index will hold 0 and 1 in two separate objects)
     int column;         // holds the column of the relation we use for the SUM
+    int real_relation;
     char relation_column_pair[5]; // used to separate the relation and the column from the dot .
 public:
     Projection(int relation = -1, int column = -1);
@@ -48,6 +50,8 @@ public:
     int getRelationIndex(void);
     void setColumn(const int col);
     int getColumn(void);
+    void setRealRelation(int relation);
+    int getRealRelation(void);
     void setRelation_Column_Pair(char* relation_column);
     void separateRelationFromColumn(void);
 };

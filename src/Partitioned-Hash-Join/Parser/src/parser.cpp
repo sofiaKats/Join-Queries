@@ -156,6 +156,11 @@ void Query::ReplacePredicateIndexWithRelation(void) {
         prdcts[i]->relation_left = atoi(relation[prdcts[i]->binding_left]);
         if(prdcts[i]->relation_after_operation == true) prdcts[i]->relation_right = atoi(relation[prdcts[i]->binding_right]);
     }
+
+    // set binding and relation for every projection
+    for(int i=0; i<number_of_projections; i++) {
+        projections[i]->setRealRelation(atoi(relation[projections[i]->getRelationIndex()]));
+    }
 }
 
 void Query::PredicatePriority(void) {
@@ -192,12 +197,15 @@ void Query::PredicatePriority(void) {
     for(int i=0; i<number_of_predicates; i++)
         cout << "predicate priority " << i << ": " << prdcts[priority_predicates[i]]->predicate << " binding left: " << prdcts[priority_predicates[i]]->binding_left << " binding right: "  << prdcts[priority_predicates[i]]->binding_right << " relation left: " << prdcts[priority_predicates[i]]->relation_left << " relation right: " << prdcts[priority_predicates[i]]->relation_right
         << " filter?: " << prdcts[priority_predicates[i]]->filter << " self-join?: " << prdcts[priority_predicates[i]]->self_join << " simple-join?: " << prdcts[priority_predicates[i]]->simple_join << endl;
+
+    for(int i=0; i<number_of_projections; i++) 
+        cout << "projection " << i << ": real relation: " << projections[i]->getRealRelation() << " binding index: " << projections[i]->getRelationIndex() << " column: " << projections[i]->getColumn() << endl; 
 }
 
 
 /********************************* PROJECTION FUNCTIONS *********************************/
 Projection::Projection(int relation, int column)
-: relation_index(relation), column(column) { memset(relation_column_pair, '\0', sizeof(relation_column_pair)); }
+: relation_index(relation), column(column), real_relation(-1) { memset(relation_column_pair, '\0', sizeof(relation_column_pair)); }
 
 Projection::~Projection() {}
 
@@ -208,6 +216,10 @@ int Projection::getRelationIndex(void) { return relation_index; }
 void Projection::setColumn(const int col) { column = col; }
 
 int Projection::getColumn(void) { return column;}
+
+int Projection::getRealRelation(void) { return real_relation; }
+
+void Projection::setRealRelation(int relation) { real_relation= relation; }
 
 void Projection::setRelation_Column_Pair(char* relation_column) { strcpy(relation_column_pair, relation_column); }
 
