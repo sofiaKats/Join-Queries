@@ -141,6 +141,7 @@ void Query::ParseProjections(char* projection) {
     cout << "number of projections: "<< number_of_projections << endl;
 }
 
+
 void Query::PredicatePriority(void) {
     int priority_index = 0;
     // filters first
@@ -149,9 +150,15 @@ void Query::PredicatePriority(void) {
             //store index of prdct array in priority array
             priority_predicates[priority_index++] = i;
             prdcts[i]->filter = true; // operation is a filter
-        }
 
+            // making sure we fetch the smallest possible index the relation is equal to
+            // implemented to make easier usage of parser in joiner.cpp
+            for(int j=number_of_relations-1; j>=0; j--)
+                if(atoi(relation[prdcts[i]->relation_index_left]) == atoi(relation[j]))
+                    prdcts[i]->relation_index_left = j;
+        }
     }
+    
     //then self joins
     for(int i=0; i<number_of_predicates; i++) {
         if(prdcts[i]->relation_after_operation == true) {
