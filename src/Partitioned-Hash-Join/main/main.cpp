@@ -5,44 +5,36 @@
 int main(int argc, char* argv[]) {
   srand(time(NULL));
 
-  Joiner* joiner;
+  Joiner *joiner;
   Parser parser;
-  Query* query;
-  char input[20], line[50];
-  memset(input, '\0', 20); memset(line, '\0', 50);
-  int filesCount;
+  Query *query;
+  char input[20]; memset(input, '\0', 20);
+  FILE *fp;
+  char *line = NULL;
+  char path[50];
+  size_t len = 0;
+  ssize_t read;
+  unsigned filesCount;
 
-  filesCount = 13;
+  fp = fopen("./workloads/small/small.init", "r");
+  if (fp == NULL){
+      cout << "Could not open init file" << endl;
+      exit(EXIT_FAILURE);
+  }
+  while ((read = getline(&line, &len, fp)) != -1) { //count lines to allocate relation table
+    if (read == 0) break;
+    ++filesCount;
+  }
   joiner = new Joiner(filesCount);
-
+  rewind(fp);
   try{
-    for (int i=0; i<=filesCount; i++){
-      sprintf(line, "./workloads/small/r%d", i);
-      joiner->AddRelation(line);
-      cout << "opened file: " << line << endl;
+    while ((read = getline(&line, &len, fp)) != -1) { //count lines to allocate relation table
+      if (read == 0) break;
+      line[strlen(line)-1] = '\0';
+      sprintf(path, "./workloads/small/%s", line);
+      joiner->AddRelation(path);
+      cout << "opened file: " << path << endl;
     }
-
-  /*cout << "--- Insert num of files ---\n";
-  scanf("%" SCNd32, &filesCount);
-  joiner = new Joiner(filesCount, 20000);
-
-  cout << ">>> Insert Relations:" << endl;
-  try{
-    while (filesCount){
-      scanf("%s", input);
-      if (!strcmp(input, "Done")) break;
-      try{
-        sprintf(line, "./workloads/small/%s", input);
-        joiner->AddRelation(line);
-        filesCount--;
-      }
-      catch(const exception& e){
-        cout << e.what() << endl;
-      }
-    }*/
-
-    // Preparation phase (not timed)
-    // Build histograms, indexes,...
 
     cout << ">>> Insert Queries:" << endl;
 

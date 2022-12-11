@@ -40,13 +40,13 @@ public:
   /// Get relation column
   RelColumn* GetRelationCol(unsigned, unsigned);
   /// Get relation column from filtered relation
-  RelColumn* GetUsedRelation(unsigned, unsigned);
+  RelColumn* GetUsedRelation(unsigned, unsigned, unsigned);
   /// Joins a given set of relations
   string Join(Query&);
   /// Prints used relations table
   void PrintUsedRelations();
   /// Checksum
-  uint64_t Checksum(unsigned, unsigned);
+  uint64_t Checksum(unsigned, unsigned, unsigned);
   /// Clear data related to previous join
   void clearJoinSession();
   /// constructor
