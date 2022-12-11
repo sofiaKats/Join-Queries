@@ -5,6 +5,7 @@
 #define IS_FINISHED 1
 #define REDFUL "\033[3;101;37m"
 #define RESTORE "\033[0m" 
+#define BLUE "\033[3;1;36m"
 
 using namespace std;
 
@@ -66,6 +67,7 @@ public:
     int ParsePredicates(char* predicates); // parses second part of query to find predicates of the query
     void ParseProjections(char* projection); // parses third part of query to find projections of query
     void PredicatePriority(void); // out of the predicates this function finds what to do first(1. filters, 2. self join, 3. other joins)
+    void ReplacePredicateIndexWithRelation(void);
 };
 
 class Parser {
