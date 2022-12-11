@@ -153,9 +153,9 @@ void Query::PredicatePriority(void) {
 
             // making sure we fetch the smallest possible index the relation is equal to
             // implemented to make easier usage of parser in joiner.cpp
-            for(int j=number_of_relations-1; j>=0; j--)
-                if(atoi(relation[prdcts[i]->relation_index_left]) == atoi(relation[j]))
-                    prdcts[i]->relation_index_left = j;
+            // for(int j=number_of_relations-1; j>=0; j--)
+            //     if(atoi(relation[prdcts[i]->relation_index_left]) == atoi(relation[j]))
+            //         prdcts[i]->relation_index_left = j;
         }
     }
     
@@ -172,7 +172,7 @@ void Query::PredicatePriority(void) {
             if(atoi(relation[prdcts[i]->relation_index_left]) == atoi(relation[prdcts[i]->relation_index_right])) {
                 priority_predicates[priority_index++] = i;
                 prdcts[i]->self_join = true;
-                prdcts[i]->relation_index_right = prdcts[i]->relation_index_left;
+                // prdcts[i]->relation_index_right = prdcts[i]->relation_index_left;
             }
         }
     }
