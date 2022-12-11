@@ -45,7 +45,8 @@ Query* Parser::OpenFileAndParse() {
     // if (line) free(line); // doesnt work without free(even with delete, memory leaks)
 
     //char line[50] = "0 1 2|0.1=1.0&0.0=2.1&1.0=1.1&1.0>30000|1.2 0.1";
-    char line[50] = "0 1 2|0.1=1.0&1.0>3000|1.2 0.1";
+    // char line[50] = "0 1 2|0.1=1.0&1.0>3000|1.2 0.1";
+    char line[100] = "12 1 6 12|0.2=1.0&1.0=2.1&0.1=3.2&3.0<33199|2.1 0.1 0.2";
     char* parts[3];
     const char pipe_[2] = "|"; char *token; int counter; int q_no = 0; // query number
     queries[q_no++] = new Query();
@@ -144,31 +145,40 @@ void Query::PredicatePriority(void) {
     int priority_index = 0;
     // filters first
     for(int i=0; i<number_of_predicates; i++) {
-        // operation is a filter
-        if(prdcts[i]->number_after_operation == true)
+        if(prdcts[i]->number_after_operation == true) {
             //store index of prdct array in priority array
             priority_predicates[priority_index++] = i;
+            prdcts[i]->filter = true; // operation is a filter
+        }
 
     }
     //then self joins
     for(int i=0; i<number_of_predicates; i++) {
         if(prdcts[i]->relation_after_operation == true) {
             //if its a self join, the priority is higher
-            if(prdcts[i]->relation_index_left == prdcts[i]->relation_index_right)
+            if(prdcts[i]->relation_index_left == prdcts[i]->relation_index_right ||
+            atoi(relation[prdcts[i]->relation_index_left]) == atoi(relation[prdcts[i]->relation_index_right])) 
+            // ^ sometimes the same relation is used in the relation part. i.e  relations: 12 1 6 12
+            {
                 priority_predicates[priority_index++] = i;
+                prdcts[i]->self_join = true;
+            }
+                
         }
     }
     // then the rest of the joins
+    //add the rest of the joins
     for(int i=0; i<number_of_predicates; i++) {
-        if(prdcts[i]->relation_after_operation == true) {
-            // it's a join with another relation, have to find which joins to do first
-            // so that every join is somehow related to the next one
-                priority_predicates[priority_index++] = i;
+        if(prdcts[i]->self_join == true || prdcts[i]->filter==true) continue;
+        if(prdcts[i]->relation_after_operation == true && prdcts[i]->relation_index_left != prdcts[i]->relation_index_right) {
+            priority_predicates[priority_index++] = i; //assign first predicate we find
+            prdcts[i]->simple_join = true;
         }
     }
 
     for(int i=0; i<number_of_predicates; i++)
-        cout << "predicate priority " << i << ": " << prdcts[priority_predicates[i]]->predicate << endl;
+        cout << "predicate priority " << i << ": " << prdcts[priority_predicates[i]]->predicate << " filter?: " << prdcts[priority_predicates[i]]->filter
+        << " self-join?: " << prdcts[priority_predicates[i]]->self_join << " simple-join?: " << prdcts[priority_predicates[i]]->simple_join << endl;
 }
 
 
@@ -198,7 +208,7 @@ void Projection::separateRelationFromColumn(void){
 
 /********************************* PREDICATES FUNCTIONS *********************************/
 Predicates::Predicates()
-:number(0), relation_index_left(-1), relation_index_right(-1), column_left(-1), column_right(-1), relation_after_operation(false), number_after_operation(false), operation('x')
+:number(0), relation_index_left(-1), relation_index_right(-1), column_left(-1), column_right(-1), relation_after_operation(false), number_after_operation(false), operation('x'), filter(false), self_join(false), simple_join(false)
 {memset(predicate, '\0', sizeof(predicate));}
 
 Predicates::~Predicates() {}

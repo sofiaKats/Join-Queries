@@ -23,6 +23,10 @@ public:
     int number;      // the number filter after the operation if it exists    
     int relation_index_right; // the relation after the operation if it exists
     int column_right;  // the column after the operation if it exists
+    // flags indicating the nature of a predicate
+    bool filter;
+    bool self_join;
+    bool simple_join;
     Predicates();
     ~Predicates();
     void setPredicates(char* prdct);
