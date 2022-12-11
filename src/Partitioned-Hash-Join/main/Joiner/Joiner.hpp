@@ -26,6 +26,8 @@ private:
   void tempStoreDuplicatesR(int, UsedRelations*, int, Matches*, uint32_t, int);
   void tempStoreDuplicatesS(int, UsedRelations*, int, Matches*, uint32_t, int);
 
+  void tempPrintMatches(Matches* matches);
+
 public:
   /// The relations that might be joined
   Relation** relations;

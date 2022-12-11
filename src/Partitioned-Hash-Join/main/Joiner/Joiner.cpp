@@ -147,12 +147,10 @@ void Joiner::updateUsedRelations(Matches* matches, int relRid, int relSid){
     return;
   }
   int i = getFirstURrow();
-  // CASE 2.1: Only one of the Relations has been joined before, the Relation R.
-  // Or both
+  // CASE 2.1: Only one of the Relations has been joined before, the Relation R., or both
   if (usedRelations->matchRows[i]->arr[relRid] != -1){
     cout << "[UpdateUR] Left or Both" << endl;
     updateURonlyR(matches, relRid, relSid);
-    cout << "returned" << endl;
     return;
   }
   // CASE 2.2: Only one of the Relations has been joined before, the Relation S.
@@ -161,7 +159,6 @@ void Joiner::updateUsedRelations(Matches* matches, int relRid, int relSid){
     updateURonlyS(matches, relSid, relRid);
     return;
   }
-  cout << "returned" << endl;
 }
 
 void Joiner::updateURFirst(Matches* matches, int relRid, int relSid){
@@ -176,6 +173,7 @@ void Joiner::updateURFirst(Matches* matches, int relRid, int relSid){
 
 void Joiner::updateURonlyR(Matches* matches, int relUR, int relNew){
   cout << "active size " << usedRelations->activeSize << " size " << matches->activeSize << endl;
+  //tempPrintMatches(matches);
   UsedRelations* temp = new UsedRelations(1000000, usedRelations->rowSize);
   for (uint32_t i=0; i < usedRelations->size; i++){ /// For each entry from usedRelations
     if (usedRelations->matchRows[i] == NULL) continue;
@@ -347,7 +345,7 @@ Joiner::~Joiner(){
 }
 
 void Joiner::moveUR(UsedRelations* temp){
-  cout << "TEMP has as " << temp->activeSize << endl;
+  cout << "Temp dupliacte array has as " << temp->activeSize << endl;
   int prevJ = 0;
   for (int i = 0; i < temp->activeSize; i++){
     for (int j = prevJ; j < usedRelations->size; j++){
@@ -363,16 +361,12 @@ void Joiner::moveUR(UsedRelations* temp){
 }
 
 void Joiner::tempStoreDuplicatesR(int j, UsedRelations* temp, int relNew, Matches* matches, uint32_t rowid, int i){
-  //cout << "J+1 is " << j+1 << "matches active size " << matches->activeSize << " rowid is " << rowid << " i is " << i << endl;
-
-  int end;
-  if ((j+1+32) > matches->activeSize) end = matches->activeSize;
-  else end = j+1+32;
+  // int end;
+  // if ((j+1+32) > matches->activeSize) end = matches->activeSize;
+  // else end = j+1+32;
 
   for (int k = j + 1; k < matches->activeSize; k++){
     if (rowid == matches->tuples[k]->key){
-      //cout << "Rowid double is " << rowid << endl;
-      //cout << "For rowid: " << rowid << " matches active size is " << matches->activeSize << endl;
       temp->matchRows[temp->activeSize] = new MatchRow(usedRelations->rowSize);            
 
       for (int p = 0; p < usedRelations->rowSize; p++){              
@@ -396,6 +390,12 @@ void Joiner::tempStoreDuplicatesS(int j, UsedRelations* temp, int relNew, Matche
       temp->matchRows[temp->activeSize]->arr[relNew] = matches->tuples[k]->key;
       temp->activeSize++;
     }
+  }
+}
+
+void Joiner::tempPrintMatches(Matches* matches){
+  for (int i = 0; i< matches->activeSize; i++){
+    cout << matches->tuples[i]->key << " " << matches->tuples[i]->payload << endl;
   }
 }
 

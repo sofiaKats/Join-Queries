@@ -110,7 +110,7 @@ void Hashtable::add_value(int pos, int value, int hash_value, Tuple* tuple){
         else hashtable[indx]->set_bitmap_index_to_0(loop);
         loop++;
     }
-    if (tuple->key == 3682) cout << "value is " << value << endl;
+    //if (tuple->key == 3682) cout << "value is " << value << endl;
 }
 
 void Hashtable::remove_value(int pos, int hash_value ){
@@ -169,6 +169,7 @@ void Hashtable::add(int payload, int value){
     int hashed_payload = hash(payload);
 
     while (checkBitmapFull(hashed_payload)) {
+        H+=8;
         //cout << "!!!!!!!!!!!!!!Resize2" << endl;
         resize();
         hashed_payload = hash(payload);
@@ -265,8 +266,11 @@ Matches* Hashtable::contains(Tuple* tuple){
             int payload1 = hashtable[currentBucket]->getTuple()->payload;
     
             if (payload1 == payload2){
-                matches->tuples[matches->activeSize] = new Tuple(hashtable[currentBucket]->getTuple()->key, tuple->key);
-                matches->activeSize++;
+                Tuple* t = new Tuple(hashtable[currentBucket]->getTuple()->key, tuple->key);
+                if (!searchIfDupl(t, matches)){
+                    matches->tuples[matches->activeSize] = t;
+                    matches->activeSize++;
+                }
             }
         }
         currentBucket = findNeighborPosByK(currentBucket, 1);
@@ -274,3 +278,10 @@ Matches* Hashtable::contains(Tuple* tuple){
 
     return matches;
 }
+bool Hashtable::searchIfDupl(Tuple* t, Matches* m){
+    for (int i = 0; i < m->activeSize; i++){
+        if (m->tuples[i]->key == t->key && m->tuples[i]->payload == t->payload) return true;
+    }
+    return false;
+}
+
