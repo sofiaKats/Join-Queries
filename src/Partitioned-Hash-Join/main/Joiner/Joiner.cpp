@@ -78,18 +78,20 @@ string Joiner::Join(Query& query)
     if (query.prdcts[idx]->number_after_operation){
       RelColumn* relR = GetUsedRelation(query.prdcts[idx]->relation_index_left, query.prdcts[idx]->column_left);
       SingleCol* matches = filterJoin(relR, query.prdcts[idx]->operation, query.prdcts[idx]->number);
-      cout << "MATCHES AS IS " << matches->activeSize << endl;
+      cout << "FILTER JOIN MATCHES ARE " << matches->activeSize << endl;
       if (firstJoin) usedRelations = new UsedRelations(matches->activeSize * 40, query.number_of_relations);
       updateURself_Filter(query.prdcts[idx]->relation_index_left, matches);
       delete relR;
     }
     //CASE 2: Join is self join e.g 1.0 = 1.2
-    else if (isSelfJoin(query.prdcts[idx]->relation_index_left, query.prdcts[idx]->relation_index_right)){
+    else if (query.prdcts[idx]->self_join){
+      cout << "The two quereis are " << query.prdcts[idx]->relation_index_left << " " << query.prdcts[idx]->relation_index_right << endl;
       RelColumn* relR = GetUsedRelation(query.prdcts[idx]->relation_index_left, query.prdcts[idx]->column_left);
-      RelColumn* relS = GetUsedRelation(query.prdcts[idx]->relation_index_right, query.prdcts[idx]->column_right);
+      RelColumn* relS = GetUsedRelation(query.prdcts[idx]->relation_index_left, query.prdcts[idx]->column_right);
       SingleCol* matches = selfJoin(relR, relS);
-      cout << "MATCHES AS IS " << matches->activeSize << endl;
+      cout << "SELF JOIN MATCHES ARE " << matches->activeSize << endl;
       if (firstJoin) usedRelations = new UsedRelations(matches->activeSize, query.number_of_relations);
+      for (int i = 0; i< matches->activeSize; i++) cout << matches->arr[i] << endl;
       updateURself_Filter(query.prdcts[idx]->relation_index_left, matches);
       delete relR;
       delete relS;
@@ -100,16 +102,17 @@ string Joiner::Join(Query& query)
       RelColumn* relS = GetUsedRelation(query.prdcts[idx]->relation_index_right, query.prdcts[idx]->column_right);
       PartitionedHashJoin* phj = new PartitionedHashJoin(relR, relS);
       Matches* matches = phj->Solve();
-      cout << "MATCHES AS IS " << matches->activeSize << endl;
+      cout << "SIMPLE JOIN MATCHES ARE " << matches->activeSize << endl;
       if (firstJoin) usedRelations = new UsedRelations(matches->activeSize, query.number_of_relations);
       updateUsedRelations(matches,query.prdcts[idx]->relation_index_left, query.prdcts[idx]->relation_index_right);
       delete phj;
       delete relR;
       delete relS;
     }
-    if (usedRelations == NULL) return "NULL";
     
     cout << usedRelations->activeSize << endl;
+    if (usedRelations == NULL || usedRelations->activeSize == 0) return "NULL";
+
   }
   //cout << usedRelations->activeSize << endl;
 
