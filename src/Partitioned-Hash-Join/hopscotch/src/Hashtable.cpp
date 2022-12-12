@@ -3,16 +3,17 @@
 #include <cstring>
 #include "math.h"
 #include "Hashtable.h"
+#include "inttypes.h"
 using namespace std;
 
 Hashtable::Hashtable(int tableR_size){
     this->depth = findClosestPowerOf2(tableR_size);
     this->table_size = pow(2,depth);
     this->emptySpaces = table_size;
-    if (table_size < 40)  {
+    if (table_size < 64)  {
         H = table_size;
     }
-    else                        H = 40;
+    else                        H = 64;
 
     hashtable = new Index*[table_size];
     for (int i=0; i<table_size; i++)
@@ -163,6 +164,9 @@ bool Hashtable::checkBitmapFull(int index){
 }
 
 void Hashtable::add(int payload, int value){
+    if (H > 140) {
+        throw runtime_error("Too many duplicates to perform hopscotch algorithm");
+    }
     Tuple* tuple = new Tuple(value, payload);
 
     if (checkHashtableFull()) resize();

@@ -33,7 +33,6 @@ Queries* Parser::OpenQueryFileAndParse() {
         lines++;
     }
     rewind(fp);
-    cout << "Lines counted are " << lines << endl;
 
     q->queries_arr = new Query*[lines];
     q->size = lines;
@@ -46,7 +45,7 @@ Queries* Parser::OpenQueryFileAndParse() {
     while ((read = getline(&line, &len, fp)) != -1) {
         if (read == 0) break;
         if(!strcmp(line, "F\n")) {
-            cout << BLUE << "END OF BATCH! " << RESTORE << endl;
+            //cout << BLUE << "END OF BATCH! " << RESTORE << endl;
             q->queries_arr[q_no++] = NULL;
             continue; // A batch of queries ended
         }
@@ -59,7 +58,7 @@ Queries* Parser::OpenQueryFileAndParse() {
             parts[counter++] = token;
             token = strtok(NULL, pipe_);
         }
-        cout << REDFUL << "Parts: " << RESTORE << endl;
+        //cout << REDFUL << "Parts: " << RESTORE << endl;
         for(int i=0; i < 3; i++) cout << parts[i] << endl;
         // parsing each one of the 3 parts separately.
         // and making sure strtok pointer stays untouched by other functs

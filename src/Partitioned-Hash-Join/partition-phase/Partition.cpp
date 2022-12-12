@@ -48,13 +48,13 @@ Hist* Partition::CreateHistogram(){
     hist->arr[index]++;
   }
 
-  cout << "HISTOGRAM \n";
+  //cout << "HISTOGRAM \n";
   for (int i = 0; i < histLength; i++){ //calculate largestTableSize
     if (hist->arr[i] == 0) continue;
     hist->usedLength++;
     if (hist->arr[i] > largestTableSize)
       largestTableSize = hist->arr[i] * sizeof(Tuple);
-    cout << i << " : " << hist->arr[i]<<endl;
+    //cout << i << " : " << hist->arr[i]<<endl;
   }
 
   return hist;
@@ -78,10 +78,10 @@ PrefixSum* Partition::CreatePrefixSum(Hist* hist){
   prefixSum->arr[pIndex][0] = -1;
   prefixSum->arr[pIndex][1] = psum;
 
-  cout << "PREFIX SUM" << endl;
-  for (int i = 0; i < prefixSum->length; i++){
-    cout << prefixSum->arr[i][0] << " : " << prefixSum->arr[i][1]<<endl;
-  }
+  // cout << "PREFIX SUM" << endl;
+  // for (int i = 0; i < prefixSum->length; i++){
+  //   cout << prefixSum->arr[i][0] << " : " << prefixSum->arr[i][1]<<endl;
+  // }
 
   return prefixSum;
 }

@@ -47,6 +47,7 @@ RelColumn* Joiner::GetUsedRelation(unsigned relationId, unsigned binding, unsign
 
   Relation& rel = GetRelation(relationId);
   RelColumn* relColumn = new RelColumn(usedRelations->activeSize);
+
   int relCol_cnt = 0;
   for (int i=0; i<usedRelations->size; i++){
     if (usedRelations->matchRows[i] == NULL)  continue;
@@ -62,7 +63,7 @@ RelColumn* Joiner::GetUsedRelation(unsigned relationId, unsigned binding, unsign
 string Joiner::Join(Query& query)
   // Executes a join query
 {
-  cout << "\n\n--- Join Queries Start---\n\n";
+  //cout << "\n\n--- Join Queries Start---\n\n";
 
   for (int i = 0; i < query.number_of_predicates; i++){
     /// Priority index
@@ -72,7 +73,7 @@ string Joiner::Join(Query& query)
       RelColumn* relR = GetUsedRelation(query.prdcts[idx]->relation_left, query.prdcts[idx]->binding_left, query.prdcts[idx]->column_left);
       SingleCol* matches = filterJoin(relR, query.prdcts[idx]->operation, query.prdcts[idx]->number);
       //cout << "FILTER JOIN MATCHES ARE " << matches->activeSize << endl;
-      if (firstJoin) usedRelations = new UsedRelations(matches->activeSize * 40, query.number_of_relations);
+      if (firstJoin) usedRelations = new UsedRelations(matches->activeSize * 64, query.number_of_relations);
       updateURself_Filter(query.prdcts[idx]->binding_left, matches);
       delete relR;
       delete matches;
@@ -144,21 +145,20 @@ void Joiner::updateUsedRelations(Matches* matches, int relRid, int relSid){
   }
   if (firstJoin){ /// First Join
     firstJoin = false;
-    cout << "[UpdateUR] First Join" << endl;
+    //cout << "[UpdateUR] First Join" << endl;
     updateURFirst(matches, relRid, relSid);
     return;
   }
   int i = getFirstURrow();
   // CASE 2.1: Only one of the Relations has been joined before, the Relation R., or both
-  if (usedRelations->matchRows[i]->arr[relRid] != -1){
-    
+  if (usedRelations->matchRows[i]->arr[relRid] != -1){    
     updateURonlyR(matches, relRid, relSid);
-    cout << "[UpdateUR] Left or Both" << endl;
+    //cout << "[UpdateUR] Left or Both" << endl;
     return;
   }
   // CASE 2.2: Only one of the Relations has been joined before, the Relation S.
   if (usedRelations->matchRows[i]->arr[relSid] != -1){
-    cout << "[UpdateUR] Right" << endl;
+    //cout << "[UpdateUR] Right" << endl;
     updateURonlyS(matches, relSid, relRid);
     return;
   }
@@ -226,7 +226,7 @@ void Joiner::updateURonlyS(Matches* matches, int relUR, int relNew){
 }
 //-----------------------------------------------------------------------
 void Joiner::updateURself_Filter(int relId, SingleCol* sc){
-  cout << "[UpdateUR] Self / Filter Join" << endl;
+  //cout << "[UpdateUR] Self / Filter Join" << endl;
   if (sc->activeSize == 0){ //NO matches clear UR
     clearUsedRelations();
     return;

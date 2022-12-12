@@ -1,4 +1,5 @@
 #include "PartitionedHashJoin.h"
+#include "inttypes.h"
 
 #define L2CACHE 256000
 
@@ -12,7 +13,8 @@ Matches* PartitionedHashJoin::Solve(){
   partitionedR->rel = new RelColumn(relR->num_tuples);
   int passCount = PartitionRec(partitionedR, relR);
   //ONLY FOR RELATION R
-  BuildHashtables(partitionedR);
+  try{
+    BuildHashtables(partitionedR);
 
   Part* partitionedS = new Part();
   partitionedS->rel = new RelColumn(relS->num_tuples);
@@ -27,6 +29,13 @@ Matches* PartitionedHashJoin::Solve(){
   delete partitionedS;
 
   return matches;
+  }
+  catch(const exception &e){
+    cout << e.what() << endl;
+    Matches* matches = new Matches(0);
+    matches = nullptr;
+    return matches;
+  }
 }
 
  void PartitionedHashJoin::Merge(Part* destPart, Part* part, int from, int n){
@@ -62,7 +71,7 @@ int PartitionedHashJoin::PartitionRec(Part* finalPart, RelColumn* rel, int maxPa
   n++;
   int passCount = 0;
 
-  cout << "\n------- PASS NO: " << passNum << " -------\n\n";
+  //cout << "\n------- PASS NO: " << passNum << " -------\n\n";
 
   Partition* partition = new Partition(rel, n, from, to);
 
@@ -113,11 +122,11 @@ void PartitionedHashJoin::BuildHashtables(Part* part){
 }
 
 Matches* PartitionedHashJoin::Join(Part* p1, Part* p2){
-  cout << "\n------- JOINING RELATIONS -------\n\n";
+  //cout << "\n------- JOINING RELATIONS -------\n\n";
   int hashtablesIndex = 0;
 
   /// Build final array of tuples containing matching rowids
-  uint32_t matchesSize = (p1->rel->num_tuples > p2->rel->num_tuples ? p2->rel->num_tuples : p1->rel->num_tuples) * 40;
+  uint32_t matchesSize = (p1->rel->num_tuples > p2->rel->num_tuples ? p2->rel->num_tuples : p1->rel->num_tuples) * 64;
   Matches* final = new Matches(matchesSize); //TODO GetH of hashtable
 
   //For every partition table

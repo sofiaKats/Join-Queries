@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 
+
 #define IS_FINISHED 1
 #define REDFUL "\033[3;101;37m"
 #define RESTORE "\033[0m" 
