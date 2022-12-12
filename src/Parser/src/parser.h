@@ -80,12 +80,24 @@ public:
 typedef struct Queries{
     int size;
     Query** queries_arr;
+    ~Queries(){
+        for (int i = 0; i<size; i++){
+            delete queries_arr[i];
+        }
+        delete [] queries_arr;
+    }
 
 }Queries;
 
 typedef struct Rels{
     int size;
     char** paths;
+    ~Rels(){
+        for (int i = 0; i<size; i++){
+            delete paths[i];
+        }
+        delete [] paths;
+    }
 }Rels;
 
 class Parser {

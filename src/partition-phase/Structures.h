@@ -3,6 +3,8 @@
 #include "../Relation/Relation.hpp"
 #include "../hopscotch/src/Hashtable.h"
 
+#define MAX_NEI_SIZE  100
+
 using namespace std;
 
 typedef struct RelColumn {

@@ -4,11 +4,14 @@
 Σπύρος Κάντας Α.Μ. 1115201800059
 
 ## Πως να κάνετε compile and execute:
-cd main\
-chmod +x compile_execute\
-./compile_execute <ονομα φακελου εισόδου> π.χ. ./compile_execute ./Tests
+cd src\
+cd main\ 
+make\
+./program
 
 ## Το πρόγραμμα
+
+Parser:
 Το πρόγραμμα αρχικά διαβάζει τα αρχεία με τα Relation και τα αποθηκεύει
 στη δομή Joiner ως μια λίστα από Relation. Έπειτα διαβάζει τα Queries από
 αρχείο που του δίνεται και εκτελεί τα Join.
@@ -60,3 +63,9 @@ chmod +x compile_execute\
 ### Parser:
   Ο Parser είναι υπεύθυνος για την σάρωση ανάλυση και μετατροπή αρχείου με queries στις
   αντίστοιχες ειδικές δομές Query, Predicates, Projection.
+
+  Disclaimer: 
+  Από τα queries που δίνονται στο small.work υπάρχουν κάποια που είτε δεν τρέχουν είτε θέλουν πολύ
+  χρόνο λόγω πολλών duplicates. Δεν προλάβαμε να υλοποιήσουμε chained δομή για duplicates στο hopscotch
+  για αυτό και τα έχουμε "φιλτράρει" ώστε να μην τρέξουν όπως φαίνεται στην γραμμή 21 της main.
+  Τα αποτελέσματα των άλλων queries βγαίνουν κανονικά

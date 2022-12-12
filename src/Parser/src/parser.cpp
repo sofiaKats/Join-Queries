@@ -8,14 +8,10 @@ Parser::Parser() {
 }
 
 Parser::~Parser() {
-    // for (int i = 0 ; i < 1; i++) delete queries[i];
-    // delete [] queries;
+    delete q;
+    delete r;
 }
 
-// νομιζω η καλυτερη λυση ειναι αυτην η συναρτηση να μεταφερθει στον joiner
-// και με το που γινει parse to query να καλουνται οι καταλληλες συναρτήσεις
-// Αλλιως: απλα αυτην η συναρτηση θα επιστρεφει query** το οποιο θα πειραζει ο τζοινερ
-// απλα μετα θα ειναι δυσκολο να φαινεται ποτε τελειωνει το καθε batch
 Queries* Parser::OpenQueryFileAndParse() {
     FILE *fp;
     char *line = NULL; size_t len = 0; ssize_t read;
@@ -73,31 +69,6 @@ Queries* Parser::OpenQueryFileAndParse() {
     fclose(fp);
     if (line) free(line); // doesnt work without free(even with delete, memory leaks)
     return q;
-    //char line[50] = "0 1 2|0.1=1.0&0.0=2.1&1.0=1.1&1.0>30000|1.2 0.1";
-    // char line[50] = "0 1 2|0.1=1.0&1.0>3000|1.2 0.1";
-    // char line[100] = "3 0 1|0.2=1.0&0.1=2.0&0.2>3499|1.2 0.1";
-    // char* parts[3];
-    // const char pipe_[2] = "|"; char *token; int counter; int q_no = 0; // query number
-    // queries[q_no++] = new Query();
-    // counter=0;
-    // // finding each one of the 3 parts
-    // token = strtok(line, pipe_); /* get the first token */
-    // while( token != NULL ) { /* walk through other tokens */
-    //     parts[counter++] = token;
-    //     token = strtok(NULL, pipe_);
-    // }
-    // //cout << REDFUL << "Parts: " << RESTORE << endl;
-    // //for(int i=0; i<3; i++) cout << parts[i] << endl;
-    // // parsing each one of the 3 parts separately.
-    // // and making sure strtok pointer stays untouched by other functs
-    // if(queries[q_no-1]->ParseRelations(parts[0]) == IS_FINISHED) {
-    //     if(queries[q_no-1]->ParsePredicates(parts[1]) == IS_FINISHED)
-    //         queries[q_no-1]->ParseProjections(parts[2]);
-    // }
-    // queries[q_no-1]->ReplacePredicateIndexWithRelation();
-    // queries[q_no-1]->PredicatePriority();
-
-    // return queries[q_no-1];
 }
 
 /********************************* QUERY FUNCTIONS *********************************/

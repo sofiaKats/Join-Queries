@@ -63,7 +63,6 @@ RelColumn* Joiner::GetUsedRelation(unsigned relationId, unsigned binding, unsign
 string Joiner::Join(Query& query)
   // Executes a join query
 {
-  //cout << "\n\n--- Join Queries Start---\n\n";
 
   for (int i = 0; i < query.number_of_predicates; i++){
     /// Priority index
@@ -77,22 +76,18 @@ string Joiner::Join(Query& query)
     if (query.prdcts[idx]->filter){
       RelColumn* relR = GetUsedRelation(query.prdcts[idx]->relation_left, query.prdcts[idx]->binding_left, query.prdcts[idx]->column_left);
       SingleCol* matches = filterJoin(relR, query.prdcts[idx]->operation, query.prdcts[idx]->number);
-      if (firstJoin) usedRelations = new UsedRelations(matches->activeSize * 64, query.number_of_relations);
+      if (firstJoin) usedRelations = new UsedRelations(matches->activeSize * MAX_NEI_SIZE, query.number_of_relations);
       updateURself_Filter(query.prdcts[idx]->binding_left, matches);
       delete relR;
       delete matches;
     }
     //CASE 2: Both Relationships are in UR
     else if (query.prdcts[idx]->self_join){
-      //cout << "SELF JOIN --------------"; 
       RelColumn* relR = GetUsedRelation(query.prdcts[idx]->relation_left, query.prdcts[idx]->binding_left, query.prdcts[idx]->column_left);
       RelColumn* relS = GetUsedRelation(query.prdcts[idx]->relation_right, query.prdcts[idx]->binding_right, query.prdcts[idx]->column_right);
       SingleCol* matches = selfJoin(relR, relS);
-      if (firstJoin) usedRelations = new UsedRelations(matches->activeSize, query.number_of_relations);
-      //for (int i = 0; i< matches->activeSize; i++) cout << matches->arr[i] << endl;
+      if (firstJoin) usedRelations = new UsedRelations(matches->activeSize * MAX_NEI_SIZE, query.number_of_relations);
       updateURself_Filter(query.prdcts[idx]->binding_left, matches);
-      //if (query.prdcts[idx]->binding_left!=query.prdcts[idx]->binding_right)
-        //updateURself_Filter(query.prdcts[idx]->binding_right, matches);
       delete relR;
       delete relS;
       delete matches;
@@ -103,8 +98,7 @@ string Joiner::Join(Query& query)
       RelColumn* relS = GetUsedRelation(query.prdcts[idx]->relation_right, query.prdcts[idx]->binding_right, query.prdcts[idx]->column_right);
       PartitionedHashJoin* phj = new PartitionedHashJoin(relR, relS);
       Matches* matches = phj->Solve();
-      //cout << "SIMPLE JOIN MATCHES ARE " << matches->activeSize << endl;
-      if (firstJoin) usedRelations = new UsedRelations(matches->activeSize, query.number_of_relations);
+      if (firstJoin) usedRelations = new UsedRelations(matches->activeSize * MAX_NEI_SIZE, query.number_of_relations);
       updateUsedRelations(matches, query.prdcts[idx]->binding_left, query.prdcts[idx]->binding_right);
       delete relR;
       delete relS;
@@ -179,9 +173,7 @@ void Joiner::updateURFirst(Matches* matches, int relRid, int relSid){
 }
 
 void Joiner::updateURonlyR(Matches* matches, int relUR, int relNew){
-  //cout << "active size of ur " << usedRelations->activeSize << " active size of matches " << matches->activeSize << endl;
-  //tempPrintMatches(matches);
-  UsedRelations* temp = new UsedRelations(1000000, usedRelations->rowSize);
+  UsedRelations* temp = new UsedRelations(matches->activeSize * MAX_NEI_SIZE, usedRelations->rowSize);
   for (uint32_t i=0; i < usedRelations->size; i++){ /// For each entry from usedRelations
     if (usedRelations->matchRows[i] == NULL) continue;
 
@@ -206,7 +198,7 @@ void Joiner::updateURonlyR(Matches* matches, int relUR, int relNew){
 }
 
 void Joiner::updateURonlyS(Matches* matches, int relUR, int relNew){
-  UsedRelations* temp = new UsedRelations(1000000, usedRelations->rowSize);
+  UsedRelations* temp = new UsedRelations(matches->activeSize * MAX_NEI_SIZE, usedRelations->rowSize);
   for (uint32_t i=0; i < usedRelations->size; i++){ /// For each entry from usedRelations
     if (usedRelations->matchRows[i] == NULL) continue;
 
@@ -330,9 +322,6 @@ void Joiner::PrintUsedRelations(){
       }
       cout << endl;
     }
-    // if (i == 10) {
-    //   break;
-    // }
   }
 }
 //-----------------------------------------------------------------------
