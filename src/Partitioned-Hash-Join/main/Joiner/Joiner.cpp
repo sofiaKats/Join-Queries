@@ -70,7 +70,6 @@ string Joiner::Join(Query& query)
     int idx = query.priority_predicates[i];
 
     if (bothRelsUsed(query.prdcts[idx]->binding_left, query.prdcts[idx]->binding_right)){
-      //cout << "both in UR "; 
       query.prdcts[idx]->self_join = 1;
     }
     
@@ -78,13 +77,12 @@ string Joiner::Join(Query& query)
     if (query.prdcts[idx]->filter){
       RelColumn* relR = GetUsedRelation(query.prdcts[idx]->relation_left, query.prdcts[idx]->binding_left, query.prdcts[idx]->column_left);
       SingleCol* matches = filterJoin(relR, query.prdcts[idx]->operation, query.prdcts[idx]->number);
-      //cout << "FILTER JOIN MATCHES ARE " << matches->activeSize << endl;
       if (firstJoin) usedRelations = new UsedRelations(matches->activeSize * 64, query.number_of_relations);
       updateURself_Filter(query.prdcts[idx]->binding_left, matches);
       delete relR;
       delete matches;
     }
-    //CASE 2: Join is self join e.g 1.0 = 1.2
+    //CASE 2: Both Relationships are in UR
     else if (query.prdcts[idx]->self_join){
       //cout << "SELF JOIN --------------"; 
       RelColumn* relR = GetUsedRelation(query.prdcts[idx]->relation_left, query.prdcts[idx]->binding_left, query.prdcts[idx]->column_left);
@@ -208,7 +206,7 @@ void Joiner::updateURonlyR(Matches* matches, int relUR, int relNew){
 }
 
 void Joiner::updateURonlyS(Matches* matches, int relUR, int relNew){
-  UsedRelations* temp = new UsedRelations(usedRelations->activeSize, usedRelations->rowSize);
+  UsedRelations* temp = new UsedRelations(1000000, usedRelations->rowSize);
   for (uint32_t i=0; i < usedRelations->size; i++){ /// For each entry from usedRelations
     if (usedRelations->matchRows[i] == NULL) continue;
 

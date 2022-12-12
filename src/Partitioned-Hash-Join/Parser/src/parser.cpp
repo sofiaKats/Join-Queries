@@ -198,7 +198,7 @@ void Query::PredicatePriority(void) {
     for(int i=0; i<number_of_predicates; i++) {
         if(prdcts[i]->relation_after_operation == true) {
             //if its a self join, the priority is higher
-            if(prdcts[i]->relation_left == prdcts[i]->relation_right) {
+            if(prdcts[i]->binding_left == prdcts[i]->binding_right) {
                 priority_predicates[priority_index++] = i;
                 prdcts[i]->self_join = true;
             }
@@ -208,7 +208,7 @@ void Query::PredicatePriority(void) {
     //add the rest of the joins
     for(int i=0; i<number_of_predicates; i++) {
         if(prdcts[i]->self_join == true || prdcts[i]->filter==true) continue;
-        if(prdcts[i]->relation_after_operation == true && prdcts[i]->relation_left != prdcts[i]->relation_right) {
+        if(prdcts[i]->relation_after_operation == true && prdcts[i]->binding_left != prdcts[i]->binding_right) {
             priority_predicates[priority_index++] = i; //assign first predicate we find
             prdcts[i]->simple_join = true;
         }
