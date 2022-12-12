@@ -28,7 +28,7 @@ Query* Parser::OpenFileAndParse() {
     // while ((read = getline(&line, &len, fp)) != -1) {
     //     if(!strcmp(line, "F\n")) {
     //         cout << BLUE << "END OF BATCH! " << RESTORE << endl;
-    //         continue; // A batch of queries ended 
+    //         continue; // A batch of queries ended
     //     }
 
     //     queries[q_no++] = new Query();
@@ -55,7 +55,7 @@ Query* Parser::OpenFileAndParse() {
     // return queries[q_no-1];
     //char line[50] = "0 1 2|0.1=1.0&0.0=2.1&1.0=1.1&1.0>30000|1.2 0.1";
     // char line[50] = "0 1 2|0.1=1.0&1.0>3000|1.2 0.1";
-    char line[100] = "12 1 6 12|0.2=1.0&1.0=2.1&0.1=3.2&3.0<33199|2.1 0.1 0.2";
+    char line[100] = "3 0 1|0.2=1.0&0.1=2.0&0.2>3499|1.2 0.1";
     char* parts[3];
     const char pipe_[2] = "|"; char *token; int counter; int q_no = 0; // query number
     queries[q_no++] = new Query();
@@ -66,8 +66,8 @@ Query* Parser::OpenFileAndParse() {
         parts[counter++] = token;
         token = strtok(NULL, pipe_);
     }
-    cout << REDFUL << "Parts: " << RESTORE << endl;
-    for(int i=0; i<3; i++) cout << parts[i] << endl;
+    //cout << REDFUL << "Parts: " << RESTORE << endl;
+    //for(int i=0; i<3; i++) cout << parts[i] << endl;
     // parsing each one of the 3 parts separately.
     // and making sure strtok pointer stays untouched by other functs
     if(queries[q_no-1]->ParseRelations(parts[0]) == IS_FINISHED) {
@@ -117,14 +117,14 @@ int Query::ParseRelations(char* relations) {
     for(int i=0; i<15; i++)  {
         if(relation[i] != NULL) {
             number_of_relations++;
-            cout << "relation[" << i << "]: " << relation[i] << endl;
+            //cout << "relation[" << i << "]: " << relation[i] << endl;
         }
     }
     return IS_FINISHED;
 }
 
 int Query::ParsePredicates(char* predicates) {
-    cout << "In predicates: " << predicates << endl;
+    //cout << "In predicates: " << predicates << endl;
     const char and_[2] = "&"; char *token; int index=0;
 
     token = strtok(predicates, and_);
@@ -133,12 +133,12 @@ int Query::ParsePredicates(char* predicates) {
         number_of_predicates++;
         token = strtok(NULL, and_);
     }
-    cout << "number of predicates: " << number_of_predicates << endl;
+    //cout << "number of predicates: " << number_of_predicates << endl;
     return IS_FINISHED;
 }
 
 void Query::ParseProjections(char* projection) {
-    cout << "Projections: " << projection << endl;
+    //cout << "Projections: " << projection << endl;
     const char space[2] = " "; char *token; int index=0;
 
     token = strtok(projection, space);
@@ -148,7 +148,7 @@ void Query::ParseProjections(char* projection) {
         projections[index-1]->separateRelationFromColumn(); // store relation and column to be summed
         token = strtok(NULL, space); // find next relation-column pair
     }
-    cout << "number of projections: "<< number_of_projections << endl;
+    //cout << "number of projections: "<< number_of_projections << endl;
 }
 
 void Query::ReplacePredicateIndexWithRelation(void) {
@@ -173,7 +173,7 @@ void Query::PredicatePriority(void) {
             prdcts[i]->filter = true; // operation is a filter
         }
     }
-    
+
     //then self joins
     for(int i=0; i<number_of_predicates; i++) {
         if(prdcts[i]->relation_after_operation == true) {
@@ -194,12 +194,13 @@ void Query::PredicatePriority(void) {
         }
     }
 
-    for(int i=0; i<number_of_predicates; i++)
+    /*for(int i=0; i<number_of_predicates; i++)
         cout << "predicate priority " << i << ": " << prdcts[priority_predicates[i]]->predicate << " binding left: " << prdcts[priority_predicates[i]]->binding_left << " binding right: "  << prdcts[priority_predicates[i]]->binding_right << " relation left: " << prdcts[priority_predicates[i]]->relation_left << " relation right: " << prdcts[priority_predicates[i]]->relation_right
         << " filter?: " << prdcts[priority_predicates[i]]->filter << " self-join?: " << prdcts[priority_predicates[i]]->self_join << " simple-join?: " << prdcts[priority_predicates[i]]->simple_join << endl;
 
-    for(int i=0; i<number_of_projections; i++) 
-        cout << "projection " << i << ": real relation: " << projections[i]->getRealRelation() << " binding index: " << projections[i]->getRelationIndex() << " column: " << projections[i]->getColumn() << endl; 
+    for(int i=0; i<number_of_projections; i++)
+        cout << "projection " << i << ": real relation: " << projections[i]->getRealRelation() << " binding index: " << projections[i]->getRelationIndex() << " column: " << projections[i]->getColumn() << endl;
+    */
 }
 
 
@@ -228,7 +229,7 @@ void Projection::separateRelationFromColumn(void){
     relation_index = relation_column_pair[0] - '0';
     column = relation_column_pair[2] - '0';
 
-    cout << "RELATION: " << relation_index << " AND COLUMN: " << column << endl;
+    //cout << "RELATION: " << relation_index << " AND COLUMN: " << column << endl;
 }
 
 /********************************* PREDICATES FUNCTIONS *********************************/
@@ -242,11 +243,11 @@ void Predicates::setPredicates(char* prdct) {
     strcpy(predicate, prdct);
     // cout << "SEPARATED PREDICATES: ";
     // for(int i=0; i<15; i++) cout << predicate[i] ;
-    cout << endl;
+    //cout << endl;
     // convert char to int
     binding_left = predicate[0] - '0';
     column_left = predicate[2] - '0';
-    cout << "left relation: " << binding_left << " left column: " << column_left;
+    //cout << "left relation: " << binding_left << " left column: " << column_left;
 
     // when small.work has > or < it's an operation with a number
     if(predicate[3] == '>' || predicate[3] == '<') {
@@ -260,7 +261,7 @@ void Predicates::setPredicates(char* prdct) {
                 decimal*=10;
             }
         }
-        cout << " operation: " << operation << " number: " << number << endl;
+        //cout << " operation: " << operation << " number: " << number << endl;
     }else if(predicate[3] == '=') {
         operation = predicate[3];
         // if the 5th index is not '.' (dot character), it's a number not a relation
@@ -274,13 +275,13 @@ void Predicates::setPredicates(char* prdct) {
                     decimal*=10;
                 }
             }
-            cout << " operation: " << operation << " number: " << number << endl;
+            //cout << " operation: " << operation << " number: " << number << endl;
         // if the 5th index is '.' (dot character), it's a number not a relation
         }else if(predicate[5] == '.') {
             relation_after_operation = true;
             binding_right = predicate[4] - '0';
             column_right = predicate[6] - '0';
-            cout << " operation: " << operation << " right relation: " << binding_right << " right column: " << column_right << endl;
+            //cout << " operation: " << operation << " right relation: " << binding_right << " right column: " << column_right << endl;
         }
     }
 }

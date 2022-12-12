@@ -6,12 +6,10 @@
 using namespace std;
 
 typedef struct RelColumn {
-  int id;
   Tuple* tuples;
   uint32_t num_tuples;
 
-  RelColumn(int id, uint32_t size){
-    this->id = id;
+  RelColumn(uint32_t size){
     tuples = new Tuple[size];
     num_tuples = size;
   }

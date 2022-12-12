@@ -9,13 +9,13 @@ PartitionedHashJoin::PartitionedHashJoin(RelColumn* relR, RelColumn* relS){
 
 Matches* PartitionedHashJoin::Solve(){
   Part* partitionedR = new Part();
-  partitionedR->rel = new RelColumn(relR->id, relR->num_tuples);
+  partitionedR->rel = new RelColumn(relR->num_tuples);
   int passCount = PartitionRec(partitionedR, relR);
   //ONLY FOR RELATION R
   BuildHashtables(partitionedR);
 
   Part* partitionedS = new Part();
-  partitionedS->rel = new RelColumn(relS->id, relS->num_tuples);
+  partitionedS->rel = new RelColumn(relS->num_tuples);
   PartitionRec(partitionedS, relS, passCount);
 
   //PrintPart(partitionedR, true);
@@ -135,7 +135,7 @@ Matches* PartitionedHashJoin::Join(Part* p1, Part* p2){
       for (uint32_t j = p2->prefixSum->arr[i][1]; j < p2->prefixSum->arr[i+1][1]; j++){
         Tuple* tuple = new Tuple(p2->rel->tuples[j].key, p2->rel->tuples[j].payload);
         Matches* matches = p1->hashtables[hashtablesIndex]->contains(tuple);
-        
+
         for (uint32_t k = 0; k < matches->activeSize; k++){
           final->tuples[final->activeSize] = new Tuple(matches->tuples[k]->key, matches->tuples[k]->payload);
           final->activeSize++;

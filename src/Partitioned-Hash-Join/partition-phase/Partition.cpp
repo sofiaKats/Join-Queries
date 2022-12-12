@@ -17,7 +17,7 @@ Part* Partition::BuildPartitionedTable(){
   Hist* hist = CreateHistogram();
 
   parted->prefixSum = CreatePrefixSum(hist);
-  parted->rel = new RelColumn(rel->id, endIndex - startIndex);
+  parted->rel = new RelColumn(endIndex - startIndex);
 
   for (int i = startIndex; i < endIndex; i++){
     int hash = Hash(rel->tuples[i].payload, n);

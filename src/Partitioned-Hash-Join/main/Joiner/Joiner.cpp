@@ -31,7 +31,7 @@ Relation& Joiner::GetRelation(unsigned relationId)
 //-----------------------------------------------------------------------
 RelColumn* Joiner::GetRelationCol(unsigned relationId, unsigned colId){
     Relation& rel = GetRelation(relationId);
-    RelColumn* relColumn = new RelColumn(relationId, rel.size);
+    RelColumn* relColumn = new RelColumn(rel.size);
     for (int i = 0; i < rel.size; i++){
       //i = rand()%(rel.size);
       relColumn->tuples[i].key = i;
@@ -46,8 +46,7 @@ RelColumn* Joiner::GetUsedRelation(unsigned relationId, unsigned binding, unsign
     return GetRelationCol(relationId, colId);
 
   Relation& rel = GetRelation(relationId);
-  RelColumn* relColumn = new RelColumn(binding, usedRelations->activeSize);
-  //changed sth here!!!!!!!!!!!!!!!!!!!!!!!
+  RelColumn* relColumn = new RelColumn(usedRelations->activeSize);
   int relCol_cnt = 0;
   for (int i=0; i<usedRelations->size; i++){
     if (usedRelations->matchRows[i] == NULL)  continue;
@@ -118,7 +117,8 @@ string Joiner::Join(Query& query)
       cout << "NULL ";
       continue;
     }
-    cout << Checksum(query.projections[i]->getRealRelation(), query.projections[i]->getRelationIndex(), query.projections[i]->getColumn()) << " ";
+    uint64_t sum = Checksum(query.projections[i]->getRealRelation(), query.projections[i]->getRelationIndex(), query.projections[i]->getColumn());
+    cout << (sum==-1?"NULL":to_string(sum)) << " ";
   }
   cout << "\n";
   clearJoinSession();
@@ -176,7 +176,7 @@ void Joiner::updateURFirst(Matches* matches, int relRid, int relSid){
 void Joiner::updateURonlyR(Matches* matches, int relUR, int relNew){
   //cout << "active size of ur " << usedRelations->activeSize << " active size of matches " << matches->activeSize << endl;
   //tempPrintMatches(matches);
-  UsedRelations* temp = new UsedRelations(1000000, usedRelations->rowSize);
+  UsedRelations* temp = new UsedRelations(usedRelations->activeSize, usedRelations->rowSize);
   for (uint32_t i=0; i < usedRelations->size; i++){ /// For each entry from usedRelations
     if (usedRelations->matchRows[i] == NULL) continue;
 
@@ -198,11 +198,10 @@ void Joiner::updateURonlyR(Matches* matches, int relUR, int relNew){
     }
   }
   moveUR(temp);
-  //delete temp;
 }
 
 void Joiner::updateURonlyS(Matches* matches, int relUR, int relNew){
-  UsedRelations* temp = new UsedRelations(100000, usedRelations->rowSize);
+  UsedRelations* temp = new UsedRelations(usedRelations->activeSize, usedRelations->rowSize);
   for (uint32_t i=0; i < usedRelations->size; i++){ /// For each entry from usedRelations
     if (usedRelations->matchRows[i] == NULL) continue;
 
@@ -363,6 +362,7 @@ void Joiner::moveUR(UsedRelations* temp){
       prevJ = j + 1;
     }
   }
+  delete temp;
 }
 //-----------------------------------------------------------------------
 void Joiner::tempStoreDuplicatesR(int j, UsedRelations* temp, int relNew, Matches* matches, uint32_t rowid, int i){
