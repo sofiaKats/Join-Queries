@@ -4,6 +4,7 @@
 // CHANGE 1 TO 50!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 Parser::Parser() {
     q = new Queries();
+    r = new Rels();
 }
 
 Parser::~Parser() {
@@ -303,4 +304,38 @@ void Predicates::setPredicates(char* prdct) {
             //cout << " operation: " << operation << " right relation: " << binding_right << " right column: " << column_right << endl;
         }
     }
+}
+
+
+Rels* Parser::OpenRelFileAndParse(){
+    FILE *fp;
+    char *line = NULL;
+    char path[50];
+    size_t len = 0;
+    ssize_t read;
+    unsigned filesCount = 0;
+    char** paths;
+
+    fp = fopen("./workloads/small/small.init", "r");
+    if (fp == NULL){
+        cout << "Could not open init file" << endl;
+        exit(EXIT_FAILURE);
+    }
+    while ((read = getline(&line, &len, fp)) != -1) { //count lines to allocate relation table
+        if (read == 0) break;
+        ++filesCount;
+    }
+    r->paths = new char*[filesCount];
+    r->size = filesCount;
+
+    filesCount = 0;
+    rewind(fp);
+    while ((read = getline(&line, &len, fp)) != -1) { //count lines to allocate relation table
+        if (read == 0) break;
+        line[strlen(line)-1] = '\0';
+        r->paths[filesCount] = new char[50];
+        sprintf(r->paths[filesCount++], "./workloads/small/%s", line);
+        cout << "opened file: " << r->paths[filesCount-1] << endl;
+    }
+    return r;    
 }

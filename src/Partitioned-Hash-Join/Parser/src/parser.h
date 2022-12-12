@@ -82,11 +82,17 @@ typedef struct Queries{
 
 }Queries;
 
+typedef struct Rels{
+    int size;
+    char** paths;
+}Rels;
+
 class Parser {
     Queries* q;
-    
+    Rels* r;    
 public:
     Parser();
     ~Parser();
     Queries* OpenQueryFileAndParse(); //opens small.work and reads the file line by line, extracting queries
+    Rels* OpenRelFileAndParse();
 };

@@ -151,8 +151,9 @@ void Joiner::updateUsedRelations(Matches* matches, int relRid, int relSid){
   int i = getFirstURrow();
   // CASE 2.1: Only one of the Relations has been joined before, the Relation R., or both
   if (usedRelations->matchRows[i]->arr[relRid] != -1){
-    cout << "[UpdateUR] Left or Both" << endl;
+    
     updateURonlyR(matches, relRid, relSid);
+    cout << "[UpdateUR] Left or Both" << endl;
     return;
   }
   // CASE 2.2: Only one of the Relations has been joined before, the Relation S.
@@ -176,7 +177,7 @@ void Joiner::updateURFirst(Matches* matches, int relRid, int relSid){
 void Joiner::updateURonlyR(Matches* matches, int relUR, int relNew){
   //cout << "active size of ur " << usedRelations->activeSize << " active size of matches " << matches->activeSize << endl;
   //tempPrintMatches(matches);
-  UsedRelations* temp = new UsedRelations(usedRelations->activeSize, usedRelations->rowSize);
+  UsedRelations* temp = new UsedRelations(1000000, usedRelations->rowSize);
   for (uint32_t i=0; i < usedRelations->size; i++){ /// For each entry from usedRelations
     if (usedRelations->matchRows[i] == NULL) continue;
 
@@ -362,7 +363,7 @@ void Joiner::moveUR(UsedRelations* temp){
       prevJ = j + 1;
     }
   }
-  delete temp;
+  //delete temp;
 }
 //-----------------------------------------------------------------------
 void Joiner::tempStoreDuplicatesR(int j, UsedRelations* temp, int relNew, Matches* matches, uint32_t rowid, int i){
