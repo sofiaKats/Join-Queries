@@ -68,6 +68,12 @@ string Joiner::Join(Query& query)
   for (int i = 0; i < query.number_of_predicates; i++){
     /// Priority index
     int idx = query.priority_predicates[i];
+
+    if (bothRelsUsed(query.prdcts[idx]->binding_left, query.prdcts[idx]->binding_right)){
+      //cout << "both in UR "; 
+      query.prdcts[idx]->self_join = 1;
+    }
+    
     //CASE 1: Join is with filter e.g 1.0 > 3000
     if (query.prdcts[idx]->filter){
       RelColumn* relR = GetUsedRelation(query.prdcts[idx]->relation_left, query.prdcts[idx]->binding_left, query.prdcts[idx]->column_left);
@@ -80,10 +86,10 @@ string Joiner::Join(Query& query)
     }
     //CASE 2: Join is self join e.g 1.0 = 1.2
     else if (query.prdcts[idx]->self_join){
+      //cout << "SELF JOIN --------------"; 
       RelColumn* relR = GetUsedRelation(query.prdcts[idx]->relation_left, query.prdcts[idx]->binding_left, query.prdcts[idx]->column_left);
       RelColumn* relS = GetUsedRelation(query.prdcts[idx]->relation_right, query.prdcts[idx]->binding_right, query.prdcts[idx]->column_right);
       SingleCol* matches = selfJoin(relR, relS);
-      //cout << "SELF JOIN MATCHES ARE " << matches->activeSize << endl;
       if (firstJoin) usedRelations = new UsedRelations(matches->activeSize, query.number_of_relations);
       //for (int i = 0; i< matches->activeSize; i++) cout << matches->arr[i] << endl;
       updateURself_Filter(query.prdcts[idx]->binding_left, matches);
@@ -264,7 +270,6 @@ SingleCol* Joiner::selfJoin(RelColumn* relR, RelColumn* relS){
   SingleCol* singleCol = new SingleCol(relR->num_tuples);
   for (uint32_t i=0; i<relR->num_tuples; i++){
     if (relR->tuples[i].payload == relS->tuples[i].payload){
-      //cout << "relR->tuples[i].key: " << relR->tuples[i].key << " == " << relS->tuples[i].key << endl;
       singleCol->arr[singleCol->activeSize] = relR->tuples[i].key;
       singleCol->activeSize++;
     }
@@ -399,4 +404,12 @@ void Joiner::tempPrintMatches(Matches* matches){
   for (int i = 0; i< 200; i++){
     cout << matches->tuples[i]->key << " " << matches->tuples[i]->payload << endl;
   }
+}
+
+bool Joiner::bothRelsUsed(int relRid, int relSid){
+  int i = getFirstURrow();
+  if (usedRelations == nullptr || i == -1 || firstJoin == true) return false;
+  if ((usedRelations->matchRows[i]->arr[relRid] != -1) && (usedRelations->matchRows[i]->arr[relSid]!=-1))
+    return true;
+  return false; 
 }

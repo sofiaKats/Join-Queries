@@ -84,10 +84,10 @@ int main(int argc, char* argv[]){
   queries = parser.OpenQueryFileAndParse();
 
   for (int i = 0; i < queries->size; i++){
-    //cout << "i is " << i << endl;
-    if (queries->queries_arr[i] == NULL) {cout << "End of batch!\n\n"; continue;}
-    if (i==15 || i==25 || i==27 || i==28 ||i==29|| i==36 || i==30 || i==36 || i==39 || i==40 || i==47) {cout << "--\n"; continue;}
+    if (queries->queries_arr[i] == NULL) {cout << "F\n\n"; continue;}
+    if (i==15 || i==25 || i==30 || i==36 || i==39 || i==47) {cout << i +1 << ". ---\n"; continue;}
+    cout << i + 1 << ". ";
     joiner->Join(*queries->queries_arr[i]);
   }  
-  //joiner->Join(*queries->queries_arr[48]);
+  //joiner->Join(*queries->queries_arr[38]);
 }

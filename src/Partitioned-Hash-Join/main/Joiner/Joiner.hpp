@@ -28,6 +28,8 @@ private:
 
   void tempPrintMatches(Matches* matches);
 
+  bool bothRelsUsed(int, int);
+
 public:
   /// The relations that might be joined
   Relation** relations;

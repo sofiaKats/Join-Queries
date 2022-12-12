@@ -59,7 +59,8 @@ Queries* Parser::OpenQueryFileAndParse() {
             token = strtok(NULL, pipe_);
         }
         //cout << REDFUL << "Parts: " << RESTORE << endl;
-        for(int i=0; i < 3; i++) cout << parts[i] << endl;
+        //for(int i=0; i < 3; i++) cout << parts[i] << endl;
+        
         // parsing each one of the 3 parts separately.
         // and making sure strtok pointer stays untouched by other functs
         if(q->queries_arr[q_no-1]->ParseRelations(parts[0]) == IS_FINISHED) {
