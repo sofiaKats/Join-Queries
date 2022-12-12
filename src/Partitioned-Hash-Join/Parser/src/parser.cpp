@@ -2,82 +2,101 @@
 
 /********************************* PARSER FUNCTIONS *********************************/
 // CHANGE 1 TO 50!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-Parser::Parser() { queries = new Query*[1]; }
+Parser::Parser() {
+    q = new Queries();
+}
 
 Parser::~Parser() {
-    for (int i = 0 ; i < 1; i++) delete queries[i];
-    delete [] queries;
+    // for (int i = 0 ; i < 1; i++) delete queries[i];
+    // delete [] queries;
 }
 
 // νομιζω η καλυτερη λυση ειναι αυτην η συναρτηση να μεταφερθει στον joiner
 // και με το που γινει parse to query να καλουνται οι καταλληλες συναρτήσεις
 // Αλλιως: απλα αυτην η συναρτηση θα επιστρεφει query** το οποιο θα πειραζει ο τζοινερ
 // απλα μετα θα ειναι δυσκολο να φαινεται ποτε τελειωνει το καθε batch
-Query* Parser::OpenFileAndParse() {
-    // FILE *fp;
-    // char *line = NULL; size_t len = 0; ssize_t read;
-    // const char pipe_[2] = "|"; char *token; int counter; int q_no = 0; // query number
+Queries* Parser::OpenQueryFileAndParse() {
+    FILE *fp;
+    char *line = NULL; size_t len = 0; ssize_t read;
+    const char pipe_[2] = "|"; char *token; int counter; int q_no = 0; // query number
+    unsigned lines = 0;
 
-    // /* opening file for reading */
-    // fp = fopen("src/small.work" , "r");
-    // if(fp == NULL) { perror("Error opening file"); exit(-1);}
-    // // each line that's not an F consist of 3 parts separated by pipes
-    // // we store each one of these 3 parts onto an array.
-    // char* parts[3];
+    /* opening /file for reading */
+    fp = fopen("./workloads/small/small.work" , "r");
+    if(fp == NULL) { perror("Error opening file"); exit(-1);}
 
-    // while ((read = getline(&line, &len, fp)) != -1) {
-    //     if(!strcmp(line, "F\n")) {
-    //         cout << BLUE << "END OF BATCH! " << RESTORE << endl;
-    //         continue; // A batch of queries ended
-    //     }
+    
 
-    //     queries[q_no++] = new Query();
-    //     counter=0;
-    //     // finding each one of the 3 parts
-    //     token = strtok(line, pipe_); /* get the first token */
-    //     while( token != NULL ) { /* walk through other tokens */
-    //         parts[counter++] = token;
-    //         token = strtok(NULL, pipe_);
-    //     }
-    //     cout << REDFUL << "Parts: " << RESTORE << endl;
-    //     for(int i=0; i<3; i++) cout << parts[i] << endl;
-    //     // parsing each one of the 3 parts separately.
-    //     // and making sure strtok pointer stays untouched by other functs
-    //     if(queries[q_no-1]->ParseRelations(parts[0]) == IS_FINISHED) {
-    //         if(queries[q_no-1]->ParsePredicates(parts[1]) == IS_FINISHED)
-    //             queries[q_no-1]->ParseProjections(parts[2]);
-    //     }
-    //     queries[q_no-1]->ReplacePredicateIndexWithRelation();
-    //     queries[q_no-1]->PredicatePriority();
-    // }
-    // fclose(fp);
-    // if (line) free(line); // doesnt work without free(even with delete, memory leaks)
-    // return queries[q_no-1];
+    while ((read = getline(&line, &len, fp)) != -1) {
+        if (read == 0) break;
+        lines++;
+    }
+    rewind(fp);
+    cout << "Lines counted are " << lines << endl;
+
+    q->queries_arr = new Query*[lines];
+    q->size = lines;
+    //We now store each query in the array, which we return to main
+
+    // each line that's not an F consist of 3 parts separated by pipes
+    // we store each one of these 3 parts onto an array.
+    char* parts[3];
+
+    while ((read = getline(&line, &len, fp)) != -1) {
+        if (read == 0) break;
+        if(!strcmp(line, "F\n")) {
+            cout << BLUE << "END OF BATCH! " << RESTORE << endl;
+            q->queries_arr[q_no++] = NULL;
+            continue; // A batch of queries ended
+        }
+
+        q->queries_arr[q_no++] = new Query();
+        counter=0;
+        // finding each one of the 3 parts
+        token = strtok(line, pipe_); /* get the first token */
+        while( token != NULL ) { /* walk through other tokens */
+            parts[counter++] = token;
+            token = strtok(NULL, pipe_);
+        }
+        cout << REDFUL << "Parts: " << RESTORE << endl;
+        for(int i=0; i < 3; i++) cout << parts[i] << endl;
+        // parsing each one of the 3 parts separately.
+        // and making sure strtok pointer stays untouched by other functs
+        if(q->queries_arr[q_no-1]->ParseRelations(parts[0]) == IS_FINISHED) {
+            if(q->queries_arr[q_no-1]->ParsePredicates(parts[1]) == IS_FINISHED)
+                q->queries_arr[q_no-1]->ParseProjections(parts[2]);
+        }
+        q->queries_arr[q_no-1]->ReplacePredicateIndexWithRelation();
+        q->queries_arr[q_no-1]->PredicatePriority();
+    }
+    fclose(fp);
+    if (line) free(line); // doesnt work without free(even with delete, memory leaks)
+    return q;
     //char line[50] = "0 1 2|0.1=1.0&0.0=2.1&1.0=1.1&1.0>30000|1.2 0.1";
     // char line[50] = "0 1 2|0.1=1.0&1.0>3000|1.2 0.1";
-    char line[100] = "3 0 1|0.2=1.0&0.1=2.0&0.2>3499|1.2 0.1";
-    char* parts[3];
-    const char pipe_[2] = "|"; char *token; int counter; int q_no = 0; // query number
-    queries[q_no++] = new Query();
-    counter=0;
-    // finding each one of the 3 parts
-    token = strtok(line, pipe_); /* get the first token */
-    while( token != NULL ) { /* walk through other tokens */
-        parts[counter++] = token;
-        token = strtok(NULL, pipe_);
-    }
-    //cout << REDFUL << "Parts: " << RESTORE << endl;
-    //for(int i=0; i<3; i++) cout << parts[i] << endl;
-    // parsing each one of the 3 parts separately.
-    // and making sure strtok pointer stays untouched by other functs
-    if(queries[q_no-1]->ParseRelations(parts[0]) == IS_FINISHED) {
-        if(queries[q_no-1]->ParsePredicates(parts[1]) == IS_FINISHED)
-            queries[q_no-1]->ParseProjections(parts[2]);
-    }
-    queries[q_no-1]->ReplacePredicateIndexWithRelation();
-    queries[q_no-1]->PredicatePriority();
+    // char line[100] = "3 0 1|0.2=1.0&0.1=2.0&0.2>3499|1.2 0.1";
+    // char* parts[3];
+    // const char pipe_[2] = "|"; char *token; int counter; int q_no = 0; // query number
+    // queries[q_no++] = new Query();
+    // counter=0;
+    // // finding each one of the 3 parts
+    // token = strtok(line, pipe_); /* get the first token */
+    // while( token != NULL ) { /* walk through other tokens */
+    //     parts[counter++] = token;
+    //     token = strtok(NULL, pipe_);
+    // }
+    // //cout << REDFUL << "Parts: " << RESTORE << endl;
+    // //for(int i=0; i<3; i++) cout << parts[i] << endl;
+    // // parsing each one of the 3 parts separately.
+    // // and making sure strtok pointer stays untouched by other functs
+    // if(queries[q_no-1]->ParseRelations(parts[0]) == IS_FINISHED) {
+    //     if(queries[q_no-1]->ParsePredicates(parts[1]) == IS_FINISHED)
+    //         queries[q_no-1]->ParseProjections(parts[2]);
+    // }
+    // queries[q_no-1]->ReplacePredicateIndexWithRelation();
+    // queries[q_no-1]->PredicatePriority();
 
-    return queries[q_no-1];
+    // return queries[q_no-1];
 }
 
 /********************************* QUERY FUNCTIONS *********************************/

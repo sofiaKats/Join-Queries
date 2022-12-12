@@ -76,10 +76,17 @@ public:
     void ReplacePredicateIndexWithRelation(void);
 };
 
+typedef struct Queries{
+    int size;
+    Query** queries_arr;
+
+}Queries;
+
 class Parser {
-    Query** queries;
+    Queries* q;
+    
 public:
     Parser();
     ~Parser();
-    Query* OpenFileAndParse(); //opens small.work and reads the file line by line, extracting queries
+    Queries* OpenQueryFileAndParse(); //opens small.work and reads the file line by line, extracting queries
 };

@@ -7,14 +7,14 @@ int main(int argc, char* argv[]) {
 
   Joiner *joiner;
   Parser parser;
-  Query *query;
+  Queries *queries;
   char input[20]; memset(input, '\0', 20);
   FILE *fp;
   char *line = NULL;
   char path[50];
   size_t len = 0;
   ssize_t read;
-  unsigned filesCount;
+  unsigned filesCount = 0;
 
   fp = fopen("./workloads/small/small.init", "r");
   if (fp == NULL){
@@ -42,10 +42,15 @@ int main(int argc, char* argv[]) {
       scanf("%s", input);
       if (!strcmp(input, "Done")) break;
       try{
-        sprintf(line, "./workloads/small/%s", input);
-        query = parser.OpenFileAndParse();
-        string results = joiner->Join(*query);
-        cout << "\n--- Join Results ---\n\n" << results << endl;
+        //sprintf(line, "./workloads/small/%s", input);
+        queries = parser.OpenQueryFileAndParse();
+        cout << "MAINNNNNNNNNNNNNNNNN" <<  endl;
+        for (int i = 0; i < queries->size; i++){
+          if(queries->queries_arr[i]!=nullptr) cout << queries->queries_arr[i]->prdcts[0]->relation_left << endl;
+        }
+        break;
+        //string results = joiner->Join(*query);
+        //cout << "\n--- Join Results ---\n\n" << results << endl;
       }
       catch(const exception& e){
         cout << e.what() << endl;
