@@ -33,7 +33,6 @@ void Relation::loadRelation(const char* fileName)
   this->size=*reinterpret_cast<uint64_t*>(addr);
   addr+=sizeof(size);
   this->numColumns=*reinterpret_cast<size_t*>(addr);
-  //cout << "Num of columns is " << numColumns << endl;
   addr+=sizeof(size_t);
 
   columns = new uint64_t*[numColumns];

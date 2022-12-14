@@ -100,8 +100,9 @@ typedef struct UsedRelations{
       //matchRows[i] = new MatchRow(rowSize);
   }
   ~UsedRelations(){
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < size; i++){
       delete matchRows[i];
+    }
     delete[] matchRows;
   }
 } UsedRelations;

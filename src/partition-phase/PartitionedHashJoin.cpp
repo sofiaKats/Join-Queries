@@ -12,16 +12,13 @@ Matches* PartitionedHashJoin::Solve(){
   Part* partitionedR = new Part();
   partitionedR->rel = new RelColumn(relR->num_tuples);
   int passCount = PartitionRec(partitionedR, relR);
-  //ONLY FOR RELATION R
+  // ONLY FOR RELATION R
   try{
     BuildHashtables(partitionedR);
 
   Part* partitionedS = new Part();
   partitionedS->rel = new RelColumn(relS->num_tuples);
   PartitionRec(partitionedS, relS, passCount);
-
-  //PrintPart(partitionedR, true);
-  //PrintPart(partitionedS, false);
 
   Matches* matches = Join(partitionedR, partitionedS);
 
@@ -71,10 +68,7 @@ int PartitionedHashJoin::PartitionRec(Part* finalPart, RelColumn* rel, int maxPa
   n++;
   int passCount = 0;
 
-  //cout << "\n------- PASS NO: " << passNum << " -------\n\n";
-
   Partition* partition = new Partition(rel, n, from, to);
-
   Part* part = partition->BuildPartitionedTable();
 
   if (passNum == maxPasses || partition->GetLargestTableSize() < L2CACHE){
@@ -129,18 +123,18 @@ Matches* PartitionedHashJoin::Join(Part* p1, Part* p2){
   uint32_t matchesSize = (p1->rel->num_tuples > p2->rel->num_tuples ? p2->rel->num_tuples : p1->rel->num_tuples) * 64;
   Matches* final = new Matches(matchesSize); //TODO GetH of hashtable
 
-  //For every partition table
+  // For every partition table
   for (int i = 0; i < p2->prefixSum->length; i++){
     if (p2->prefixSum->arr[i][0] == -1) break;
 
     int hash = p2->prefixSum->arr[i][0];
 
-    //if hash value exists in relation R
+    // If hash value exists in relation R
     hashtablesIndex = ExistsInPrefix(hash, p1->prefixSum);
 
     if (hashtablesIndex != -1){
 
-      //For every tuple in this partition
+      // For every tuple in this partition
       for (uint32_t j = p2->prefixSum->arr[i][1]; j < p2->prefixSum->arr[i+1][1]; j++){
         Tuple* tuple = new Tuple(p2->rel->tuples[j].key, p2->rel->tuples[j].payload);
         Matches* matches = p1->hashtables[hashtablesIndex]->contains(tuple);

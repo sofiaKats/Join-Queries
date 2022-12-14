@@ -13,7 +13,7 @@ Hashtable::Hashtable(int tableR_size){
     if (table_size < 64)  {
         H = table_size;
     }
-    else                        H = 64;
+    else H = 64;
 
     hashtable = new Index*[table_size];
     for (int i=0; i<table_size; i++)
@@ -93,7 +93,7 @@ int Hashtable::find_empty_index(int i, int key){
 
 void Hashtable::add_value(int pos, int value, int hash_value, Tuple* tuple){
     //hash_value = hash(tuple->payload);
-    
+
     hashtable[pos]->set_value(tuple->key);
     hashtable[pos]->set_has_value(true);
 
@@ -262,13 +262,13 @@ Matches* Hashtable::contains(Tuple* tuple){
     int nei = H;
     Matches* matches = new Matches(nei);
     int payload2 = tuple->payload;
-    int hashhop = hash(payload2);   
+    int hashhop = hash(payload2);
     int currentBucket = hashhop;
 
     for (int loops = 0; loops < nei; loops++){
         if (hashtable[hashhop]->get_bitmap_index(loops) == 1){
             int payload1 = hashtable[currentBucket]->getTuple()->payload;
-    
+
             if (payload1 == payload2){
                 Tuple* t = new Tuple(hashtable[currentBucket]->getTuple()->key, tuple->key);
                 if (!searchIfDupl(t, matches)){
@@ -288,4 +288,3 @@ bool Hashtable::searchIfDupl(Tuple* t, Matches* m){
     }
     return false;
 }
-

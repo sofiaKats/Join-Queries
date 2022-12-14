@@ -26,8 +26,7 @@ private:
   void tempStoreDuplicatesR(int, UsedRelations*, int, Matches*, uint32_t, int);
   void tempStoreDuplicatesS(int, UsedRelations*, int, Matches*, uint32_t, int);
 
-  void tempPrintMatches(Matches* matches);
-
+  void printMatches(Matches* matches);
   bool bothRelsUsed(int, int);
 
 public:
