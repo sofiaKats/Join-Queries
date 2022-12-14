@@ -1,4 +1,4 @@
-#include "Structures.h"
+#include "../Structures/Structures.h"
 #include <math.h>
 
 class Partition {

@@ -1,7 +1,7 @@
 #pragma once
-#include "../../partition-phase/PartitionedHashJoin.h"
-#include "../../partition-phase/Structures.h"
-#include "../../Parser/src/parser.h"
+#include "../partition-phase/PartitionedHashJoin.h"
+#include "../Structures/Structures.h"
+#include "../Parser/parser.h"
 
 //---------------------------------------------------------------------------
 class Joiner {
