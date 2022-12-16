@@ -14,7 +14,7 @@ BLD = ./obj
 
 # Compiler options
 CC = g++
-CFLAGS = -std=c++11 -Wno-unused-parameter -g -w
+CFLAGS = -std=c++11 -Wno-unused-parameter -g -w -pthread
 
 # Executable file names
 EXE_PROG = ./program
