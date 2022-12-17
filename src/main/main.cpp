@@ -28,5 +28,5 @@ int main(int argc, char* argv[]){
   end = clock();
   double duration = ((double)end - start)/CLOCKS_PER_SEC;
   cout << "Run in ~" << duration << " sec\n";
-  exit(1);
+  exit(1); // we need munmap to be called to free mapped memory
 }
