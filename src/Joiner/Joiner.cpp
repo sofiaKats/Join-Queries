@@ -342,6 +342,7 @@ void Joiner::clearUsedRelations(){
 //-----------------------------------------------------------------------
 Joiner::~Joiner(){
   for (int i = 0; i<size; i++){
+    relations[i]->~Relation();
     delete relations[i];
   }
   delete[] relations;
