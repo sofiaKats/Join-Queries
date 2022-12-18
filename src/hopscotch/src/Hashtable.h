@@ -19,15 +19,17 @@ private:
     bool insert(int, int, Tuple*);
     int findPos(int, int);
     int checkBucketBitmap(int, int&, bool&, int);
-    int swapEmpty(int, int, int, int, Tuple*);
+    int swapEmpty(int, int, int, int, Tuple*, Duplicates*);
     int findSwapNeighbourPos(int);
     int slideLeft(int, int);
     int find_empty_index(int, int);
-    void add_value(int, int, int, Tuple*);
+    void add_value(int, int, int, Tuple*, Duplicates*);
     void remove_value(int, int);
     void resize();
     int findClosestPowerOf2(int);
     bool searchIfDupl(Tuple*, Matches*);
+    int searchFirstPos(Tuple*, int);
+    void addDupl(Tuple*, int);
 public:
     Hashtable(int);
     ~Hashtable();

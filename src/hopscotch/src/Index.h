@@ -29,6 +29,32 @@ typedef struct Matches {
   }
 } Matches;
 
+class Duplicates{
+public:
+  int* arr;
+  int size;
+  int activeSize = 0;
+  Duplicates(int size){
+    this->size = size;
+    this->arr = new int[size];
+    //for (int i = 0; i < size; i++) {this->arr[i] = new int;}  
+  }
+  ~Duplicates(){
+    delete [] arr;
+  }
+  void resize(){
+    delete [] arr;
+    size*=2;
+    arr = new int[size]; 
+    //for (int i = 0; i < size; i++) {this->arr[i] = new int;} 
+  }
+  bool isFull(){
+    if (activeSize == size) return true;
+    return false;
+  }
+
+};
+
 
 // each index of the hopscoth table has a value and a corresponding bitmap
 class Index
@@ -39,6 +65,7 @@ private:
     int* bitmap;
     int H;
     Tuple* tuple;
+    Duplicates* duplicates;
 public:
     Index(int);
     ~Index();
@@ -53,5 +80,10 @@ public:
     void set_value(const int val);
     int  get_value(void);
     bool is_bitmap_full(); //returns true if full, false if not full
+    bool has_duplicates();
+    void addDupl(int);
+    void print();
+    Duplicates* getDuplicates();
+    void setDuplicates(Duplicates*);
 };
 

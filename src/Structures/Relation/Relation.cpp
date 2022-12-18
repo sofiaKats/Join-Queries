@@ -88,7 +88,7 @@ void Relation::findMINValueOfColumns(void){
       if(columns[colId][rowId] < min) min = columns[colId][rowId];
     
     column_metadata[colId]->setL(min);
-    cout << "min value of cold: " << colId << " is " << min << endl;
+    //cout << "min value of cold: " << colId << " is " << min << endl;
   }
 }
 
@@ -103,7 +103,7 @@ void Relation::findMAXValueOfColumns(void){
       if(columns[colId][rowId] > max) max = columns[colId][rowId];
     
     column_metadata[colId]->setU(max);
-    cout << "max value of cold: " << colId << " is " << max << endl;
+    //cout << "max value of cold: " << colId << " is " << max << endl;
   }
 }
 
@@ -126,7 +126,7 @@ void Relation::findDistinctValues(void) {
         column_metadata[colId]->increase_d_value_by_1();
       }
     }
-    cout << "d value of colId: " << colId << " is " << column_metadata[colId]->getD() << endl;
+    //cout << "d value of colId: " << colId << " is " << column_metadata[colId]->getD() << endl;
   }
 }
 
