@@ -85,5 +85,6 @@ public:
     void print();
     Duplicates* getDuplicates();
     void setDuplicates(Duplicates*);
+    bool searchDupls(int);
 };
 

@@ -84,3 +84,11 @@ Duplicates* Index::getDuplicates(){
 void Index::setDuplicates(Duplicates* dupl){
     this->duplicates = dupl;
 }
+
+bool Index::searchDupls(int key){
+    if (duplicates == nullptr) return false;
+    for (int i = 0; i < duplicates->activeSize; i++){
+        if (duplicates->arr[i] == key) return true;
+    }
+    return false;
+}

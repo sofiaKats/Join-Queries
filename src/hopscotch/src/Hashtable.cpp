@@ -189,15 +189,13 @@ void Hashtable::add(int payload, int value){
 
     //Search if value has been added before in hashtable
     int pos = searchFirstPos(tuple, hashed_payload);
+    if (pos == -2) {return;}
     if (pos != -1 && pos!=-2) {
         //cout << "DUPLICATE VALUE " << payload << " " << value << endl;
         addDupl(tuple, pos);
         return;
     }
-    //cout << "NON DUPLICATE VALUE " << payload << endl;
-
-    if (pos == -2) {return;}
-
+    //cout << "NON DUPLICATE VALUE " << payload << endl; 
 
     if (checkHashtableFull()) resize();    
 
@@ -316,7 +314,7 @@ int Hashtable::findNeighborPosByK(int currPos, int k){
 Matches* Hashtable::contains(Tuple* tuple){
     //find hash value and neighborhood
     int nei = H;
-    Matches* matches = new Matches(1000);
+    Matches* matches = new Matches(200);
     int payload2 = tuple->payload;
     int hashhop = hash(payload2);
     int currentBucket = hashhop;
@@ -365,7 +363,7 @@ int Hashtable::searchFirstPos(Tuple* tuple, int hashhop){
         if (!hashtable[hashhop]->get_has_value()) {currentBucket = findNeighborPosByK(currentBucket, 1); continue;}
 
         if (tuple->payload == hashtable[hashhop]->getTuple()->payload){
-            if (tuple->key != hashtable[hashhop]->getTuple()->key)
+            if ((tuple->key != hashtable[hashhop]->getTuple()->key) && (!hashtable[hashhop]->searchDupls(tuple->key)))
                 return currentBucket;
             else {return -2;}
         }
