@@ -5,9 +5,12 @@ Partition::Partition(RelColumn* rel, int n, int from, int to){
   this->rel = rel;
   this->startIndex = from;
   this->endIndex = to == -1 ? rel->num_tuples : to;
+
+  sch = new JobScheduler();
+  sch->initialize_scheduler(NUM_THREADS);
 }
 
-int Partition::Hash(int key, int n){
+uint32_t Partition::Hash(uint32_t key, int n){
   uint32_t tmp = key << (32 - n);
   return tmp >> (32 - n);
 }
@@ -39,7 +42,7 @@ Part* Partition::BuildPartitionedTable(){
   return parted;
 }
 
-Hist* Partition::CreateHistogram(){
+/*Hist* Partition::CreateHistogram(){
   int histLength = pow(2,n);
   Hist* hist = new Hist(histLength);
 
@@ -50,22 +53,69 @@ Hist* Partition::CreateHistogram(){
 
   for (int i = 0; i < histLength; i++){ //calculate largestTableSize
     if (hist->arr[i] == 0) continue;
-    hist->usedLength++;
+    hist->activeSize++;
     if (hist->arr[i] > largestTableSize)
       largestTableSize = hist->arr[i] * sizeof(Tuple);
   }
 
   return hist;
+}*/
+
+Hist* Partition::CreateHistogram(){
+  uint32_t histLength = pow(2,n);
+  Hist* hist = new Hist(histLength);
+  //result array having each thread's hist
+  Hist** histArr = new Hist*[sch->execution_threads];
+
+  uint32_t size = endIndex - startIndex;
+  uint32_t offset = floor(size / sch->execution_threads);
+  uint32_t end, start = startIndex;
+
+  for (int t=0; t<sch->execution_threads; t++){
+    end = start + offset;
+    if (t == sch->execution_threads - 1){ //last thread gets remaining
+      end = endIndex;
+    }
+    sch->submit_job(new Job(thread_CreateHistogram, (void*)new HistArgs(this, histArr, t, start, end)));
+    start += offset;
+  }
+  sch->wait_all_tasks_finish();
+
+  uint32_t val;
+  for (int j=0; j<histLength; j++){ //create a single hist from the resulting ones
+    for (int i=0; i<sch->execution_threads; i++){
+      if ((val = histArr[i]->arr[j]) == 0) continue;
+      hist->arr[j] += val;
+    }
+    if (hist->arr[j] > 0) hist->activeSize++;
+    if (hist->arr[j] > largestTableSize)
+      largestTableSize = hist->arr[j] * sizeof(Tuple);
+  }
+
+  return hist;
+}
+
+void* Partition::thread_CreateHistogram(void* vargp){
+  HistArgs* args = (HistArgs*)vargp;
+  Partition* instance = args->instance;
+  Hist* hist = args->histArr[args->thread_id] = new Hist(pow(2,instance->n));
+
+  for (uint32_t i=args->start; i<args->end; i++){
+    uint32_t index = instance->Hash(instance->rel->tuples[i].payload, instance->n);
+    hist->arr[index]++;
+  }
+  delete args;
+  return 0;
 }
 
 PrefixSum* Partition::CreatePrefixSum(Hist* hist){
-  int psum = 0;
-  int pIndex = 0;
+  uint32_t psum = 0;
+  uint32_t pIndex = 0;
   PrefixSum* prefixSum;
 
-  prefixSum = new PrefixSum(hist->usedLength + 1);
+  prefixSum = new PrefixSum(hist->activeSize + 1);
 
-  for (int i = 0; i < hist->length; i++){
+  for (uint32_t i = 0; i < hist->length; i++){
     if (hist->arr[i] == 0)
       continue;
 

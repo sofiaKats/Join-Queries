@@ -49,8 +49,9 @@ void* do_work(void* object){
 				pthread_exit(NULL);
 			}
 			//wait until the condition says queue non-emtpy.
-      if(sch->q->size <= 0)
-			  pthread_cond_wait(&(sch->q_not_empty),&(sch->qlock));
+      if(sch->q->size <= 0){
+        pthread_cond_wait(&(sch->q_not_empty),&(sch->qlock));
+      }
 		}
 		j = sch->q->head;	//set the job variable j.
 		sch->q->size--;		//decrement queue size.

@@ -17,6 +17,8 @@ int main(void){
   jbo->submit_job(new Job(task, NULL));
   jbo->submit_job(new Job(task, NULL));
   jbo->wait_all_tasks_finish();
+  jbo->wait_all_tasks_finish();
+  //jbo->wait_all_tasks_finish();
   cout << "bye\n";
   cout << jbo->destroy_scheduler() << endl;
   exit(0);

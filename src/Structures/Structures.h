@@ -3,7 +3,7 @@
 #include "Relation/Relation.hpp"
 #include "../hopscotch/src/Hashtable.h"
 
-#define MAX_NEI_SIZE  100
+#define MAX_NEI_SIZE 100
 
 using namespace std;
 
@@ -22,11 +22,11 @@ typedef struct RelColumn {
 
 typedef struct Hist{
   uint32_t length;
-  uint32_t usedLength = 0;
-  int* arr;
+  uint32_t activeSize = 0;
+  uint32_t* arr;
 
   Hist(uint32_t size){
-    arr = new int[size]{};
+    arr = new uint32_t[size]{};
     length = size;
   }
   ~Hist(){

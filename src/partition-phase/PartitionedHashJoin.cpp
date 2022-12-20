@@ -78,7 +78,7 @@ int PartitionedHashJoin::PartitionRec(Part* finalPart, RelColumn* rel, int maxPa
     delete part;
     return passNum;
   }
-
+  
   for (int i = 0; i < part->prefixSum->length - 1; i++){
     from = part->prefixSum->arr[i][1];
     to = part->prefixSum->arr[i+1][1];

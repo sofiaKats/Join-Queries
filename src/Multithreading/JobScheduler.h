@@ -3,14 +3,13 @@
 #include "Job.h"
 #include "Queue.h"
 
-#define NUM_THREADS 4;
+#define NUM_THREADS 4
 using namespace std;
 
 class JobScheduler{
-private:
+public:
   int execution_threads; // number of execution threads
   pthread_t* tids; // execution threads
-public:
   bool quit;
   bool wait_all;
   Queue* q; // a queue that holds submitted jobs / tasks
