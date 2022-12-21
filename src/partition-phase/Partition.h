@@ -13,7 +13,6 @@ private:
   Hist* CreateHistogram();
   PrefixSum* CreatePrefixSum(Hist*);
   static void* thread_CreateHistogram(void*);
-  JobScheduler* sch;
 
 public:
   Partition(RelColumn*, int, int = 0, int = -1);

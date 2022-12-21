@@ -5,9 +5,6 @@ Partition::Partition(RelColumn* rel, int n, int from, int to){
   this->rel = rel;
   this->startIndex = from;
   this->endIndex = to == -1 ? rel->num_tuples : to;
-
-  sch = new JobScheduler();
-  sch->initialize_scheduler(NUM_THREADS);
 }
 
 uint32_t Partition::Hash(uint32_t key, int n){
@@ -65,33 +62,34 @@ Hist* Partition::CreateHistogram(){
   uint32_t histLength = pow(2,n);
   Hist* hist = new Hist(histLength);
   //result array having each thread's hist
-  Hist** histArr = new Hist*[sch->execution_threads];
+  Hist** histArr = new Hist*[sch.execution_threads];
 
   uint32_t size = endIndex - startIndex;
-  uint32_t offset = floor(size / sch->execution_threads);
+  uint32_t offset = floor(size / sch.execution_threads);
   uint32_t end, start = startIndex;
 
-  for (int t=0; t<sch->execution_threads; t++){
+  for (int t=0; t<sch.execution_threads; t++){
     end = start + offset;
-    if (t == sch->execution_threads - 1){ //last thread gets remaining
+    if (t == sch.execution_threads - 1){ //last thread gets remaining
       end = endIndex;
     }
-    sch->submit_job(new Job(thread_CreateHistogram, (void*)new HistArgs(this, histArr, t, start, end)));
+    sch.submit_job(new Job(thread_CreateHistogram, (void*)new HistArgs(this, histArr, t, start, end)));
     start += offset;
   }
-  sch->wait_all_tasks_finish();
+  sch.wait_all_tasks_finish();
 
   uint32_t val;
   for (int j=0; j<histLength; j++){ //create a single hist from the resulting ones
-    for (int i=0; i<sch->execution_threads; i++){
+    for (int i=0; i<sch.execution_threads; i++){
       if ((val = histArr[i]->arr[j]) == 0) continue;
       hist->arr[j] += val;
     }
-    if (hist->arr[j] > 0) hist->activeSize++;
-    if (hist->arr[j] > largestTableSize)
-      largestTableSize = hist->arr[j] * sizeof(Tuple);
+    if ((val = hist->arr[j]) > 0){
+      hist->activeSize++;
+      if (val > largestTableSize)
+        largestTableSize = val * sizeof(Tuple);
+    }
   }
-
   return hist;
 }
 

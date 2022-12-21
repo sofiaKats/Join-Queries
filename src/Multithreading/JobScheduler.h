@@ -22,6 +22,9 @@ public:
   int execute_all_jobs();
   int wait_all_tasks_finish();
   int destroy_scheduler();
+  JobScheduler();
 };
+
+extern JobScheduler sch;
 
 void * do_work(void*);

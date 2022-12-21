@@ -11,15 +11,14 @@ void* task(void* vargp){
 }
 
 int main(void){
-  JobScheduler *jbo = new JobScheduler();
-  jbo->initialize_scheduler(4);
-  jbo->submit_job(new Job(task, NULL));
-  jbo->submit_job(new Job(task, NULL));
-  jbo->submit_job(new Job(task, NULL));
-  jbo->wait_all_tasks_finish();
-  jbo->wait_all_tasks_finish();
+  sch.initialize_scheduler(4);
+  sch.submit_job(new Job(task, NULL));
+  sch.submit_job(new Job(task, NULL));
+  sch.submit_job(new Job(task, NULL));
+  sch.wait_all_tasks_finish();
+  //sch.wait_all_tasks_finish();
   //jbo->wait_all_tasks_finish();
   cout << "bye\n";
-  cout << jbo->destroy_scheduler() << endl;
+  cout << sch.destroy_scheduler() << endl;
   exit(0);
 }

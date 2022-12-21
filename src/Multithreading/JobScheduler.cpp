@@ -1,5 +1,10 @@
 #include "JobScheduler.h"
 
+JobScheduler sch;
+//-----------------------------------------------------------------------
+JobScheduler::JobScheduler(){
+  initialize_scheduler(NUM_THREADS);
+}
 //-----------------------------------------------------------------------
 int JobScheduler::initialize_scheduler(int execution_threads){
   this->execution_threads = execution_threads;
@@ -24,7 +29,7 @@ int JobScheduler::initialize_scheduler(int execution_threads){
     fprintf(stderr, "[JobScheduler] Barrier initiation error\n");
     return -1;
   }
-  for (int i=0; i<execution_threads; i++) {
+  for (int i=0; i<execution_threads; i++){
     if(pthread_create(&(tids[i]), NULL, do_work, this)){
       fprintf(stderr, "[JobScheduler] Thread initiation error\n");
       return -1;
@@ -124,6 +129,6 @@ int JobScheduler::destroy_scheduler(){
   pthread_barrier_destroy(&barrier);
   delete this->q;
   delete[] this->tids;
-  delete this;
+  //delete this;
   return 0;
 }
