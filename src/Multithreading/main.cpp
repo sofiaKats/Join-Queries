@@ -11,13 +11,12 @@ void* task(void* vargp){
 }
 
 int main(void){
-  sch.initialize_scheduler(4);
   sch.submit_job(new Job(task, NULL));
   sch.submit_job(new Job(task, NULL));
   sch.submit_job(new Job(task, NULL));
   sch.wait_all_tasks_finish();
-  //sch.wait_all_tasks_finish();
-  //jbo->wait_all_tasks_finish();
+  sch.wait_all_tasks_finish();
+  sch.wait_all_tasks_finish();
   cout << "bye\n";
   cout << sch.destroy_scheduler() << endl;
   exit(0);

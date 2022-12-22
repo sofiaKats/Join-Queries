@@ -11,6 +11,7 @@ public:
   int execution_threads; // number of execution threads
   pthread_t* tids; // execution threads
   bool quit;
+  int counter;
   bool wait_all;
   Queue* q; // a queue that holds submitted jobs / tasks
   pthread_mutex_t qlock;		//lock on the queue list
@@ -23,8 +24,7 @@ public:
   int wait_all_tasks_finish();
   int destroy_scheduler();
   JobScheduler();
+  static void* do_work(void*);
 };
 
 extern JobScheduler sch;
-
-void * do_work(void*);

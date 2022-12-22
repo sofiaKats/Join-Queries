@@ -1,10 +1,9 @@
 #include "JobScheduler.h"
 
+//-----------------------------------------------------------------------
 JobScheduler sch;
 //-----------------------------------------------------------------------
-JobScheduler::JobScheduler(){
-  initialize_scheduler(NUM_THREADS);
-}
+JobScheduler::JobScheduler(){ initialize_scheduler(NUM_THREADS); }
 //-----------------------------------------------------------------------
 int JobScheduler::initialize_scheduler(int execution_threads){
   this->execution_threads = execution_threads;
@@ -38,7 +37,7 @@ int JobScheduler::initialize_scheduler(int execution_threads){
   return 0;
 }
 //-----------------------------------------------------------------------
-void* do_work(void* object){
+void* JobScheduler::do_work(void* object){
   JobScheduler* sch = reinterpret_cast<JobScheduler*>(object);
   Job* j;
 	while(1){
@@ -46,17 +45,17 @@ void* do_work(void* object){
 
 		while(sch->q->size <= 0){ //while queue empty
       if(sch->wait_all){
-				pthread_mutex_unlock(&(sch->qlock));
-        pthread_barrier_wait(&(sch->barrier));
+        sch->counter++;
+				//pthread_mutex_unlock(&(sch->qlock));
+        //pthread_barrier_wait(&(sch->barrier));
 			}
       if(sch->quit){
 				pthread_mutex_unlock(&(sch->qlock));
 				pthread_exit(NULL);
 			}
 			//wait until the condition says queue non-emtpy.
-      if(sch->q->size <= 0){
-        pthread_cond_wait(&(sch->q_not_empty),&(sch->qlock));
-      }
+      if(sch->q->size > 0) continue;
+      pthread_cond_wait(&(sch->q_not_empty),&(sch->qlock));
 		}
 		j = sch->q->head;	//set the job variable j.
 		sch->q->size--;		//decrement queue size.
@@ -101,11 +100,17 @@ int JobScheduler::wait_all_tasks_finish(){
 		pthread_cond_wait(&q_empty,&qlock);
 	}
   this->wait_all = true;
+  this->counter = 0;
   pthread_cond_broadcast(&q_not_empty);
   pthread_mutex_unlock(&qlock);
 
-  pthread_barrier_wait(&barrier);
-  pthread_mutex_lock(&qlock);
+  //pthread_barrier_wait(&barrier);
+  while(1){
+    pthread_mutex_lock(&qlock);
+    if(counter >= execution_threads)
+      break;
+    pthread_mutex_unlock(&qlock);
+  }
   this->wait_all = false;
   pthread_mutex_unlock(&qlock);
 
@@ -129,6 +134,5 @@ int JobScheduler::destroy_scheduler(){
   pthread_barrier_destroy(&barrier);
   delete this->q;
   delete[] this->tids;
-  //delete this;
   return 0;
 }

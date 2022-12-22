@@ -13,30 +13,48 @@ uint32_t Partition::Hash(uint32_t key, int n){
 }
 
 Part* Partition::BuildPartitionedTable(){
-  Part* parted = new Part();
+  Part* part = new Part();
   Hist* hist = CreateHistogram();
 
-  parted->prefixSum = CreatePrefixSum(hist);
-  parted->rel = new RelColumn(endIndex - startIndex);
+  part->prefixSum = CreatePrefixSum(hist);
+  part->rel = new RelColumn(endIndex - startIndex);
 
-  for (int i = startIndex; i < endIndex; i++){
-    int hash = Hash(rel->tuples[i].payload, n);
+  int numThreads = sch.execution_threads;
+  uint32_t offset = floor((endIndex-startIndex) / numThreads);
+  uint32_t end, start = startIndex;
+
+  for (int t=0; t<numThreads; t++){
+    end = start + offset;
+    if (t == numThreads - 1){ //last thread gets remaining
+      end = endIndex;
+    }
+    sch.submit_job(new Job(thread_BuildPartitionedTable, (void*)new BuildArgs(this, part, t, start, end)));
+    start += offset;
+  }
+  sch.wait_all_tasks_finish();
+
+  return part;
+}
+
+void* Partition::thread_BuildPartitionedTable(void* vargp){
+  BuildArgs* args = (BuildArgs*)vargp;
+  Partition* inst = args->instance;
+
+  for (int i = args->start; i < args->end; i++){
+    int hash = inst->Hash(inst->rel->tuples[i].payload, inst->n);
     int index;
 
-    for (int j = 0; j < parted->prefixSum->length; j++){
-      if (parted->prefixSum->arr[j][0] == hash){
-        index = parted->prefixSum->arr[j][1];
+    for (int j = 0; j < args->part->prefixSum->length; j++){
+      if (args->part->prefixSum->arr[j][0] == hash){
+        index = args->part->prefixSum->arr[j][1];
         break;
       }
     }
 
-    for (; parted->rel->tuples[index].payload != 0; index++); //find empty bucket
-    parted->rel->tuples[index] = rel->tuples[i];
+    for (; args->part->rel->tuples[index].payload != 0; index++); //find empty bucket
+    args->part->rel->tuples[index] = inst->rel->tuples[i];
   }
-
-  delete hist;
-
-  return parted;
+  return 0;
 }
 
 /*Hist* Partition::CreateHistogram(){
@@ -62,15 +80,15 @@ Hist* Partition::CreateHistogram(){
   uint32_t histLength = pow(2,n);
   Hist* hist = new Hist(histLength);
   //result array having each thread's hist
-  Hist** histArr = new Hist*[sch.execution_threads];
+  int numThreads = sch.execution_threads;
+  Hist** histArr = new Hist*[numThreads];
 
-  uint32_t size = endIndex - startIndex;
-  uint32_t offset = floor(size / sch.execution_threads);
+  uint32_t offset = floor((endIndex-startIndex) / numThreads);
   uint32_t end, start = startIndex;
 
-  for (int t=0; t<sch.execution_threads; t++){
+  for (int t=0; t<numThreads; t++){
     end = start + offset;
-    if (t == sch.execution_threads - 1){ //last thread gets remaining
+    if (t == numThreads - 1){ //last thread gets remaining
       end = endIndex;
     }
     sch.submit_job(new Job(thread_CreateHistogram, (void*)new HistArgs(this, histArr, t, start, end)));
@@ -80,7 +98,7 @@ Hist* Partition::CreateHistogram(){
 
   uint32_t val;
   for (int j=0; j<histLength; j++){ //create a single hist from the resulting ones
-    for (int i=0; i<sch.execution_threads; i++){
+    for (int i=0; i<numThreads; i++){
       if ((val = histArr[i]->arr[j]) == 0) continue;
       hist->arr[j] += val;
     }

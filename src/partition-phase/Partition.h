@@ -13,6 +13,7 @@ private:
   Hist* CreateHistogram();
   PrefixSum* CreatePrefixSum(Hist*);
   static void* thread_CreateHistogram(void*);
+  static void* thread_BuildPartitionedTable(void*);
 
 public:
   Partition(RelColumn*, int, int = 0, int = -1);
@@ -27,4 +28,13 @@ typedef struct HistArgs{
   uint32_t start, end;
   HistArgs(Partition* obj, Hist** h, int id, uint32_t s, uint32_t e):
     instance(obj), histArr(h), thread_id(id), start(s), end(e){}
-}Args;
+}HistArgs;
+
+typedef struct BuildArgs{
+  Partition* instance;
+  Part* part;
+  int thread_id;
+  uint32_t start, end;
+  BuildArgs(Partition* obj, Part* p, int id, uint32_t s, uint32_t e):
+    instance(obj), part(p), thread_id(id), start(s), end(e){}
+}BuildArgs;
