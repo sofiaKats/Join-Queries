@@ -12,22 +12,20 @@ typedef struct Tuple {
   }
 } Tuple;
 
-typedef struct Matches {
+typedef struct MatchesPtr {
   Tuple** tuples;
   uint32_t size;
   uint32_t activeSize = 0;
   uint32_t joinSize = 0;
 
-  Matches(uint32_t size){
+  MatchesPtr(uint32_t size){
     this->size = size;
     tuples = new Tuple*[size]{};
   }
-  ~Matches(){
-    for (int i=0; i<size; i++)
-      delete tuples[i];
+  ~MatchesPtr(){
     delete[] tuples;
   }
-} Matches;
+} MatchesPtr;
 
 class Duplicates{
 public:
@@ -37,7 +35,7 @@ public:
   Duplicates(int size){
     this->size = size;
     this->arr = new int[size];
-    //for (int i = 0; i < size; i++) {this->arr[i] = new int;}  
+    //for (int i = 0; i < size; i++) {this->arr[i] = new int;}
   }
   ~Duplicates(){
     delete [] arr;
@@ -45,8 +43,8 @@ public:
   void resize(){
     delete [] arr;
     size*=2;
-    arr = new int[size]; 
-    //for (int i = 0; i < size; i++) {this->arr[i] = new int;} 
+    arr = new int[size];
+    //for (int i = 0; i < size; i++) {this->arr[i] = new int;}
   }
   bool isFull(){
     if (activeSize == size) return true;
@@ -54,7 +52,6 @@ public:
   }
 
 };
-
 
 // each index of the hopscoth table has a value and a corresponding bitmap
 class Index
@@ -87,4 +84,3 @@ public:
     void setDuplicates(Duplicates*);
     bool searchDupls(int);
 };
-

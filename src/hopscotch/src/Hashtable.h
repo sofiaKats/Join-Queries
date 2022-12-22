@@ -27,7 +27,7 @@ private:
     void remove_value(int, int);
     void resize();
     int findClosestPowerOf2(int);
-    bool searchIfDupl(Tuple*, Matches*);
+    bool searchIfDupl(Tuple*, MatchesPtr*);
     int searchFirstPos(Tuple*, int);
     void addDupl(Tuple*, int);
 public:
@@ -35,5 +35,5 @@ public:
     ~Hashtable();
     void add(int, int);
     void print_hashtable();
-    Matches* contains(Tuple*);
+    MatchesPtr* contains(Tuple*);
 };

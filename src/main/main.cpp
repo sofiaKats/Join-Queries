@@ -10,14 +10,18 @@ int main(int argc, char* argv[]){
   Queries *queries;
   Rels* relations;
 
+  cout << "==== Loading files...\n\n";
   relations = parser.OpenRelFileAndParse();
+  cout << "  -- loaded rel files\n";
   joiner = new Joiner(relations->size);
   for (int i = 0; i<relations->size; i++){
     joiner->AddRelation(relations->paths[i]);
   }
 
   queries = parser.OpenQueryFileAndParse();
+  cout << "  -- loaded query files\n";
 
+  cout << "\n==== Running queries...\n\n";
   start = clock();
   for (int i = 0; i <queries->size; i++){
     if (queries->queries_arr[i] == NULL) {cout << "F\n\n"; continue;}
@@ -28,6 +32,6 @@ int main(int argc, char* argv[]){
 
   end = clock();
   double duration = ((double)end - start)/CLOCKS_PER_SEC;
-  cout << "Run in ~" << duration << " sec\n";
+  cout << "==== Run in ~" << duration << " sec\n";
   exit(1); // we need munmap to be called to free mapped memory
 }

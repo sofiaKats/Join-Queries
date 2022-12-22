@@ -11,9 +11,8 @@ void* task(void* vargp){
 }
 
 int main(void){
-  sch.submit_job(new Job(task, NULL));
-  sch.submit_job(new Job(task, NULL));
-  sch.submit_job(new Job(task, NULL));
+  for(int i=0; i<8; i++)
+    sch.submit_job(new Job(task, NULL));
   sch.wait_all_tasks_finish();
   sch.wait_all_tasks_finish();
   sch.wait_all_tasks_finish();

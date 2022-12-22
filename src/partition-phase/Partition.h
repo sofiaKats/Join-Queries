@@ -33,8 +33,8 @@ typedef struct HistArgs{
 typedef struct BuildArgs{
   Partition* instance;
   Part* part;
-  int thread_id;
   uint32_t start, end;
-  BuildArgs(Partition* obj, Part* p, int id, uint32_t s, uint32_t e):
-    instance(obj), part(p), thread_id(id), start(s), end(e){}
+  pthread_mutex_t* lock;
+  BuildArgs(Partition* obj, Part* p, pthread_mutex_t* l, uint32_t s, uint32_t e):
+    instance(obj), part(p), lock(l), start(s), end(e){}
 }BuildArgs;

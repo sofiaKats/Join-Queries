@@ -22,7 +22,7 @@ Queries* Parser::OpenQueryFileAndParse() {
     fp = fopen("./workloads/small/small.work" , "r");
     if(fp == NULL) { perror("Error opening file"); exit(-1);}
 
-    
+
 
     while ((read = getline(&line, &len, fp)) != -1) {
         if (read == 0) break;
@@ -56,7 +56,7 @@ Queries* Parser::OpenQueryFileAndParse() {
         }
         //cout << REDFUL << "Parts: " << RESTORE << endl;
         //for(int i=0; i < 3; i++) cout << parts[i] << endl;
-        
+
         // parsing each one of the 3 parts separately.
         // and making sure strtok pointer stays untouched by other functs
         if(q->queries_arr[q_no-1]->ParseRelations(parts[0]) == IS_FINISHED) {
@@ -306,7 +306,6 @@ Rels* Parser::OpenRelFileAndParse(){
         line[strlen(line)-1] = '\0';
         r->paths[filesCount] = new char[50];
         sprintf(r->paths[filesCount++], "./workloads/small/%s", line);
-        cout << "opened file: " << r->paths[filesCount-1] << endl;
     }
-    return r;    
+    return r;
 }

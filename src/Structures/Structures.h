@@ -96,8 +96,6 @@ typedef struct UsedRelations{
     this->size = size;
     this->rowSize = rowSize;
     matchRows = new MatchRow*[size]{};
-    //for (int i = 0; i < size; i++)
-      //matchRows[i] = new MatchRow(rowSize);
   }
   ~UsedRelations(){
     for (int i = 0; i < size; i++){
@@ -119,3 +117,20 @@ typedef struct SingleCol{
     delete[] arr;
   }
 }SingleCol;
+
+typedef struct Matches {
+  Tuple** tuples;
+  uint32_t size;
+  uint32_t activeSize = 0;
+  uint32_t joinSize = 0;
+
+  Matches(uint32_t size){
+    this->size = size;
+    tuples = new Tuple*[size]{};
+  }
+  ~Matches(){
+    for (int i=0; i<size; i++)
+      delete tuples[i];
+    delete[] tuples;
+  }
+} Matches;
