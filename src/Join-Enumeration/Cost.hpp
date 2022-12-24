@@ -33,6 +33,5 @@ private:
 public:
     Cost(Query*, Relation**);
 
-    int prdctCost(char*);   // (2.2 = 3.5)
     int cost(char*);        // (2.2 = 3.5 & 1.0 = 2.1)
 };
