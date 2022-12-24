@@ -162,6 +162,9 @@ void Query::PredicatePriority(void) {
             //store index of prdct array in priority array
             priority_predicates[priority_index++] = i;
             prdcts[i]->filter = true; // operation is a filter
+
+            //NEW
+            prdcts[i]->flag = FILTER_EQUALS;
         }
     }
 
@@ -172,6 +175,12 @@ void Query::PredicatePriority(void) {
             if(prdcts[i]->binding_left == prdcts[i]->binding_right) {
                 priority_predicates[priority_index++] = i;
                 prdcts[i]->self_join = true;
+
+                //NEW
+                if (prdcts[i]->column_left == prdcts[i]->column_right)
+                    prdcts[i]->flag = SELF_RELATION;
+                else 
+                    prdcts[i]->flag = FILTER_SELF_JOIN;
             }
         }
     }
@@ -182,6 +191,9 @@ void Query::PredicatePriority(void) {
         if(prdcts[i]->relation_after_operation == true && prdcts[i]->binding_left != prdcts[i]->binding_right) {
             priority_predicates[priority_index++] = i; //assign first predicate we find
             prdcts[i]->simple_join = true;
+
+            //NEW
+            prdcts[i]->flag = DIFF_RELATIONS;
         }
     }
 

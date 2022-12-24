@@ -8,6 +8,12 @@
 #define RESTORE "\033[0m" 
 #define BLUE "\033[3;1;36m"
 
+#define FILTER_EQUALS 0
+#define FILTER_SELF_JOIN 1
+#define DIFF_RELATIONS 2
+#define SELF_RELATION 3
+
+
 using namespace std;
 
 // small.work file has 50 queries. These queries can have up to 4 relations,
@@ -31,6 +37,7 @@ public:
     bool filter;
     bool self_join;
     bool simple_join;
+    int flag;
     Predicates();
     ~Predicates();
     void setPredicates(char* prdct);
