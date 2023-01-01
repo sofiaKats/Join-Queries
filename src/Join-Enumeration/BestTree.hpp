@@ -2,6 +2,8 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "JoinTreeList.hpp"
+
 typedef struct Node{
     char combination[100];
 }Node;
@@ -9,15 +11,12 @@ typedef struct Node{
 
 class BestTree{
 private:
-    Node** combs;
-    int size;
-    int hash(char*);
-    int factorial(int);
 public:
+    JoinTreeList** bestTrees;
+    int size;
+
     BestTree(int);
     ~BestTree();
-    void add(char*);
-    int contains();
-    int cost(char*);
+    void print();
 };
 

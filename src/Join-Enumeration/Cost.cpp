@@ -9,7 +9,7 @@ Cost::Cost(Query* q, Relation**){
 }
 
 //PRIORITY FOR IMPLEMENTATION, CASE 0, CASE 2
-int Cost::cost(char* predicates){
+int Cost::cost(){
     int sum = 0;
     int cost;
 
@@ -18,19 +18,19 @@ int Cost::cost(char* predicates){
         {
         case 0:
             //0 will mean: Φίλτρα της μορφής σA=k (R.A = k)
-            cost = cost_FilterEquals();
+            //cost = cost_FilterEquals();
             break;
         case 1:
             //1 will mean: Φίλτρα της μορφής σA=Β (R.A = R.Β)
-            cost = cost_FilterSelfJoin();
+            //cost = cost_FilterSelfJoin();
             break;
         case 2:
             //2 will mean: Ζεύξη μεταξύ δύο διαφορετικών πινάκων (R.A = S.B)
-            cost = cost_DiffRelations();
+            //cost = cost_DiffRelations();
             break;
         case 3:
             //3 will mean: Αυτοσυσχέτιση (R.A = R.A) ?? MALLON AUTO ENNOEI 
-            cost = cost_SelfRelation();
+            //cost = cost_SelfRelation();
             break;        
         default:
             break;
