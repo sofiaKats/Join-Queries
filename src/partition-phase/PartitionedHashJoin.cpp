@@ -9,57 +9,48 @@ PartitionedHashJoin::PartitionedHashJoin(RelColumn* relR, RelColumn* relS){
 }
 
 Matches* PartitionedHashJoin::Solve(){
-  Part* partitionedR = new Part();
+  Matches* matches;
+  Part *partitionedS = NULL, *partitionedR = new Part();
   partitionedR->rel = new RelColumn(relR->num_tuples);
   int passCount = PartitionRec(partitionedR, relR);
-  // ONLY FOR RELATION R
+
   try{
     BuildHashtables(partitionedR);
 
-  Part* partitionedS = new Part();
-  partitionedS->rel = new RelColumn(relS->num_tuples);
-  PartitionRec(partitionedS, relS, passCount);
-
-  Matches* matches = Join(partitionedR, partitionedS);
-
-  delete partitionedR;
-  delete partitionedS;
-
-  return matches;
+    partitionedS = new Part();
+    partitionedS->rel = new RelColumn(relS->num_tuples);
+    PartitionRec(partitionedS, relS, passCount);
+    matches = Join(partitionedR, partitionedS);
   }
   catch(const exception &e){
     cout << e.what() << endl;
-    Matches* matches = new Matches(0);
-    matches = nullptr;
-    return matches;
   }
+
+  delete partitionedR;
+  delete partitionedS;
+  return matches;
 }
 
  void PartitionedHashJoin::Merge(Part* destPart, Part* part, int from, int n){
-   int partIndex = 0;
-   int index = 0;
-   int base = 0;
+   uint32_t partIndex = 0;
+   uint32_t index = 0;
+   uint32_t base = 0;
 
    //Merge Relation table
    for (int i = from; i < from + part->rel->num_tuples; i++){
      destPart->rel->tuples[i] = part->rel->tuples[partIndex++];
    }
-
-   //Merge PrefixSum table
+   //Init PrefixSum table
    if (destPart->prefixSum == NULL)
       destPart->prefixSum = new PrefixSum(pow(2, n) + 1);
+   //Merge PrefixSum table
+   index = destPart->prefixSum->activeSize;
+   base = destPart->prefixSum->arr[index][1];
 
-   for (index = 1; destPart->prefixSum->arr[index][1] != 0; index++);
-   if (index == 1) index = 0; // if second element's start index is 0 then first is as well.
-   else{ //get end position of previous prefix sum table to continue from
-     index--;
-     base = destPart->prefixSum->arr[index][1];
-   }
-
-   partIndex = 0;
-   for (int i = index; i < index + part->prefixSum->length; i++){
-     destPart->prefixSum->arr[i][0] = part->prefixSum->arr[partIndex][0];
-     destPart->prefixSum->arr[i][1] = part->prefixSum->arr[partIndex++][1] + base;
+   for (int i = 0; i < part->prefixSum->length; i++){
+     destPart->prefixSum->arr[i+index][0] = part->prefixSum->arr[i][0];
+     destPart->prefixSum->arr[i+index][1] = part->prefixSum->arr[i][1] + base;
+     destPart->prefixSum->activeSize++;
    }
 }
 

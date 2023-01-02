@@ -37,6 +37,7 @@ typedef struct Hist{
 typedef struct PrefixSum{
   uint32_t length;
   int** arr;
+  uint32_t activeSize = 0;
 
   PrefixSum(uint32_t size){
     arr = new int*[size];

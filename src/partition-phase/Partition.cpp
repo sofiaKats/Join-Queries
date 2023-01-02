@@ -43,7 +43,6 @@ Part* Partition::BuildPartitionedTable(){
   part->prefixSum = CreatePrefixSum(hist);
   part->rel = new RelColumn(endIndex - startIndex);
 
-  //NEW
   mtx = new pthread_mutex_t[part->prefixSum->length];
 
   int numThreads = sch.execution_threads;
@@ -65,7 +64,7 @@ Part* Partition::BuildPartitionedTable(){
 
   for (int i = 0; i < part->prefixSum->length; i++)
     pthread_mutex_destroy(mtx);
-  
+
   delete [] mtx;
 
   return part;
@@ -77,8 +76,7 @@ void* Partition::thread_BuildPartitionedTable(void* vargp){
 
   for (int i = args->start; i < args->end; i++){
     int hash = inst->Hash(inst->rel->tuples[i].payload, inst->n);
-    int index;
-    int j;
+    int index, j;
 
     for (j = 0; j < args->part->prefixSum->length; j++){
       if (args->part->prefixSum->arr[j][0] == hash){
@@ -172,7 +170,6 @@ PrefixSum* Partition::CreatePrefixSum(Hist* hist){
   for (uint32_t i = 0; i < hist->length; i++){
     if (hist->arr[i] == 0)
       continue;
-
     prefixSum->arr[pIndex][0] = i;
     prefixSum->arr[pIndex++][1] = psum;
     psum += hist->arr[i];
