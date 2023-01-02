@@ -20,6 +20,8 @@ Queries* Parser::OpenQueryFileAndParse() {
 
     /* opening /file for reading */
     fp = fopen("./workloads/small/small.work" , "r");
+    //fp = fopen("../main/workloads/small/small.work" , "r");
+
     if(fp == NULL) { perror("Error opening file"); exit(-1);}
 
 
@@ -300,6 +302,7 @@ Rels* Parser::OpenRelFileAndParse(){
     char** paths;
 
     fp = fopen("./workloads/small/small.init", "r");
+    //fp = fopen("../main/workloads/small/small.init", "r");
     if (fp == NULL){
         cout << "Could not open init file" << endl;
         exit(EXIT_FAILURE);

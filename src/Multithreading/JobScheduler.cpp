@@ -28,11 +28,12 @@ int JobScheduler::initialize_scheduler(int execution_threads){
     fprintf(stderr, "[JobScheduler] Barrier initiation error\n");
     return -1;
   }
-  for (int i=0; i<execution_threads; i++){
+  for (int i=0; i< execution_threads; i++){
     if(pthread_create(&(tids[i]), NULL, do_work, this)){
       fprintf(stderr, "[JobScheduler] Thread initiation error\n");
       return -1;
 	  }
+    cout << "Thread id is " << tids[i] << endl;
   }
   return 0;
 }

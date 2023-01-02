@@ -11,53 +11,62 @@ uint32_t Partition::Hash(uint32_t key, int n){
   return key & ((1 << n) - 1);
 }
 
-/*Part* Partition::BuildPartitionedTable(){
-  Part* part = new Part();
-  Hist* hist = CreateHistogram();
+// Part* Partition::BuildPartitionedTable(){
+//   Part* part = new Part();
+//   Hist* hist = CreateHistogram();
 
-  part->prefixSum = CreatePrefixSum(hist);
-  part->rel = new RelColumn(endIndex - startIndex);
+//   part->prefixSum = CreatePrefixSum(hist);
+//   part->rel = new RelColumn(endIndex - startIndex);
 
-  for (int i = startIndex; i < endIndex; i++){
-    int hash = Hash(rel->tuples[i].payload, n);
-    int index;
+//   for (int i = startIndex; i < endIndex; i++){
+//     int hash = Hash(rel->tuples[i].payload, n);
+//     int index;
 
-    for (int j = 0; j < part->prefixSum->length; j++){
-      if (part->prefixSum->arr[j][0] == hash){
-        index = part->prefixSum->arr[j][1];
-        break;
-      }
-    }
+//     for (int j = 0; j < part->prefixSum->length; j++){
+//       if (part->prefixSum->arr[j][0] == hash){
+//         index = part->prefixSum->arr[j][1];
+//         break;
+//       }
+//     }
 
-    for (; part->rel->tuples[index].payload != 0; index++); //find empty bucket
-    part->rel->tuples[index] = rel->tuples[i];
-  }
-  return part;
-}*/
+//     for (; part->rel->tuples[index].payload != 0; index++); //find empty bucket
+//     part->rel->tuples[index] = rel->tuples[i];
+//   }
+//   return part;
+// }
 
 Part* Partition::BuildPartitionedTable(){
   Part* part = new Part();
   Hist* hist = CreateHistogram();
-  pthread_mutex_t mtx;
+  pthread_mutex_t* mtx;
 
   part->prefixSum = CreatePrefixSum(hist);
   part->rel = new RelColumn(endIndex - startIndex);
 
+  //NEW
+  mtx = new pthread_mutex_t[part->prefixSum->length];
+
   int numThreads = sch.execution_threads;
   uint32_t offset = floor((endIndex-startIndex) / numThreads);
   uint32_t end, start = startIndex;
-  pthread_mutex_init(&mtx,NULL);
 
-  for (int t=0; t<numThreads; t++){
+  for (int i = 0; i < part->prefixSum->length; i++)
+    pthread_mutex_init(&mtx[i],NULL);
+
+  for (int t=0; t < numThreads; t++){
     end = start + offset;
     if (t == numThreads - 1){ //last thread gets remaining
       end = endIndex;
     }
-    sch.submit_job(new Job(thread_BuildPartitionedTable, (void*)new BuildArgs(this, part, &mtx, start, end)));
+    sch.submit_job(new Job(thread_BuildPartitionedTable, (void*)new BuildArgs(this, part, mtx, start, end)));
     start += offset;
   }
   sch.wait_all_tasks_finish();
-  pthread_mutex_destroy(&mtx);
+
+  for (int i = 0; i < part->prefixSum->length; i++)
+    pthread_mutex_destroy(mtx);
+  
+  delete [] mtx;
 
   return part;
 }
@@ -69,40 +78,41 @@ void* Partition::thread_BuildPartitionedTable(void* vargp){
   for (int i = args->start; i < args->end; i++){
     int hash = inst->Hash(inst->rel->tuples[i].payload, inst->n);
     int index;
+    int j;
 
-    for (int j = 0; j < args->part->prefixSum->length; j++){
+    for (j = 0; j < args->part->prefixSum->length; j++){
       if (args->part->prefixSum->arr[j][0] == hash){
         index = args->part->prefixSum->arr[j][1];
         break;
       }
     }
-    pthread_mutex_lock(args->lock);
+    pthread_mutex_lock(&(args->lock[j]));
     for (; args->part->rel->tuples[index].payload != 0; index++); //find empty bucket
     args->part->rel->tuples[index] = inst->rel->tuples[i];
-    pthread_mutex_unlock(args->lock);
+    pthread_mutex_unlock(&(args->lock[j]));
   }
   delete args;
   return NULL;
 }
 
-/*Hist* Partition::CreateHistogram(){
-  int histLength = pow(2,n);
-  Hist* hist = new Hist(histLength);
+// Hist* Partition::CreateHistogram(){
+//   int histLength = pow(2,n);
+//   Hist* hist = new Hist(histLength);
 
-  for (int i = startIndex; i < endIndex; i++){
-    int index = Hash(rel->tuples[i].payload, n);
-    hist->arr[index]++;
-  }
+//   for (int i = startIndex; i < endIndex; i++){
+//     int index = Hash(rel->tuples[i].payload, n);
+//     hist->arr[index]++;
+//   }
 
-  for (int i = 0; i < histLength; i++){ //calculate largestTableSize
-    if (hist->arr[i] == 0) continue;
-    hist->activeSize++;
-    if (hist->arr[i] > largestTableSize)
-      largestTableSize = hist->arr[i] * sizeof(Tuple);
-  }
+//   for (int i = 0; i < histLength; i++){ //calculate largestTableSize
+//     if (hist->arr[i] == 0) continue;
+//     hist->activeSize++;
+//     if (hist->arr[i] > largestTableSize)
+//       largestTableSize = hist->arr[i] * sizeof(Tuple);
+//   }
 
-  return hist;
-}*/
+//   return hist;
+// }
 
 Hist* Partition::CreateHistogram(){
   uint32_t histLength = pow(2,n);
