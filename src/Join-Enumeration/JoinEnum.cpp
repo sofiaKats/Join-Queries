@@ -3,23 +3,43 @@
 #include <set>
 #include <string>
 
+//-------------------------Set---------------------------------------
+
 Set::Set(){
     prdcts = new Predicates*[10];
+    this->setSize = 0;
 }
 
 Set::Set(Set* set, Predicates* p){
-    prdcts = new Predicates*[set->setSize];
+    setSize = 0;
+    prdcts = new Predicates*[set->setSize + 1];
     for (int i = 0; i < set->setSize; i++){
         prdcts[i] = set->prdcts[i];
         setSize++;
     }
-    prdcts[setSize] = p;
-    setSize;
+    prdcts[setSize++] = p;
 }
 
-SetArr::SetArr(){
-    sets = new Set*[20];    
+void Set::print(){
+    cout << "------Subset is: " << endl;
+    //setSize = 1;
+    // cout << setSize;
+    // for (int i = 0; i < setSize; i++){
+    //     cout << prdcts[i]->relation_left << " ";
+    // }
+    cout << endl;
 }
+
+//-------------------------SetArr---------------------------------------
+
+
+SetArr::SetArr(){
+    sets = new Set*[20]; 
+    setArrSize = 0;   
+}
+
+//-------------------------JoinEnum---------------------------------------
+
 
 JoinEnum::JoinEnum(Query* q){
     relSet = new Predicates*[q->number_of_predicates];
@@ -31,16 +51,22 @@ JoinEnum::JoinEnum(Query* q){
     bt = new BestTree(relSetSize);
 }
 
+
 void JoinEnum::getSubsetsUtil(int r, int index, Predicates** data, int i, SetArr* subsets, int subsetsIndex){
     int n = relSetSize;
     // Current combination is ready, print it
     if (index == r) {
+        //cout << "here!" << endl;
         subsets->sets[subsetsIndex] = new Set();
-        subsets->sets[subsetsIndex]->prdcts = data;
-        subsets->sets[subsetsIndex]->setSize++;
-
+        for (int j = 0; j < r; j++){      
+            //cout << data[j]->binding_left << endl;      
+            subsets->sets[subsetsIndex]->prdcts[j] = data[j];
+            cout << "--" << data[j]->binding_left << " ";
+            subsets->sets[subsetsIndex]->setSize++;
+        }
+        cout << endl;
         subsetsIndex++;
-        subsets->sets++;        
+        subsets->setArrSize++;        
         return;
     }
  
@@ -68,13 +94,22 @@ SetArr* JoinEnum::getSubsets(int r){
  
     // Print all combination using temporary array 'data[]'
     getSubsetsUtil(r, 0, data, 0, subsets, 0);
+    //cout << "END" << endl;
     return subsets;
 }
 
 bool JoinEnum::subsetContains(Predicates* rel, Set* set){
     for (int i = 0; i < set->setSize; i++){
-        if (rel == set->prdcts[i]) return true;
+        if (equalPredicates(rel, set->prdcts[i])) return true;
     }
+    cout << "false;" << endl;
+    return false;
+}
+
+bool JoinEnum::equalPredicates(Predicates* p1, Predicates* p2){
+    if (p1->binding_left == p2->binding_left && p1->binding_right == p2->binding_right 
+        && p1->operation == p2->operation)
+        return true;
     return false;
 }
 
@@ -84,22 +119,25 @@ JoinTree* JoinEnum::DP_linear(){
         bt->bestTrees[0]->add(jt);
     }
     bt->print();
+    
     for (int i = 1; i < relSetSize; i++){
         SetArr* subsets = getSubsets(i);
         for (int j = 0; j < subsets->setArrSize; j++){
             Set* S = subsets->sets[j];
-            // for (int r = 0; r < relSetSize; r++){
-            //     if (subsetContains(relSet[r], S)) continue;
+            //S->print();
+            for (int r = 0; r < relSetSize; r++){
+                if (subsetContains(relSet[r], S)) continue;
+                cout << "doesn't contain " << relSet[r]->operation << " " << relSet[r]->relation_left << r << endl;
                 
-            //     JoinTree* CurrTree = new JoinTree(S->prdcts, S->setSize, relSet[r]);
-            //     Set* S_new = new Set(S, relSet[r]);
+                JoinTree* CurrTree = new JoinTree(S->prdcts, S->setSize, relSet[r]);
+                Set* S_new = new Set(S, relSet[r]);
 
-            //     JoinTreeNode* JoinTreeNode = bt->bestTrees[i-1]->contains(S_new->prdcts, S_new->setSize);
-            //     if ( JoinTreeNode == NULL || JoinTreeNode->jt->cost->cost() > CurrTree->cost->cost()){
-            //         bt->bestTrees[i-1]->replace(JoinTreeNode, CurrTree);                    
-            //     }                
-            // }
+                JoinTreeNode* JoinTreeNode = bt->bestTrees[i]->contains(S_new->prdcts, S_new->setSize);
+                // if ( JoinTreeNode == NULL || JoinTreeNode->jt->cost->cost() > CurrTree->cost->cost()){
+                //     bt->bestTrees[i]->replace(JoinTreeNode, CurrTree);                    
+                // }                
+            }
         }
     }
-    return bt->bestTrees[relSetSize - 1]->getHead()->jt;
+    //return bt->bestTrees[relSetSize - 1]->getHead()->jt;
 }

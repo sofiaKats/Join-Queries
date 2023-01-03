@@ -3,14 +3,15 @@
 
 typedef struct Set{
     Predicates** prdcts;
-    int setSize = 0; 
+    int setSize; 
     Set();  
     Set(Set*, Predicates*);
+    void print();
 }Set;
 
 typedef struct SetArr{
     Set** sets;
-    int setArrSize = 0;
+    int setArrSize;
     SetArr();    
 }SetArr;
 
@@ -23,6 +24,7 @@ private:
     SetArr* getSubsets(int);
     void getSubsetsUtil(int, int, Predicates**, int, SetArr*, int);
     bool subsetContains(Predicates*, Set*);
+    bool equalPredicates(Predicates*, Predicates*);
 public:
     JoinEnum(Query*);
     JoinTree* DP_linear();

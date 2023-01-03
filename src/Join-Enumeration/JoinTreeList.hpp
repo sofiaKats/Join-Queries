@@ -27,6 +27,8 @@ class JoinTreeList
 private:
     JoinTreeNode* head;
     int size;
+
+    bool equalPredicates(Predicates*, Predicates*);
 public:
     JoinTreeList();
     ~JoinTreeList();

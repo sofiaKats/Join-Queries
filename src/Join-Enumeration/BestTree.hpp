@@ -14,6 +14,7 @@ private:
 public:
     JoinTreeList** bestTrees;
     int size;
+    int activeSize;
 
     BestTree(int);
     ~BestTree();

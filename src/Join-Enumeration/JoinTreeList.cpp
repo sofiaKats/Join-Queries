@@ -3,7 +3,7 @@
 //-------------------------JoinTree---------------------------------------
 
 JoinTree::JoinTree(Predicates* p){
-    cout << "New join tree of size-1 predicates was just created!" << endl;
+    //cout << "New join tree of size-1 predicates was just created!" << endl;
     arr = new Predicates*[1];
     size = 1;
     cost = nullptr;
@@ -59,19 +59,26 @@ void JoinTreeList::add(JoinTree* jt){
     size++;
 }
 
+bool JoinTreeList::equalPredicates(Predicates* p1, Predicates* p2){
+    if (p1->binding_left == p2->binding_left && p1->binding_right == p2->binding_right 
+        && p1->operation == p2->operation)
+        return true;
+    return false;
+}
+
 
 JoinTreeNode* JoinTreeList::contains(Predicates** p, int size){
     bool flag = true;
     JoinTreeNode* temp = head;
     while (temp != nullptr){
         for (int i = 0; i < size; i++){
-            if (temp->jt->arr[i] != p[i]){
+            if (!equalPredicates(p[i], temp->jt->arr[i])){
                 flag = false;
                 break;
             }
         }
         if (flag == true) return temp;
-        temp->next;
+        temp = temp->next;
     }
     if (flag == false) return nullptr;    
 }
@@ -92,9 +99,8 @@ void JoinTreeList::replace(JoinTreeNode* old, JoinTree* newJ){
 void JoinTreeList::print(){
     JoinTreeNode* temp = head;
     while (temp != nullptr){
-        cout << "Join tree with prdcts";
+        cout << "---Join tree with prdcts: ";
         temp->jt->print();
-        cout << endl;
         temp = temp->next;
     }
 
