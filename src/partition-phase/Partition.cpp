@@ -43,13 +43,14 @@ Part* Partition::BuildPartitionedTable(){
   part->prefixSum = CreatePrefixSum(hist);
   part->rel = new RelColumn(endIndex - startIndex);
 
-  mtx = new pthread_mutex_t[part->prefixSum->length];
+  uint32_t mtxSize = part->prefixSum->length;
+  mtx = new pthread_mutex_t[mtxSize];
 
   int numThreads = sch.execution_threads;
   uint32_t offset = floor((endIndex-startIndex) / numThreads);
   uint32_t end, start = startIndex;
 
-  for (int i = 0; i < part->prefixSum->length; i++)
+  for (uint32_t i = 0; i < mtxSize; i++)
     pthread_mutex_init(&mtx[i],NULL);
 
   for (int t=0; t < numThreads; t++){
@@ -62,7 +63,7 @@ Part* Partition::BuildPartitionedTable(){
   }
   sch.wait_all_tasks_finish();
 
-  for (int i = 0; i < part->prefixSum->length; i++)
+  for (uint32_t i = 0; i < mtxSize; i++)
     pthread_mutex_destroy(mtx);
 
   delete [] mtx;
@@ -141,9 +142,11 @@ Hist* Partition::CreateHistogram(){
     if ((val = hist->arr[j]) > 0){
       hist->activeSize++;
       if (val > largestTableSize)
-        largestTableSize = val * sizeof(Tuple);
+        largestTableSize = val;
     }
   }
+  largestTableSize *= sizeof(Tuple);
+  
   return hist;
 }
 

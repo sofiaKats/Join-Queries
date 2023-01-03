@@ -26,7 +26,7 @@ void Relation::loadRelation(const char* fileName)
   if (length<16) {
     throw runtime_error("* file does not contain a valid header");
   }
-  char* addr=static_cast<char*>(mmap(nullptr,length,PROT_READ,MAP_PRIVATE,fd,0u));
+  char* addr=static_cast<char*>(mmap(NULL,length,PROT_READ,MAP_PRIVATE,fd,0u));
   if (addr==MAP_FAILED) {
     throw runtime_error("* cannot mmap file");
   }
@@ -67,7 +67,7 @@ Relation::Relation(const char* fileName, int id) : ownsMemory(false)
 Relation::~Relation()
   // Destructor
 {
-  for(int colId=0; colId<numColumns; colId++){ 
+  for(int colId=0; colId<numColumns; colId++){
     delete column_metadata[colId];
     // delete [] columns[colId];
   }
@@ -84,9 +84,9 @@ void Relation::findMINValueOfColumns(void){
     // find the minimum value of the column,and set l value to min
     unsigned long int min = columns[colId][0];
 
-    for(int rowId=1; rowId<size; rowId++) 
+    for(int rowId=1; rowId<size; rowId++)
       if(columns[colId][rowId] < min) min = columns[colId][rowId];
-    
+
     column_metadata[colId]->setL(min);
     //cout << "min value of cold: " << colId << " is " << min << endl;
   }
@@ -99,9 +99,9 @@ void Relation::findMAXValueOfColumns(void){
     // find the maximum value of the column,and set u value to max
     unsigned long int max = columns[colId][0];
 
-    for(int rowId=1; rowId<size; rowId++) 
+    for(int rowId=1; rowId<size; rowId++)
       if(columns[colId][rowId] > max) max = columns[colId][rowId];
-    
+
     column_metadata[colId]->setU(max);
     //cout << "max value of cold: " << colId << " is " << max << endl;
   }
@@ -116,7 +116,7 @@ void Relation::findDistinctValues(void) {
       if(column_metadata[colId]->getSizeOfDistinctArray() < NVALUE)
       // if array size < N, we change index ~ x-u ~
         position = (columns[colId][rowId] > column_metadata[colId]->getU()) ? columns[colId][rowId] - column_metadata[colId]->getU() : column_metadata[colId]->getU() - columns[colId][rowId];
-      else 
+      else
         // if array size >= N, the we change index ~ x-l mod N ~
         position = (columns[colId][rowId] > column_metadata[colId]->getL()) ? (columns[colId][rowId] - column_metadata[colId]->getL()) % NVALUE : (column_metadata[colId]->getL() - columns[colId][rowId]) % NVALUE;
 

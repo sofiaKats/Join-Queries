@@ -20,7 +20,7 @@ private:
   SingleCol* selfJoin(RelColumn*, RelColumn*);
   SingleCol* filterJoin(RelColumn*, char, int);
 
-  int getFirstURrow();
+  uint32_t getFirstURrow();
 
   void moveUR(UsedRelations*);
   void tempStoreDuplicatesR(int, UsedRelations*, int, Matches*, uint32_t, int);

@@ -33,7 +33,6 @@ int JobScheduler::initialize_scheduler(int execution_threads){
       fprintf(stderr, "[JobScheduler] Thread initiation error\n");
       return -1;
 	  }
-    cout << "Thread id is " << tids[i] << endl;
   }
   return 0;
 }

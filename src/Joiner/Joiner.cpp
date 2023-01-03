@@ -40,8 +40,8 @@ RelColumn* Joiner::GetRelationCol(unsigned relationId, unsigned colId){
 }
 //-----------------------------------------------------------------------
 RelColumn* Joiner::GetUsedRelation(unsigned relationId, unsigned binding, unsigned colId){
-  int notNullRow = getFirstURrow();
-  if (notNullRow == -1 || usedRelations->matchRows[notNullRow]->arr[binding] == -1 || firstJoin == true )
+  int firstRow = getFirstURrow();
+  if (firstRow == -1 || usedRelations->matchRows[firstRow]->arr[binding] == -1)
     return GetRelationCol(relationId, colId);
 
   Relation& rel = GetRelation(relationId);
@@ -49,7 +49,7 @@ RelColumn* Joiner::GetUsedRelation(unsigned relationId, unsigned binding, unsign
 
   int relCol_cnt = 0;
   for (int i=0; i<usedRelations->size; i++){
-    if (usedRelations->matchRows[i] == NULL)  continue;
+    if (usedRelations->matchRows[i] == NULL) continue;
 
     uint32_t rowid = usedRelations->matchRows[i]->arr[binding];
     relColumn->tuples[relCol_cnt].key = rowid;
@@ -275,10 +275,10 @@ SingleCol* Joiner::selfJoin(RelColumn* relR, RelColumn* relS){
 bool Joiner::isSelfJoin(unsigned int relR, unsigned int relS){
   return relR == relS;
 }
-int Joiner::getFirstURrow(){
+uint32_t Joiner::getFirstURrow(){
   if (firstJoin) return -1;
-  for (int i = 0; i < usedRelations->size; i++){
-    if (usedRelations->matchRows[i] != nullptr){
+  for (uint32_t i = 0; i < usedRelations->size; i++){
+    if (usedRelations->matchRows[i] != NULL){
       return i;
     }
   }
@@ -321,7 +321,7 @@ SingleCol* Joiner::filterJoin(RelColumn* rel, char operation, int n){
 void Joiner::PrintUsedRelations(){
   cout << "\n--- Join Results in UR table---\n\n" << endl;
   for (int i=0; i<usedRelations->size; i++){
-    if (usedRelations->matchRows[i] != nullptr) {
+    if (usedRelations->matchRows[i] != NULL) {
       for (int j = 0; j < usedRelations->matchRows[i]->size; j++) {
         cout << usedRelations->matchRows[i]->arr[j] << " ";
       }
@@ -352,7 +352,7 @@ void Joiner::moveUR(UsedRelations* temp){
   int prevJ = 0;
   for (int i = 0; i < temp->activeSize; i++){
     for (int j = prevJ; j < usedRelations->size; j++){
-      if (usedRelations->matchRows[j] == nullptr){
+      if (usedRelations->matchRows[j] == NULL){
         usedRelations->matchRows[j] = temp->matchRows[i];
         usedRelations->activeSize++;
         break;
@@ -399,7 +399,7 @@ void Joiner::printMatches(Matches* matches){
 //-----------------------------------------------------------------------
 bool Joiner::bothRelsUsed(int relRid, int relSid){
   int i = getFirstURrow();
-  if (usedRelations == nullptr || i == -1 || firstJoin == true) return false;
+  if (usedRelations == NULL || i == -1 || firstJoin == true) return false;
   if ((usedRelations->matchRows[i]->arr[relRid] != -1) && (usedRelations->matchRows[i]->arr[relSid]!=-1))
     return true;
   return false;

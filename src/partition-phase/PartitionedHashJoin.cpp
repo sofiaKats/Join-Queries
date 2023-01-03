@@ -73,7 +73,6 @@ int PartitionedHashJoin::PartitionRec(Part* finalPart, RelColumn* rel, int maxPa
   for (int i = 0; i < part->prefixSum->length - 1; i++){
     from = part->prefixSum->arr[i][1];
     to = part->prefixSum->arr[i+1][1];
-
     passCount = PartitionRec(finalPart, part->rel, maxPasses, n, passNum, from, to);
   }
 
@@ -184,10 +183,8 @@ void* PartitionedHashJoin::thread_Join(void* vargp){
 
 int PartitionedHashJoin::ExistsInPrefix(int hash, PrefixSum* prefixSum){
   for (int i = 0; i < prefixSum->length; i++){
+    if (prefixSum->arr[i][0] == hash) return i;
     if (prefixSum->arr[i][0] == -1) return -1;
-    if (prefixSum->arr[i][0] == hash){
-      return i;
-    }
   }
   return -1;
 }
