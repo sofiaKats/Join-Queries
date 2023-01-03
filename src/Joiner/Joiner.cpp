@@ -139,22 +139,20 @@ void Joiner::updateUsedRelations(Matches* matches, int relRid, int relSid){
     clearUsedRelations();
     return;
   }
-  if (firstJoin){ /// First Join
+  // CASE 1 First Join
+  if (firstJoin){
     firstJoin = false;
-    //cout << "[UpdateUR] First Join" << endl;
     updateURFirst(matches, relRid, relSid);
     return;
   }
   int i = getFirstURrow();
   // CASE 2.1: Only one of the Relations has been joined before, the Relation R., or both
   if (usedRelations->matchRows[i]->arr[relRid] != -1){
-    //cout << "[UpdateUR] Left or Both" << endl;
     updateURonlyR(matches, relRid, relSid);
     return;
   }
   // CASE 2.2: Only one of the Relations has been joined before, the Relation S.
   if (usedRelations->matchRows[i]->arr[relSid] != -1){
-    //cout << "[UpdateUR] Right" << endl;
     updateURonlyS(matches, relSid, relRid);
     return;
   }

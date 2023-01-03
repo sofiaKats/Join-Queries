@@ -315,31 +315,29 @@ MatchesPtr* Hashtable::contains(Tuple* tuple){
     //find hash value and neighborhood
     int nei = H;
     MatchesPtr* matches = new MatchesPtr(nei);
-    int payload2 = tuple->payload;
+    int32_t payload2 = tuple->payload;
     int hashhop = hash(payload2);
     int currentBucket = hashhop;
 
     for (int loops = 0; loops < nei; loops++){
         if (hashtable[hashhop]->get_bitmap_index(loops) == 1){
-            int payload1 = hashtable[currentBucket]->getTuple()->payload;
+            int32_t payload1 = hashtable[currentBucket]->getTuple()->payload;
 
             if (payload1 == payload2){
                 Tuple* t = new Tuple(hashtable[currentBucket]->getTuple()->key, tuple->key);
                 if (!searchIfDupl(t, matches)){
-                    matches->tuples[matches->activeSize] = t;
-                    matches->activeSize++;
+                    matches->tuples[matches->activeSize++] = t;
 
                     if (hashtable[currentBucket]->has_duplicates()){
                         //cout << "contains: duplicates are " << hashtable[currentBucket]->getDuplicates()->activeSize << " with value " << tuple->payload << endl;
                         for (int k = 0; k < hashtable[currentBucket]->getDuplicates()->activeSize; k++){
                             //cout << " " << hashtable[currentBucket]->getDuplicates()->arr[k];
                             Tuple* t = new Tuple(hashtable[currentBucket]->getDuplicates()->arr[k], tuple->key);
-                            matches->tuples[matches->activeSize] = t;
-                            matches->activeSize++;
+                            matches->tuples[matches->activeSize++] = t;
                         }
                         //cout << endl;
                     }
-                }
+                }//else {cout << hashtable[currentBucket]->getTuple()->key << " "<< tuple->key<<endl;}
             }
         }
         currentBucket = findNeighborPosByK(currentBucket, 1);
@@ -350,7 +348,8 @@ MatchesPtr* Hashtable::contains(Tuple* tuple){
 
 bool Hashtable::searchIfDupl(Tuple* t, MatchesPtr* m){
     for (int i = 0; i < m->activeSize; i++){
-        if (m->tuples[i]->key == t->key && m->tuples[i]->payload == t->payload) { return true;}
+        if (m->tuples[i]->key == t->key && m->tuples[i]->payload == t->payload)
+          return true;
     }
     return false;
 }

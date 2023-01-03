@@ -146,7 +146,7 @@ Hist* Partition::CreateHistogram(){
     }
   }
   largestTableSize *= sizeof(Tuple);
-  
+
   return hist;
 }
 

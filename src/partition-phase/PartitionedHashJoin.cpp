@@ -16,7 +16,6 @@ Matches* PartitionedHashJoin::Solve(){
 
   try{
     BuildHashtables(partitionedR);
-
     partitionedS = new Part();
     partitionedS->rel = new RelColumn(relS->num_tuples);
     PartitionRec(partitionedS, relS, passCount);
@@ -83,25 +82,26 @@ int PartitionedHashJoin::PartitionRec(Part* finalPart, RelColumn* rel, int maxPa
 }
 
 void PartitionedHashJoin::BuildHashtables(Part* part){
-  int hashtablesLength = part->prefixSum->length;
+  uint32_t hashtablesLength = part->prefixSum->activeSize;
+  uint32_t partitionSize;
+  uint32_t indexR = 0;
+  
   part->hashtables = new Hashtable*[hashtablesLength];
-  int subRelationSize;
-  int indexR = 0;
   //for every partition table
-  for (int i = 1; i < hashtablesLength; i++){
+  for (uint32_t i = 1; i < hashtablesLength; i++){
+    //if(part->prefixSum->arr[i-1][0] == -1) return;
+
     //find its size from prefix sum
-    subRelationSize = part->prefixSum->arr[i][1] - part->prefixSum->arr[i - 1][1];
+    partitionSize = part->prefixSum->arr[i][1] - part->prefixSum->arr[i - 1][1];
 
     //create new hashtable for this partition
-    part->hashtables[i - 1] = new Hashtable(subRelationSize);
+    part->hashtables[i - 1] = new Hashtable(partitionSize);
 
     //fill hashtable
-    for (int j = 0; j < subRelationSize; j++){
+    for (uint32_t j = 0; j < partitionSize; j++){
       part->hashtables[i - 1]->add(part->rel->tuples[indexR].payload, part->rel->tuples[indexR].key);
       indexR++;
     }
-
-    if(part->prefixSum->arr[i][0] == -1) break;  // TO BE FIXED!!!!!!!!!!!
   }
 }
 
@@ -131,12 +131,14 @@ void* PartitionedHashJoin::thread_Join(void* vargp){
   JoinArgs* args = (JoinArgs*)vargp;
   Part* p1 = args->part1;
   Part* p2 = args->part2;
+  Hashtable* hashtable = p1->hashtables[args->hashi];
 
   for (uint32_t j = p2->prefixSum->arr[args->i][1]; j < p2->prefixSum->arr[args->i+1][1]; j++){
     Tuple* tuple = new Tuple(p2->rel->tuples[j].key, p2->rel->tuples[j].payload);
-    MatchesPtr* matches = p1->hashtables[args->hashi]->contains(tuple);
-    pthread_mutex_lock(args->lock);
+    //cout << p2->rel->tuples[j].key << " " << p2->rel->tuples[j].payload << endl;
+    MatchesPtr* matches = hashtable->contains(tuple);
 
+    pthread_mutex_lock(args->lock);
     for (uint32_t k = 0; k < matches->activeSize; k++)
       args->matches->tuples[args->matches->activeSize++] = matches->tuples[k];
     pthread_mutex_unlock(args->lock);
