@@ -347,9 +347,15 @@ MatchesPtr* Hashtable::contains(Tuple* tuple){
 
 
 bool Hashtable::searchIfDupl(Tuple* t, MatchesPtr* m){
+    static Tuple* prev; //cache
+    if (prev != NULL && prev->key == t->key && prev->payload == t->payload){
+      return true;
+    }
     for (int i = 0; i < m->activeSize; i++){
-        if (m->tuples[i]->key == t->key && m->tuples[i]->payload == t->payload)
+        if (m->tuples[i]->key == t->key && m->tuples[i]->payload == t->payload){
+          prev = t;
           return true;
+        }
     }
     return false;
 }
