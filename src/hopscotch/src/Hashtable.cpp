@@ -337,7 +337,7 @@ MatchesPtr* Hashtable::contains(Tuple* tuple){
                         }
                         //cout << endl;
                     }
-                }//else {cout << hashtable[currentBucket]->getTuple()->key << " "<< tuple->key<<endl;}
+                }
             }
         }
         currentBucket = findNeighborPosByK(currentBucket, 1);

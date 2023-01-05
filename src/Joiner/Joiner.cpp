@@ -386,6 +386,7 @@ void Joiner::tempStoreDuplicatesS(int j, UsedRelations* temp, int relNew, Matche
       temp->matchRows[temp->activeSize]->arr[relNew] = matches->tuples[k]->key;
       temp->activeSize++;
     }
+    else return;
   }
 }
 //-----------------------------------------------------------------------

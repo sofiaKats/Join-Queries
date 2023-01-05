@@ -79,7 +79,7 @@ typedef struct MatchRow{
   uint32_t size;
   MatchRow(uint32_t size){
     this->size = size;
-    arr = new int32_t[size]{-1};
+    arr = new int32_t[size];
     for (int i =0; i<size; i++)
       arr[i] = -1;
   }
