@@ -117,7 +117,7 @@ typedef struct SingleCol{
   ~SingleCol(){
     delete[] arr;
   }
-}SingleCol;
+} SingleCol;
 
 typedef struct Matches {
   Tuple** tuples;
@@ -135,3 +135,22 @@ typedef struct Matches {
     delete[] tuples;
   }
 } Matches;
+
+typedef struct Node{
+  MatchRow* row;
+  Node* next = NULL;
+public:
+  Node(MatchRow* r): row(r){}
+} Node;
+
+class List{
+private:
+  Node* head = NULL;
+  Node* current;
+public:
+  MatchRow* GetNext();
+  void Push(MatchRow*);
+  void Pop();
+  void Delete();
+  ~List();
+};
