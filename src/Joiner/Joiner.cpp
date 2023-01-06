@@ -47,14 +47,13 @@ RelColumn* Joiner::GetUsedRelation(unsigned relationId, unsigned binding, unsign
   Relation& rel = GetRelation(relationId);
   RelColumn* relColumn = new RelColumn(usedRelations->activeSize);
 
-  int relCol_cnt = 0;
+  relColumn->num_tuples = 0;
   for (int i=0; i<usedRelations->size; i++){
     if (usedRelations->matchRows[i] == NULL) continue;
 
     uint32_t rowid = usedRelations->matchRows[i]->arr[binding];
-    relColumn->tuples[relCol_cnt].key = rowid;
-    relColumn->tuples[relCol_cnt].payload = rel.columns[colId][rowid];
-    relCol_cnt++;
+    relColumn->tuples[relColumn->num_tuples].key = rowid;
+    relColumn->tuples[relColumn->num_tuples++].payload = rel.columns[colId][rowid];
   }
   return relColumn;
 }
@@ -386,6 +385,7 @@ void Joiner::tempStoreDuplicatesS(int j, UsedRelations* temp, int relNew, Matche
       temp->matchRows[temp->activeSize]->arr[relNew] = matches->tuples[k]->key;
       temp->activeSize++;
     }
+    else return;
   }
 }
 //-----------------------------------------------------------------------
@@ -397,7 +397,7 @@ void Joiner::printMatches(Matches* matches){
 //-----------------------------------------------------------------------
 bool Joiner::bothRelsUsed(int relRid, int relSid){
   int i = getFirstURrow();
-  if (usedRelations == NULL || i == -1 || firstJoin == true) return false;
+  if (i == -1) return false;
   if ((usedRelations->matchRows[i]->arr[relRid] != -1) && (usedRelations->matchRows[i]->arr[relSid]!=-1))
     return true;
   return false;
