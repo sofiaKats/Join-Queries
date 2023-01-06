@@ -24,7 +24,10 @@ JoinTree::JoinTree(Predicates** p, int size, Predicates* newR){
 
 void JoinTree::print(){
     for (int i = 0; i < size; i++){
-        cout << arr[i]->relation_left << " ";
+        cout << arr[i]->relation_left << "." << arr[i]->column_left << arr[i]->operation;
+        if (arr[i]->number_after_operation) cout << arr[i]->number;
+        else cout << arr[i]->relation_right << "." << arr[i]->column_right;
+        cout << " -> ";    
     }
     cout << endl;
 }

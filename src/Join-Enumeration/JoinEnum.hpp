@@ -19,8 +19,10 @@ typedef struct SetArr{
 class JoinEnum{
 private:
     BestTree* bt;
-    Predicates** relSet;
+    Predicates** relSet; //all predicates of query   
     int relSetSize;
+    int filterIndex;    //this is the index from which the non-filter predicates start on the 
+                        //relset array, while the filters are on the start
     //
     SetArr* getSubsets(int);
     void getSubsetsUtil(int, int, Predicates**, int, SetArr*, int);

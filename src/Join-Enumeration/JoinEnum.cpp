@@ -22,14 +22,12 @@ Set::Set(Set* set, Predicates* p){
 
 void Set::print(){
     cout << "------Subset is: ";
-    //cout << setSize;
     for (int i = 0; i < setSize; i++){
         cout << prdcts[i]->relation_left << "." << prdcts[i]->column_left << prdcts[i]->operation;
         if (prdcts[i]->number_after_operation) cout << prdcts[i]->number;
         else cout << prdcts[i]->relation_right << "." << prdcts[i]->column_right;
         cout << " ";    
     }
-    //cout << endl;
 }
 
 //-------------------------SetArr---------------------------------------
@@ -49,10 +47,14 @@ void SetArr::add(Set* set){
 
 
 JoinEnum::JoinEnum(Query* q){
+    filterIndex = 0;
     relSet = new Predicates*[q->number_of_predicates];
     for (int i = 0; i < q->number_of_predicates; i++){
+
+        int idx = q->priority_predicates[i];
         relSet[i] = new Predicates();
-        relSet[i] = q->prdcts[i];
+        relSet[i] = q->prdcts[idx];
+        if (relSet[i]->number_after_operation) filterIndex++;
     }
     relSetSize = q->number_of_predicates;
     bt = new BestTree(relSetSize);
@@ -101,7 +103,7 @@ SetArr* JoinEnum::getSubsets(int r){
     SetArr* subsets = new SetArr();
  
     // Print all combination using temporary array 'data[]'
-    getSubsetsUtil(r, 0, data, 0, subsets, 0);
+    getSubsetsUtil(r, 0, data, filterIndex, subsets, 0);
     //cout << "END" << endl;
     return subsets;
 }
@@ -140,26 +142,25 @@ bool JoinEnum::connected(Predicates* p1, Set* s){
 }
 
 JoinTree* JoinEnum::DP_linear(){
-    for (int i = 0; i < relSetSize; i++){
+    for (int i = filterIndex; i < relSetSize; i++){
         JoinTree* jt = new JoinTree(relSet[i]);
         bt->bestTrees[0]->add(jt);
     }
-    //bt->print();
+
     SetArr* subsets = getSubsets(1);
+     cout << ".........Get all subsets with size 1" << endl;
 
     
-    for (int i = 1; i < relSetSize; i++){
-        cout << ".........Get all subsets with size " << i << endl;
+    for (int i = 1 + filterIndex; i < relSetSize; i++){
         //SetArr* subsets = getSubsets(i);
 
         SetArr* subsets_new = new SetArr();
-        cout << "Subsets w size 1 are " << subsets->setArrSize << endl;
         for (int j = 0; j < subsets->setArrSize; j++){
             Set* S = subsets->sets[j];
-            //S->print();
-            cout << "J IS " << j << endl;
 
-            for (int r = 0; r < relSetSize; r++){
+            cout << "SUBSET NO: " << j << endl;
+
+            for (int r = filterIndex; r < relSetSize; r++){
                 if (subsetContains(relSet[r], S)) continue;
                 if (!connected(relSet[r], S)) continue;
 
@@ -176,6 +177,8 @@ JoinTree* JoinEnum::DP_linear(){
             }
         }
         subsets = subsets_new;
+        cout << "\n.........Get all subsets with size " << i << endl;
     }
+    bt->bestTrees[relSetSize - 1]->getHead()->jt->print();
     //return bt->bestTrees[relSetSize - 1]->getHead()->jt;
 }
