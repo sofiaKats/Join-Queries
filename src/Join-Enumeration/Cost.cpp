@@ -11,6 +11,7 @@ Cost::Cost(Query* q, Relation**){
 //PRIORITY FOR IMPLEMENTATION, CASE 0, CASE 2
 int Cost::cost(){
     int sum = 0;
+    /*
     int cost;
 
     for (int i = 0; i < query->number_of_predicates; i++){
@@ -36,10 +37,13 @@ int Cost::cost(){
             break;
         }
         sum+=cost;
-    }
+    }*/
 
     return sum;
 }
 
+Cost::Cost(){
+
+}
 
 

@@ -12,7 +12,8 @@ typedef struct Set{
 typedef struct SetArr{
     Set** sets;
     int setArrSize;
-    SetArr();    
+    SetArr();  
+    void add(Set*);  
 }SetArr;
 
 class JoinEnum{
@@ -25,6 +26,7 @@ private:
     void getSubsetsUtil(int, int, Predicates**, int, SetArr*, int);
     bool subsetContains(Predicates*, Set*);
     bool equalPredicates(Predicates*, Predicates*);
+    bool connected(Predicates*, Set*);
 public:
     JoinEnum(Query*);
     JoinTree* DP_linear();

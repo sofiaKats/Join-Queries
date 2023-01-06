@@ -31,6 +31,7 @@ private:
 
     //Φίλτρα της μορφής σk1 <= A <= k2 ?? NOT TO BE IMPLEMENTED NOW
 public:
+    Cost();
     Cost(Query*, Relation**);
 
     int cost();        // (2.2 = 3.5 & 1.0 = 2.1)
