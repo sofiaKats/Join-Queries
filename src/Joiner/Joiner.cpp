@@ -3,9 +3,6 @@
 Joiner::Joiner(uint32_t size){
   this->size = size;
   relations = new Relation*[size]{};
-  for (int i=0; i<size; i++){
-    relations[i] = NULL;
-  }
 }
 //-----------------------------------------------------------------------
 void Joiner::AddRelation(const char* fileName)
@@ -168,7 +165,8 @@ void Joiner::updateURFirst(Matches* matches, int relRid, int relSid){
 }
 //-----------------------------------------------------------------------
 void Joiner::updateURonlyR(Matches* matches, int relUR, int relNew){
-  UsedRelations* temp = new UsedRelations(matches->activeSize * MAX_NEI_SIZE, usedRelations->rowSize);
+  UsedRelationsTemp* temp = new UsedRelationsTemp(matches->activeSize * MAX_NEI_SIZE, usedRelations->rowSize);
+
   uint32_t actives = usedRelations->activeSize;
   for (uint32_t i=0; i < usedRelations->size; i++){ /// For each entry from usedRelations
     if (usedRelations->matchRows[i] == NULL) continue;
@@ -195,7 +193,8 @@ void Joiner::updateURonlyR(Matches* matches, int relUR, int relNew){
 }
 //-----------------------------------------------------------------------
 void Joiner::updateURonlyS(Matches* matches, int relUR, int relNew){
-  UsedRelations* temp = new UsedRelations(matches->activeSize * MAX_NEI_SIZE, usedRelations->rowSize);
+  UsedRelationsTemp* temp = new UsedRelationsTemp(matches->activeSize * MAX_NEI_SIZE, usedRelations->rowSize);
+
   uint32_t actives = usedRelations->activeSize;
 
   for (uint32_t i=0; i < usedRelations->size; i++){ /// For each entry from usedRelations
@@ -339,13 +338,12 @@ void Joiner::clearUsedRelations(){
 //-----------------------------------------------------------------------
 Joiner::~Joiner(){
   for (int i = 0; i<size; i++){
-    relations[i]->~Relation(); // destructor doesnt get invoked automatically for some reason
     delete relations[i];
   }
   delete[] relations;
 }
 //-----------------------------------------------------------------------
-void Joiner::moveUR(UsedRelations* temp){
+void Joiner::moveUR(UsedRelationsTemp* temp){
   int prevJ = 0;
   for (int i = 0; i < temp->activeSize; i++){
     for (int j = prevJ; j < usedRelations->size; j++){
@@ -357,10 +355,10 @@ void Joiner::moveUR(UsedRelations* temp){
       prevJ = j + 1;
     }
   }
-  //delete temp; Cannot delete temp does not deep copy to UR
+  delete temp;
 }
 //-----------------------------------------------------------------------
-void Joiner::tempStoreDuplicatesR(int j, UsedRelations* temp, int relNew, Matches* matches, uint32_t rowid, int i){
+void Joiner::tempStoreDuplicatesR(int j, UsedRelationsTemp* temp, int relNew, Matches* matches, uint32_t rowid, int i){
   for (int k = j + 1; k < matches->activeSize; k++){
     if (rowid == matches->tuples[k]->key){
       temp->matchRows[temp->activeSize] = new MatchRow(usedRelations->rowSize);
@@ -374,7 +372,7 @@ void Joiner::tempStoreDuplicatesR(int j, UsedRelations* temp, int relNew, Matche
   }
 }
 //-----------------------------------------------------------------------
-void Joiner::tempStoreDuplicatesS(int j, UsedRelations* temp, int relNew, Matches* matches, uint32_t rowid, int i){
+void Joiner::tempStoreDuplicatesS(int j, UsedRelationsTemp* temp, int relNew, Matches* matches, uint32_t rowid, int i){
   for (int k = j + 1; k < matches->activeSize; k++){
     if (rowid == matches->tuples[k]->payload){
       temp->matchRows[temp->activeSize] = new MatchRow(usedRelations->rowSize);

@@ -36,8 +36,12 @@ class Relation {
   private:
   /// Owns memory (false if it was mmaped)
   bool ownsMemory;
-  ///id 
+  ///id
   int id;
+  /// mmap address
+  char* address;
+  /// mmap length
+  size_t length;
   /// Loads data from a file
   void loadRelation(const char* fileName);
 
@@ -48,7 +52,7 @@ class Relation {
   uint64_t numColumns;
   /// The join column containing the keys
   uint64_t** columns;
-  Metadata** column_metadata; // each column has a Metadata struct of it's own. 
+  Metadata** column_metadata; // each column has a Metadata struct of it's own.
   /// Constructor using mmap
   Relation(const char* fileName, int id);
   /// Delete copy constructor
@@ -57,7 +61,7 @@ class Relation {
   Relation(Relation&& other)=default;
   /// The destructor
   ~Relation();
-  
+
   int getId();
 
   void findMINValueOfColumns(void);

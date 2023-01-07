@@ -99,12 +99,26 @@ typedef struct UsedRelations{
     matchRows = new MatchRow*[size]{};
   }
   ~UsedRelations(){
-    for (int i = 0; i < size; i++){
+    for (int i = 0; i < size; i++)
       delete matchRows[i];
-    }
     delete[] matchRows;
   }
 } UsedRelations;
+
+typedef struct UsedRelationsTemp{
+  MatchRow** matchRows;
+  uint32_t size;
+  uint32_t rowSize;
+  uint32_t activeSize = 0;
+  UsedRelationsTemp(uint32_t size, uint32_t rowSize){
+    this->size = size;
+    this->rowSize = rowSize;
+    matchRows = new MatchRow*[size]{};
+  }
+  ~UsedRelationsTemp(){
+    delete[] matchRows;
+  }
+} UsedRelationsTemp;
 
 typedef struct SingleCol{
   uint32_t size;
@@ -119,7 +133,7 @@ typedef struct SingleCol{
   }
 } SingleCol;
 
-typedef struct Matches {
+typedef struct Matches{
   Tuple** tuples;
   uint32_t size;
   uint32_t activeSize = 0;
@@ -135,22 +149,3 @@ typedef struct Matches {
     delete[] tuples;
   }
 } Matches;
-
-typedef struct Node{
-  MatchRow* row;
-  Node* next = NULL;
-public:
-  Node(MatchRow* r): row(r){}
-} Node;
-
-class List{
-private:
-  Node* head = NULL;
-  Node* current;
-public:
-  MatchRow* GetNext();
-  void Push(MatchRow*);
-  void Pop();
-  void Delete();
-  ~List();
-};

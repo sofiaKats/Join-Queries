@@ -21,16 +21,16 @@ void Relation::loadRelation(const char* fileName)
     throw runtime_error("* fstat");
   }
 
-  auto length=sb.st_size;
+  length=sb.st_size;
 
   if (length<16) {
     throw runtime_error("* file does not contain a valid header");
   }
-  char* addr=static_cast<char*>(mmap(NULL,length,PROT_READ,MAP_PRIVATE,fd,0u));
-  if (addr==MAP_FAILED) {
+  address=static_cast<char*>(mmap(NULL,length,PROT_READ,MAP_PRIVATE,fd,0u));
+  if (address==MAP_FAILED) {
     throw runtime_error("* cannot mmap file");
   }
-
+  char* addr = address;
   this->size=*reinterpret_cast<uint64_t*>(addr);
   addr+=sizeof(size);
   this->numColumns=*reinterpret_cast<size_t*>(addr);
@@ -38,11 +38,8 @@ void Relation::loadRelation(const char* fileName)
 
   columns = new uint64_t*[numColumns];
 
-  for (unsigned i=0;i<numColumns;++i) {
-    //create array
-    columns[i] = new uint64_t[size];
+  for (unsigned i=0; i<numColumns; ++i) {
     columns[i] = reinterpret_cast<uint64_t*>(addr);
-
     addr+=size*sizeof(uint64_t);
   }
   close(fd);
@@ -67,12 +64,15 @@ Relation::Relation(const char* fileName, int id) : ownsMemory(false)
 Relation::~Relation()
   // Destructor
 {
-  for(int colId=0; colId<numColumns; colId++){
+  delete[] columns;
+  munmap(address, length);
+  // Segmentation fault
+  /*for(int colId=0; colId<numColumns; colId++){
     delete column_metadata[colId];
     // delete [] columns[colId];
   }
   delete [] column_metadata;
-  delete [] columns;
+  delete [] columns;*/
 }
 
 int Relation::getId(){return id;}
