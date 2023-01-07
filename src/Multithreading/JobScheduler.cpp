@@ -24,10 +24,6 @@ int JobScheduler::initialize_scheduler(int execution_threads){
     fprintf(stderr, "[JobScheduler] CV initiation error\n");
     return -1;
   }
-  if(pthread_barrier_init(&barrier, NULL, execution_threads + 1)){
-    fprintf(stderr, "[JobScheduler] Barrier initiation error\n");
-    return -1;
-  }
   for (int i=0; i< execution_threads; i++){
     if(pthread_create(&(tids[i]), NULL, do_work, this)){
       fprintf(stderr, "[JobScheduler] Thread initiation error\n");
@@ -46,8 +42,6 @@ void* JobScheduler::do_work(void* object){
 		while(sch->q->size <= 0){ //while queue empty
       if(sch->wait_all){
         sch->counter++;
-				//pthread_mutex_unlock(&(sch->qlock));
-        //pthread_barrier_wait(&(sch->barrier));
 			}
       if(sch->quit){
 				pthread_mutex_unlock(&(sch->qlock));
@@ -104,7 +98,6 @@ int JobScheduler::wait_all_tasks_finish(){
   pthread_cond_broadcast(&q_not_empty);
   pthread_mutex_unlock(&qlock);
 
-  //pthread_barrier_wait(&barrier);
   while(1){
     pthread_mutex_lock(&qlock);
     if(counter >= execution_threads)
@@ -131,7 +124,6 @@ int JobScheduler::destroy_scheduler(){
   pthread_mutex_destroy(&qlock);
 	pthread_cond_destroy(&q_empty);
   pthread_cond_destroy(&q_not_empty);
-  pthread_barrier_destroy(&barrier);
   delete this->q;
   delete[] this->tids;
   return 0;

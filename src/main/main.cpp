@@ -33,5 +33,6 @@ int main(int argc, char* argv[]){
   end = clock();
   double duration = ((double)end - start)/CLOCKS_PER_SEC;
   cout << "==== Run in ~" << duration << " sec\n";
+  delete joiner;
   exit(1); // we need munmap to be called to free mapped memory
 }

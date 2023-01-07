@@ -67,7 +67,7 @@ Part* Partition::BuildPartitionedTable(){
     pthread_mutex_destroy(mtx);
 
   delete [] mtx;
-
+  delete hist;
   return part;
 }
 
@@ -147,6 +147,8 @@ Hist* Partition::CreateHistogram(){
   }
   largestTableSize *= sizeof(Tuple);
 
+  for (int t=0; t<numThreads; t++) delete histArr[t];
+  delete[] histArr;
   return hist;
 }
 

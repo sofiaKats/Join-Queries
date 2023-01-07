@@ -8,7 +8,7 @@ CFLAGS = -std=c++11 -Wno-unused-parameter -g -w -pthread
 EXE_PROG = ./program
 
 # .o files needed
-OBJS_PROG = main.o ../Multithreading/JobScheduler.o ../partition-phase/Partition.o ../partition-phase/PartitionedHashJoin.o ../hopscotch/src/Index.o ../hopscotch/src/Hashtable.o ../Structures/Relation/Relation.o ../Joiner/Joiner.o ../Parser/parser.o
+OBJS_PROG = main.o ../Structures/List/List.o ../Multithreading/JobScheduler.o ../partition-phase/Partition.o ../partition-phase/PartitionedHashJoin.o ../hopscotch/src/Index.o ../hopscotch/src/Hashtable.o ../Structures/Relation/Relation.o ../Joiner/Joiner.o ../Parser/parser.o
 
 # Build executables
 all: $(EXE_PROG)

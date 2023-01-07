@@ -88,24 +88,6 @@ typedef struct MatchRow{
   }
 } MatchRow;
 
-typedef struct UsedRelations{
-  MatchRow** matchRows;
-  uint32_t size;
-  uint32_t rowSize;
-  uint32_t activeSize = 0;
-  UsedRelations(uint32_t size, uint32_t rowSize){
-    this->size = size;
-    this->rowSize = rowSize;
-    matchRows = new MatchRow*[size]{};
-  }
-  ~UsedRelations(){
-    for (int i = 0; i < size; i++){
-      delete matchRows[i];
-    }
-    delete[] matchRows;
-  }
-} UsedRelations;
-
 typedef struct SingleCol{
   uint32_t size;
   uint32_t activeSize = 0;
@@ -137,20 +119,27 @@ typedef struct Matches {
 } Matches;
 
 typedef struct Node{
-  MatchRow* row;
+  MatchRow* row = NULL;
   Node* next = NULL;
 public:
   Node(MatchRow* r): row(r){}
 } Node;
 
 class List{
-private:
-  Node* head = NULL;
-  Node* current;
 public:
-  MatchRow* GetNext();
+  Node* head;
+  uint32_t size;
+  List();
   void Push(MatchRow*);
   void Pop();
-  void Delete();
+  void Delete(Node*);
   ~List();
 };
+
+typedef struct UsedRelations{
+  List list;
+  uint32_t rowSize;
+  UsedRelations(uint32_t rowSize){
+    this->rowSize = rowSize;
+  }
+} UsedRelations;

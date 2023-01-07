@@ -20,7 +20,7 @@ private:
   SingleCol* selfJoin(RelColumn*, RelColumn*);
   SingleCol* filterJoin(RelColumn*, char, int);
 
-  uint32_t getFirstURrow();
+  MatchRow* getFirstURrow();
 
   void moveUR(UsedRelations*);
   void tempStoreDuplicatesR(int, UsedRelations*, int, Matches*, uint32_t, int);
@@ -43,7 +43,7 @@ public:
   /// Get relation column from filtered relation
   RelColumn* GetUsedRelation(unsigned, unsigned, unsigned);
   /// Joins a given set of relations
-  string Join(Query&);
+  void Join(Query&);
   /// Prints used relations table
   void PrintUsedRelations();
   /// Checksum
