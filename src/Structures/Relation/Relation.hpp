@@ -36,8 +36,6 @@ class Relation {
   private:
   /// Owns memory (false if it was mmaped)
   bool ownsMemory;
-  ///id
-  int id;
   /// mmap address
   char* address;
   /// mmap length
@@ -54,15 +52,13 @@ class Relation {
   uint64_t** columns;
   Metadata** column_metadata; // each column has a Metadata struct of it's own.
   /// Constructor using mmap
-  Relation(const char* fileName, int id);
+  Relation(const char* fileName);
   /// Delete copy constructor
   Relation(const Relation& other)=delete;
   /// Move constructor
   Relation(Relation&& other)=default;
   /// The destructor
   ~Relation();
-
-  int getId();
 
   void findMINValueOfColumns(void);
   void findMAXValueOfColumns(void);
