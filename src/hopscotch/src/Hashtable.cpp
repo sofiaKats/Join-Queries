@@ -10,10 +10,10 @@ Hashtable::Hashtable(int tableR_size){
     this->depth = findClosestPowerOf2(tableR_size);
     this->table_size = pow(2,depth);
     this->emptySpaces = table_size;
-    if (table_size < 64)  {
+    if (table_size < 4)  {
         H = table_size;
     }
-    else H = 64;
+    else H = 4;
 
     hashtable = new Index*[table_size];
     for (int i=0; i < table_size; i++)
@@ -36,7 +36,7 @@ int Hashtable::findClosestPowerOf2(int number){
         power*=2;
         counter++;
     }
-
+    counter+=1;
     return counter;
 }
 
@@ -139,7 +139,7 @@ void Hashtable::remove_value(int pos, int hash_value ){
 
 
 void Hashtable::resize(){
-    cout << "start resize " << endl;
+    cout << " start resize " << endl;
     Index** hashtable_old = hashtable;
     int table_size_old = table_size;
 
@@ -157,9 +157,7 @@ void Hashtable::resize(){
         if (hashtable_old[i]->get_has_value())  {
             //add duplicates also
             if (hashtable_old[i]->has_duplicates()){
-                //cout << "resize dupl " << hashtable_old[i]->getTuple()->payload << endl;
                 for (int k = 0; k < hashtable_old[i]->getDuplicates()->activeSize; k++){
-                    //cout << " RESIZE ADD " << endl;
                     add(hashtable_old[i]->getTuple()->payload, hashtable_old[i]->getDuplicates()->arr[k]);
                 }
             }
@@ -191,16 +189,14 @@ void Hashtable::add(int payload, int value){
     int pos = searchFirstPos(tuple, hashed_payload);
     if (pos == -2) {return;}
     if (pos != -1 && pos!=-2) {
-        //cout << "DUPLICATE VALUE " << payload << " " << value << endl;
         addDupl(tuple, pos);
         return;
     }
-    //cout << "NON DUPLICATE VALUE " << payload << endl;
 
     if (checkHashtableFull()) resize();
 
     while (checkBitmapFull(hashed_payload)) {
-        H+=8;
+        H+=2;
         //cout << "!!!!!!!!!!!!!!Resize2" << endl;
         resize();
         hashed_payload = hash(payload);
@@ -285,10 +281,10 @@ int Hashtable::findNeighborPosByK(int currPos, int k){
     return (currPos + k + table_size)%table_size;
 }
 
-// Matches* Hashtable::contains(Tuple* tuple){
+// MatchesPtr* Hashtable::contains(Tuple* tuple){
 //     //find hash value and neighborhood
 //     int nei = H;
-//     Matches* matches = new Matches(nei);
+//     MatchesPtr* matches = new MatchesPtr(nei);
 //     int payload2 = tuple->payload;
 //     int hashhop = hash(payload2);
 //     int currentBucket = hashhop;
@@ -314,14 +310,14 @@ int Hashtable::findNeighborPosByK(int currPos, int k){
 MatchesPtr* Hashtable::contains(Tuple* tuple){
     //find hash value and neighborhood
     int nei = H;
-    MatchesPtr* matches = new MatchesPtr(nei);
+    MatchesPtr* matches = new MatchesPtr(64);
     int32_t payload2 = tuple->payload;
     int hashhop = hash(payload2);
     int currentBucket = hashhop;
 
     for (int loops = 0; loops < nei; loops++){
         if (hashtable[hashhop]->get_bitmap_index(loops) == 1){
-            int32_t payload1 = hashtable[currentBucket]->getTuple()->payload;
+            int payload1 = hashtable[currentBucket]->getTuple()->payload;
 
             if (payload1 == payload2){
                 Tuple* t = new Tuple(hashtable[currentBucket]->getTuple()->key, tuple->key);
@@ -329,13 +325,10 @@ MatchesPtr* Hashtable::contains(Tuple* tuple){
                     matches->tuples[matches->activeSize++] = t;
 
                     if (hashtable[currentBucket]->has_duplicates()){
-                        //cout << "contains: duplicates are " << hashtable[currentBucket]->getDuplicates()->activeSize << " with value " << tuple->payload << endl;
                         for (int k = 0; k < hashtable[currentBucket]->getDuplicates()->activeSize; k++){
-                            //cout << " " << hashtable[currentBucket]->getDuplicates()->arr[k];
                             Tuple* t = new Tuple(hashtable[currentBucket]->getDuplicates()->arr[k], tuple->key);
                             matches->tuples[matches->activeSize++] = t;
                         }
-                        //cout << endl;
                     }
                 }
             }
@@ -364,10 +357,10 @@ int Hashtable::searchFirstPos(Tuple* tuple, int hashhop){
 
     int currentBucket = hashhop;
     for (int loops = 0; loops < H; loops++){
-        if (!hashtable[hashhop]->get_has_value()) {currentBucket = findNeighborPosByK(currentBucket, 1); continue;}
+        if (!hashtable[currentBucket]->get_has_value()) {currentBucket = findNeighborPosByK(currentBucket, 1); continue;}
 
-        if (tuple->payload == hashtable[hashhop]->getTuple()->payload){
-            if ((tuple->key != hashtable[hashhop]->getTuple()->key) && (!hashtable[hashhop]->searchDupls(tuple->key)))
+        if (tuple->payload == hashtable[currentBucket]->getTuple()->payload){
+            if ((tuple->key != hashtable[currentBucket]->getTuple()->key) && (!hashtable[currentBucket]->searchDupls(tuple->key)))
                 return currentBucket;
             else {return -2;}
         }
