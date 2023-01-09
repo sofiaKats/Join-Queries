@@ -11,13 +11,15 @@ private:
   void updateURFirst(Matches*, int, int);
   void updateURonlyR(Matches*, int, int);
   void updateURonlyS(Matches*, int, int);
-  void updateURself_Filter(int, SingleCol*);
+  void updateURfilter(int, SingleCol*);
+  void updateURself(int,int, SelfCols*);
   void clearUsedRelations();
 
   bool isSelfJoin(unsigned int, unsigned int);
   bool isFilterJoin(char);
 
-  SingleCol* selfJoin(RelColumn*, RelColumn*);
+  //SingleCol* selfJoin(RelColumn*, RelColumn*);
+  SelfCols* selfJoin(RelColumn*, RelColumn*);
   SingleCol* filterJoin(RelColumn*, char, int);
 
   uint32_t getFirstURrow();

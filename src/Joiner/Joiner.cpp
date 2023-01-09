@@ -66,7 +66,7 @@ string Joiner::Join(Query& query)
       RelColumn* relR = GetUsedRelation(query.prdcts[idx]->relation_left, query.prdcts[idx]->binding_left, query.prdcts[idx]->column_left);
       SingleCol* matches = filterJoin(relR, query.prdcts[idx]->operation, query.prdcts[idx]->number);
       if (firstJoin) usedRelations = new UsedRelations(matches->activeSize * MAX_NEI_SIZE, query.number_of_relations);
-      updateURself_Filter(query.prdcts[idx]->binding_left, matches);
+      updateURfilter(query.prdcts[idx]->binding_left, matches);
       delete relR;
       delete matches;
     }
@@ -74,9 +74,9 @@ string Joiner::Join(Query& query)
     else if (query.prdcts[idx]->self_join){
       RelColumn* relR = GetUsedRelation(query.prdcts[idx]->relation_left, query.prdcts[idx]->binding_left, query.prdcts[idx]->column_left);
       RelColumn* relS = GetUsedRelation(query.prdcts[idx]->relation_right, query.prdcts[idx]->binding_right, query.prdcts[idx]->column_right);
-      SingleCol* matches = selfJoin(relR, relS);
+      SelfCols* matches = selfJoin(relR, relS);
       if (firstJoin) usedRelations = new UsedRelations(matches->activeSize * MAX_NEI_SIZE, query.number_of_relations);
-      updateURself_Filter(query.prdcts[idx]->binding_left, matches);
+      updateURself(query.prdcts[idx]->binding_left, query.prdcts[idx]->binding_right, matches);
       delete relR;
       delete relS;
       delete matches;
@@ -215,7 +215,7 @@ void Joiner::updateURonlyS(Matches* matches, int relUR, int relNew){
   moveUR(temp);
 }
 //-----------------------------------------------------------------------
-void Joiner::updateURself_Filter(int relId, SingleCol* sc){
+void Joiner::updateURfilter(int relId, SingleCol* sc){
   if (sc->activeSize == 0){ //NO matches clear UR
     clearUsedRelations();
     return;
@@ -251,16 +251,69 @@ void Joiner::updateURself_Filter(int relId, SingleCol* sc){
     if (--actives == 0) return;
   }
 }
+void Joiner::updateURself(int relRid, int relSid, SelfCols* sc){
+  if (sc->activeSize == 0){ //NO matches clear UR
+    clearUsedRelations();
+    return;
+  }
+  if (firstJoin){
+    firstJoin = false;
+    for (uint32_t i = 0; i < sc->activeSize; i++){
+      usedRelations->matchRows[i] = new MatchRow(usedRelations->rowSize);
+      usedRelations->matchRows[i]->arr[relRid] = sc->arr[i][0];
+      usedRelations->matchRows[i]->arr[relSid] = sc->arr[i][1];
+
+    }
+    usedRelations->activeSize = sc->activeSize;
+    return;
+  }
+
+  uint32_t actives = usedRelations->activeSize;
+  bool del;
+  for (uint32_t i=0; i < usedRelations->size; i++){
+    if (usedRelations->matchRows[i] == NULL) continue;
+
+    del = true;
+    uint32_t rowidR = usedRelations->matchRows[i]->arr[relRid];
+    uint32_t rowidS = usedRelations->matchRows[i]->arr[relSid];
+
+    for (uint32_t j=0; j < sc->activeSize; j++){ /// Check if exists in new match table
+      if (rowidR == sc->arr[j][0] && rowidS == sc->arr[j][1]){
+        del = false;
+        break;
+      }
+    }
+    if (del){
+      delete usedRelations->matchRows[i];
+      usedRelations->matchRows[i] = NULL;
+      usedRelations->activeSize--;
+    }
+    if (--actives == 0) return;
+  }
+}
+//-- old self join--------------------
 //-----------------------------------------------------------------------
-SingleCol* Joiner::selfJoin(RelColumn* relR, RelColumn* relS){
-  SingleCol* singleCol = new SingleCol(relR->num_tuples);
-  for (uint32_t i=0; i<relR->num_tuples; i++){
+// SingleCol* Joiner::selfJoin(RelColumn* relR, RelColumn* relS){
+//   SingleCol* singleCol = new SingleCol(relR->num_tuples);
+//   for (uint32_t i=0; i < relR->num_tuples; i++){
+//     if (relR->tuples[i].payload == relS->tuples[i].payload){
+//       singleCol->arr[singleCol->activeSize] = relR->tuples[i].key;
+//       singleCol->activeSize++;
+//     }
+//   }
+//   return singleCol;
+// }
+//-----------------------------------------------------------------------
+SelfCols* Joiner::selfJoin(RelColumn* relR, RelColumn* relS){
+  SelfCols* selfCols = new SelfCols(relR->num_tuples);
+  for (uint32_t i=0; i < relR->num_tuples; i++){
     if (relR->tuples[i].payload == relS->tuples[i].payload){
-      singleCol->arr[singleCol->activeSize] = relR->tuples[i].key;
-      singleCol->activeSize++;
+      selfCols->arr[selfCols->activeSize][0] = relR->tuples[i].key;
+      selfCols->arr[selfCols->activeSize][1] = relS->tuples[i].key;
+      selfCols->activeSize++;
     }
   }
-  return singleCol;
+  return selfCols; 
 }
 //-----------------------------------------------------------------------
 bool Joiner::isSelfJoin(unsigned int relR, unsigned int relS){
