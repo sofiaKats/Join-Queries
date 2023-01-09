@@ -10,15 +10,15 @@ PartitionedHashJoin::PartitionedHashJoin(RelColumn* relR, RelColumn* relS){
 
 Matches* PartitionedHashJoin::Solve(){
   Matches* matches;
-  Part *partitionedS = NULL, *partitionedR = new Part();
-  partitionedR->rel = new RelColumn(relR->num_tuples);
-  int passCount = PartitionRec(partitionedR, relR);
+  Part *partitionedS = NULL, *partitionedR = new Part(); //Move to Merge
+  partitionedR->rel = new RelColumn(relR->num_tuples); // Move to Merge
+  int passCount = PartitionRec(&partitionedR, relR);
 
   try{
     BuildHashtables(partitionedR);
-    partitionedS = new Part();
-    partitionedS->rel = new RelColumn(relS->num_tuples);
-    PartitionRec(partitionedS, relS, passCount);
+    partitionedS = new Part(); //Move to Merge
+    partitionedS->rel = new RelColumn(relS->num_tuples); //Move to Merge
+    PartitionRec(&partitionedS, relS, passCount);
     matches = Join(partitionedR, partitionedS);
   }
   catch(const exception &e){
@@ -30,30 +30,34 @@ Matches* PartitionedHashJoin::Solve(){
   return matches;
 }
 
- void PartitionedHashJoin::Merge(Part* destPart, Part* part, int from, int n){
-   uint32_t partIndex = 0;
-   uint32_t index = 0;
-   uint32_t base = 0;
+void PartitionedHashJoin::Merge(Part** destPart, Part* part, uint32_t from, int n, int passNum){
+  if (passNum == 1) { *destPart = part; return; }
+  uint32_t partIndex = 0;
+  uint32_t index = 0;
+  uint32_t base = 0;
 
-   //Merge Relation table
-   for (int i = from; i < from + part->rel->num_tuples; i++){
-     destPart->rel->tuples[i] = part->rel->tuples[partIndex++];
-   }
-   //Init PrefixSum table
-   if (destPart->prefixSum == NULL)
-      destPart->prefixSum = new PrefixSum(pow(2, n) + 1);
-   //Merge PrefixSum table
-   index = destPart->prefixSum->activeSize;
-   base = destPart->prefixSum->arr[index][1];
+  //Merge Relation table
+  for (int i = from; i < from + part->rel->num_tuples; i++){
+   (*destPart)->rel->tuples[i] = part->rel->tuples[partIndex++];
+  }
+  //Init PrefixSum table
+  if ((*destPart)->prefixSum == NULL)
+   (*destPart)->prefixSum = new PrefixSum(pow(2, n) + 10);
 
-   for (int i = 0; i < part->prefixSum->length; i++){
-     destPart->prefixSum->arr[i+index][0] = part->prefixSum->arr[i][0];
-     destPart->prefixSum->arr[i+index][1] = part->prefixSum->arr[i][1] + base;
-     destPart->prefixSum->activeSize++;
-   }
+  //Merge PrefixSum table
+  index = (*destPart)->prefixSum->activeSize;
+  index = index == 0 ? index : --(*destPart)->prefixSum->activeSize;
+  base = (*destPart)->prefixSum->arr[index][1];
+
+  for (int i = 0; i < part->prefixSum->activeSize; i++){
+   (*destPart)->prefixSum->arr[i+index][0] = part->prefixSum->arr[i][0];
+   (*destPart)->prefixSum->arr[i+index][1] = part->prefixSum->arr[i][1] + base;
+   (*destPart)->prefixSum->activeSize++;
+  }
+  delete part;
 }
 
-int PartitionedHashJoin::PartitionRec(Part* finalPart, RelColumn* rel, int maxPasses, int n, int passNum, int from, int to){
+int PartitionedHashJoin::PartitionRec(Part** finalPart, RelColumn* rel, int maxPasses, int n, int passNum, uint32_t from, uint32_t to){
   passNum++;
   n++;
   int passCount = 0;
@@ -63,13 +67,11 @@ int PartitionedHashJoin::PartitionRec(Part* finalPart, RelColumn* rel, int maxPa
 
   if (passNum == maxPasses || partition->GetLargestTableSize() < L2CACHE){
     //Merge Relation and PrefixSum table to finalPart tables
-    Merge(finalPart, part, from, n);
+    Merge(finalPart, part, from, n, passNum);
     delete partition;
-    delete part;
     return passNum;
   }
-
-  for (int i = 0; i < part->prefixSum->length - 1; i++){
+  for (uint32_t i = 0; i < part->prefixSum->length - 1; i++){
     from = part->prefixSum->arr[i][1];
     to = part->prefixSum->arr[i+1][1];
     passCount = PartitionRec(finalPart, part->rel, maxPasses, n, passNum, from, to);
@@ -85,7 +87,7 @@ void PartitionedHashJoin::BuildHashtables(Part* part){
   uint32_t hashtablesLength = part->prefixSum->activeSize;
   uint32_t partitionSize;
   uint32_t indexR = 0;
-  
+
   part->hashtables = new Hashtable*[hashtablesLength];
   //for every partition table
   for (uint32_t i = 1; i < hashtablesLength; i++){
