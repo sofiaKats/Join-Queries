@@ -1,24 +1,19 @@
 #include "Joiner.hpp"
 
 Joiner::Joiner(uint32_t size){
-  this->size = size;
   relations = new Relation*[size]{};
 }
 //-----------------------------------------------------------------------
 void Joiner::AddRelation(const char* fileName)
 // Loads a relation from disk
 {
-  for (int i = 0; i < size; i++)
-  if (relations[i] == NULL){
-    relations[i] = new Relation(fileName, i);
-    return;
-  }
+    relations[numRelations++] = new Relation(fileName);
 }
 //---------------------------------------------------------------------------
 Relation& Joiner::GetRelation(unsigned relationId)
 // Loads a relation from disk
 {
-  if (relationId >= size) {
+  if (relationId >= numRelations) {
     char error[256];
     sprintf(error, "* relation with id: %d does not exist", relationId);
     throw runtime_error(error);
@@ -124,7 +119,6 @@ uint64_t Joiner::Checksum(unsigned relationId, unsigned binding, unsigned colId)
   for (int i=0; i<usedRelations->size; i++){
     if (usedRelations->matchRows[i] == NULL) continue;
     uint32_t idx = usedRelations->matchRows[i]->arr[binding];
-    if (idx == -1) return 0;
     sum += rel.columns[colId][idx];
   }
   return sum;
@@ -155,23 +149,23 @@ void Joiner::updateUsedRelations(Matches* matches, int relRid, int relSid){
 }
 //-----------------------------------------------------------------------
 void Joiner::updateURFirst(Matches* matches, int relRid, int relSid){
-  uint32_t i;
-  for (i=0; i < matches->activeSize; i++){
+  for (uint32_t i=0; i < matches->activeSize; i++){
     usedRelations->matchRows[i] = new MatchRow(usedRelations->rowSize);
     usedRelations->matchRows[i]->arr[relRid] = matches->tuples[i]->key;
     usedRelations->matchRows[i]->arr[relSid] = matches->tuples[i]->payload;
   }
-  usedRelations->activeSize = i;
+  usedRelations->activeSize = matches->activeSize;
 }
 //-----------------------------------------------------------------------
 void Joiner::updateURonlyR(Matches* matches, int relUR, int relNew){
   UsedRelationsTemp* temp = new UsedRelationsTemp(matches->activeSize * MAX_NEI_SIZE, usedRelations->rowSize);
-
   uint32_t actives = usedRelations->activeSize;
+  bool del;
+
   for (uint32_t i=0; i < usedRelations->size; i++){ /// For each entry from usedRelations
     if (usedRelations->matchRows[i] == NULL) continue;
 
-    bool del = true;
+    del = true;
     uint32_t rowid = usedRelations->matchRows[i]->arr[relUR];
     for (uint32_t j=0; j < matches->activeSize; j++){ /// Check if exists in new match table
 
@@ -196,11 +190,12 @@ void Joiner::updateURonlyS(Matches* matches, int relUR, int relNew){
   UsedRelationsTemp* temp = new UsedRelationsTemp(matches->activeSize * MAX_NEI_SIZE, usedRelations->rowSize);
 
   uint32_t actives = usedRelations->activeSize;
+  bool del;
 
   for (uint32_t i=0; i < usedRelations->size; i++){ /// For each entry from usedRelations
     if (usedRelations->matchRows[i] == NULL) continue;
 
-    bool del = true;
+    del = true;
     uint32_t rowid = usedRelations->matchRows[i]->arr[relUR];
     for (uint32_t j=0; j<matches->activeSize; j++){ /// Check if exists in new match table
       if (rowid == matches->tuples[j]->payload){
@@ -227,20 +222,20 @@ void Joiner::updateURself_Filter(int relId, SingleCol* sc){
   }
   if (firstJoin){
     firstJoin = false;
-    uint32_t i;
-    for (i = 0; i < sc->activeSize; i++){
+    for (uint32_t i = 0; i < sc->activeSize; i++){
       usedRelations->matchRows[i] = new MatchRow(usedRelations->rowSize);
       usedRelations->matchRows[i]->arr[relId] = sc->arr[i];
     }
-    usedRelations->activeSize = i;
+    usedRelations->activeSize = sc->activeSize;
     return;
   }
 
   uint32_t actives = usedRelations->activeSize;
+  bool del;
   for (uint32_t i=0; i < usedRelations->size; i++){
     if (usedRelations->matchRows[i] == NULL) continue;
 
-    bool del = true;
+    del = true;
     uint32_t rowid = usedRelations->matchRows[i]->arr[relId];
     for (uint32_t j=0; j < sc->activeSize; j++){ /// Check if exists in new match table
       if (rowid == sc->arr[j]){
@@ -337,7 +332,7 @@ void Joiner::clearUsedRelations(){
 }
 //-----------------------------------------------------------------------
 Joiner::~Joiner(){
-  for (int i = 0; i<size; i++){
+  for (int i = 0; i<numRelations; i++){
     delete relations[i];
   }
   delete[] relations;

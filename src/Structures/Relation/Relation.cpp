@@ -46,11 +46,10 @@ void Relation::loadRelation(const char* fileName)
 }
 
 //---------------------------------------------------------------------------
-Relation::Relation(const char* fileName, int id) : ownsMemory(false)
+Relation::Relation(const char* fileName) : ownsMemory(false)
   // Constructor that loads relation from disk
 {
   loadRelation(fileName);
-  this->id = id;
   column_metadata = new Metadata*[numColumns];
   for(int colId=0; colId<numColumns; colId++) column_metadata[colId] = new Metadata(this->size);
   findMINValueOfColumns();
@@ -74,8 +73,6 @@ Relation::~Relation()
   delete [] column_metadata;
   delete [] columns;*/
 }
-
-int Relation::getId(){return id;}
 
 //---------------------------------------------------------------------------
 void Relation::findMINValueOfColumns(void){

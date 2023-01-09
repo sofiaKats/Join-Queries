@@ -33,7 +33,7 @@ public:
   /// The relations that might be joined
   Relation** relations;
   UsedRelations* usedRelations = NULL;
-  uint32_t size;
+  uint32_t numRelations = 0;
   /// Add relation
   void AddRelation(const char* fileName);
   /// Get relation

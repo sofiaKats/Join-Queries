@@ -166,7 +166,6 @@ void* Partition::thread_CreateHistogram(void* vargp){
 
 PrefixSum* Partition::CreatePrefixSum(Hist* hist){
   uint32_t psum = 0;
-  uint32_t pIndex = 0;
   PrefixSum* prefixSum;
 
   prefixSum = new PrefixSum(hist->activeSize + 1);
@@ -174,16 +173,14 @@ PrefixSum* Partition::CreatePrefixSum(Hist* hist){
   for (uint32_t i = 0; i < hist->length; i++){
     if (hist->arr[i] == 0)
       continue;
-    prefixSum->arr[pIndex][0] = i;
-    prefixSum->arr[pIndex++][1] = psum;
+    prefixSum->arr[prefixSum->activeSize][0] = i;
+    prefixSum->arr[prefixSum->activeSize++][1] = psum;
     psum += hist->arr[i];
   }
-  prefixSum->arr[pIndex][0] = -1;
-  prefixSum->arr[pIndex][1] = psum;
+  prefixSum->arr[prefixSum->activeSize][0] = -1;
+  prefixSum->arr[prefixSum->activeSize++][1] = psum;
 
   return prefixSum;
 }
 
-uint32_t Partition::GetLargestTableSize(){
-  return largestTableSize;
-}
+uint32_t Partition::GetLargestTableSize(){ return largestTableSize; }
