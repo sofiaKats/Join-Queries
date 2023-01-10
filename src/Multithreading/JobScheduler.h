@@ -3,7 +3,7 @@
 #include "Job.h"
 #include "Queue.h"
 
-#define NUM_THREADS 2
+#define NUM_THREADS 8
 using namespace std;
 
 class JobScheduler{

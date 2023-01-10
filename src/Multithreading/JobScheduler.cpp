@@ -46,6 +46,7 @@ void* JobScheduler::do_work(void* object){
 		while(sch->q->size <= 0){ //while queue empty
       if(sch->wait_all){
         sch->counter++;
+        pthread_cond_signal(&(sch->q_empty));
 				//pthread_mutex_unlock(&(sch->qlock));
         //pthread_barrier_wait(&(sch->barrier));
 			}
@@ -106,10 +107,8 @@ int JobScheduler::wait_all_tasks_finish(){
 
   //pthread_barrier_wait(&barrier);
   while(1){
-    pthread_mutex_lock(&qlock);
-    if(counter >= execution_threads)
-      break;
-    pthread_mutex_unlock(&qlock);
+    pthread_cond_wait(&q_empty,&qlock);
+    if(counter >= execution_threads) break;
   }
   this->wait_all = false;
   pthread_mutex_unlock(&qlock);

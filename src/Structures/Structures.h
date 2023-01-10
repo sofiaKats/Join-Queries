@@ -3,7 +3,7 @@
 #include "Relation/Relation.hpp"
 #include "../hopscotch/src/Hashtable.h"
 
-#define MAX_NEI_SIZE 100
+#define MAX_MATCHES 36
 
 using namespace std;
 
@@ -93,6 +93,7 @@ typedef struct UsedRelations{
   uint32_t size;
   uint32_t rowSize;
   uint32_t activeSize = 0;
+  bool firstJoin = true;
   UsedRelations(uint32_t size, uint32_t rowSize){
     this->size = size;
     this->rowSize = rowSize;

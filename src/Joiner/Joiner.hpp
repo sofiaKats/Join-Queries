@@ -6,14 +6,12 @@
 //---------------------------------------------------------------------------
 class Joiner {
 private:
-  bool firstJoin = true;
-  void updateUsedRelations(Matches*, int, int);
-  void updateURFirst(Matches*, int, int);
-  void updateURonlyR(Matches*, int, int);
-  void updateURonlyS(Matches*, int, int);
-  void updateURfilter(int, SingleCol*);
-  void updateURself(int,int, SelfCols*);
-  void clearUsedRelations();
+  void updateUsedRelations(UsedRelations*, Matches*, int, int);
+  void updateURFirst(UsedRelations*, Matches*, int, int);
+  void updateURonlyR(UsedRelations*, Matches*, int, int);
+  void updateURonlyS(UsedRelations*, Matches*, int, int);
+  void updateURfilter(UsedRelations*, int, SingleCol*);
+  void updateURself(UsedRelations*, int,int, SelfCols*);
 
   bool isSelfJoin(unsigned int, unsigned int);
   bool isFilterJoin(char);
@@ -22,19 +20,18 @@ private:
   SelfCols* selfJoin(RelColumn*, RelColumn*);
   SingleCol* filterJoin(RelColumn*, char, int);
 
-  uint32_t getFirstURrow();
+  uint32_t getFirstURrow(UsedRelations*);
 
-  void moveUR(UsedRelationsTemp*);
-  void tempStoreDuplicatesR(int, UsedRelationsTemp*, int, Matches*, uint32_t, int);
-  void tempStoreDuplicatesS(int, UsedRelationsTemp*, int, Matches*, uint32_t, int);
+  void moveUR(UsedRelations*, UsedRelationsTemp*);
+  void tempStoreDuplicatesR(UsedRelations*, int, UsedRelationsTemp*, int, Matches*, uint32_t, int);
+  void tempStoreDuplicatesS(UsedRelations*, int, UsedRelationsTemp*, int, Matches*, uint32_t, int);
 
   void printMatches(Matches* matches);
-  bool bothRelsUsed(int, int);
+  bool bothRelsUsed(UsedRelations*, int, int);
 
 public:
   /// The relations that might be joined
   Relation** relations;
-  UsedRelations* usedRelations = NULL;
   uint32_t numRelations = 0;
   /// Add relation
   void AddRelation(const char* fileName);
@@ -43,17 +40,25 @@ public:
   /// Get relation column
   RelColumn* GetRelationCol(unsigned, unsigned);
   /// Get relation column from filtered relation
-  RelColumn* GetUsedRelation(unsigned, unsigned, unsigned);
+  RelColumn* GetUsedRelation(UsedRelations*, unsigned, unsigned, unsigned);
   /// Joins a given set of relations
-  string Join(Query&);
+  static void* thread_executeQuery(void*);
   /// Prints used relations table
-  void PrintUsedRelations();
+  void PrintUsedRelations(UsedRelations*);
   /// Checksum
-  uint64_t Checksum(unsigned, unsigned, unsigned);
-  /// Clear data related to previous join
-  void clearJoinSession();
+  uint64_t Checksum(UsedRelations*, unsigned, unsigned, unsigned);
   /// constructor
   Joiner(uint32_t);
   ~Joiner();
 };
 //---------------------------------------------------------------------------
+class JoinerArgs{
+public:
+  Joiner* obj;
+  Query* query;
+  char** output;
+  int id;
+
+  JoinerArgs(Joiner* o, Query* q, char** out, int i)
+   :obj(o), query(q), output(out), id(i){}
+};

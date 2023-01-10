@@ -4,11 +4,12 @@
 #include <time.h>
 
 int main(int argc, char* argv[]){
-  clock_t start, end;
+  struct timespec start, end;
   Joiner *joiner;
   Parser parser;
   Queries *queries;
   Rels* relations;
+  char** out;
 
   cout << "==== Loading files...\n\n";
   relations = parser.OpenRelFileAndParse();
@@ -22,17 +23,18 @@ int main(int argc, char* argv[]){
   cout << "  -- loaded query files\n";
 
   cout << "\n==== Running queries...\n\n";
-  start = clock();
+  clock_gettime(CLOCK_MONOTONIC, &start);
   for (int i = 0; i < queries->size; i++){
-    if (queries->queries_arr[i] == NULL) {cout << "F\n\n"; continue;}
-    if (i==15 || i==29 || i==30 || i==39 || i==53) {cout << i + 1 << ". ---\n"; continue;}
-    cout << i + 1 << ". ";
-    joiner->Join(*queries->queries_arr[i]);
+    sch.submit_job(new Job(joiner->thread_executeQuery, (void*)new JoinerArgs(joiner, queries->queries_arr[i], out, i)));
   }
 
-  end = clock();
-  double duration = ((double)end - start)/CLOCKS_PER_SEC;
+  sch.wait_all_tasks_finish();
+  
+  clock_gettime(CLOCK_MONOTONIC, &end);
+  double duration = (end.tv_sec - start.tv_sec);
+  duration += (end.tv_nsec - start.tv_nsec) / 1000000000.0;
+
   cout << "==== Run in ~" << duration << " sec\n";
   delete joiner;
-  exit(1); // we need munmap to be called to free mapped memory
+  return 0;
 }
