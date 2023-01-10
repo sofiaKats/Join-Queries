@@ -80,7 +80,7 @@ int JobScheduler::submit_job(Job* j){
 	if(q->size == 0) { //add first
 		q->head = j;
 		q->tail = j;
-    pthread_cond_signal(&q_not_empty);
+    pthread_cond_broadcast(&q_not_empty);
 	}else {  //apppend to end;
 		q->tail->next = j;
 		q->tail = j;
