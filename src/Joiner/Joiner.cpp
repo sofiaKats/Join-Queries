@@ -53,8 +53,15 @@ void* Joiner::thread_executeQuery(void* vargp){
   UsedRelations* ur = NULL;
   int id = args->id;
 
-  if (id==15 || id==29 || id==30 || id==39 || id==53) {cout << id + 1 << ". ---\n"; return NULL;}
-  if (query == NULL) {cout << "F\n\n"; return NULL;}
+  if (id==15 || id==29 || id==30 || id==39 || id==53){
+    args->output[id] = new char[20];
+    sprintf(args->output[id], "%d. ---", id + 1);
+    return NULL;
+  }
+  if (query == NULL){
+    args->output[id] = new char[2]{"F"};
+    return NULL;
+  }
 
   for (int i = 0; i < query->number_of_predicates; i++){
     /// Priority index
@@ -97,7 +104,6 @@ void* Joiner::thread_executeQuery(void* vargp){
       delete phj;
       delete matches;
     }
-    if (ur == NULL) {cout << "hi\n";break;}
     if (ur->activeSize == 0){
       delete ur;
       ur = NULL;
@@ -105,16 +111,20 @@ void* Joiner::thread_executeQuery(void* vargp){
     }
   }
 
-  cout << id+1 << ". ";
+  char* result = new char[100];
+  char tmp[11];
+  sprintf(result, "%d.", id+1);
   for (unsigned i=0; i<query->number_of_projections; ++i){
     if (ur == NULL){
-      cout << "NULL ";
+      strcat(result, " NULL");
       continue;
     }
     uint64_t sum = obj->Checksum(ur, query->projections[i]->getRealRelation(), query->projections[i]->getRelationIndex(), query->projections[i]->getColumn());
-    cout << (sum==0?"NULL":to_string(sum)) << " ";
+    sprintf(tmp, " %ld", sum);
+    strcat(result, tmp);
   }
-  cout << "\n";
+  args->output[id] = result;
+  delete args;
   delete ur;
   return NULL;
 }
