@@ -4,19 +4,17 @@
 
 #include "JoinTreeList.hpp"
 
-typedef struct Node{
-    char combination[100];
-}Node;
-
 
 class BestTree{
 private:
 public:
     JoinTreeList** bestTrees;
+    Relation** rels;
+    int relSize;
     int size;
     int activeSize;
 
-    BestTree(int);
+    BestTree(int, Relation**, int);
     ~BestTree();
     void print();
 };

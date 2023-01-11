@@ -46,7 +46,7 @@ void SetArr::add(Set* set){
 //-------------------------JoinEnum---------------------------------------
 
 
-JoinEnum::JoinEnum(Query* q){
+JoinEnum::JoinEnum(Query* q, Relation** r, int size){
     filterIndex = 0;
     relSet = new Predicates*[q->number_of_predicates];
     for (int i = 0; i < q->number_of_predicates; i++){
@@ -57,7 +57,7 @@ JoinEnum::JoinEnum(Query* q){
         if (relSet[i]->number_after_operation) filterIndex++;
     }
     relSetSize = q->number_of_predicates;
-    bt = new BestTree(relSetSize);
+    bt = new BestTree(relSetSize, r, size);
 }
 
 
@@ -143,7 +143,7 @@ bool JoinEnum::connected(Predicates* p1, Set* s){
 
 JoinTree* JoinEnum::DP_linear(){
     for (int i = filterIndex; i < relSetSize; i++){
-        JoinTree* jt = new JoinTree(relSet[i]);
+        JoinTree* jt = new JoinTree(relSet[i], bt->rels);
         bt->bestTrees[0]->add(jt);
     }
 

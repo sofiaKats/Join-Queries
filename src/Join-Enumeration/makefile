@@ -8,7 +8,7 @@ CFLAGS = -std=c++11 -Wno-unused-parameter -g -w -pthread
 EXE_PROG = ./enum
 
 # .o files needed
-OBJS_PROG = joinMain.o BestTree.o Cost.o JoinEnum.o JoinTreeList.o ../Parser/parser.o
+OBJS_PROG = joinMain.o BestTree.o Cost.o JoinEnum.o JoinTreeList.o ../Parser/parser.o ../Structures/Relation/Relation.o
 
 # Build executables
 all: $(EXE_PROG)

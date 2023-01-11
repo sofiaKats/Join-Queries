@@ -9,7 +9,7 @@ public:
     Cost* cost;
 
     JoinTree(Predicates**,  int, Predicates*);
-    JoinTree(Predicates*);
+    JoinTree(Predicates*, Relation**);
     void print();
 };
 

@@ -15,7 +15,8 @@ typedef struct tempMetadata{
 class Cost{
 private:
     Query* query;
-    tempMetadata*** metadata; 
+    //tempMetadata*** metadata; 
+    Metadata*** metadata;
 
     //Φίλτρα της μορφής σA=k (R.A = k)
     int cost_FilterEquals(); 
@@ -32,7 +33,7 @@ private:
     //Φίλτρα της μορφής σk1 <= A <= k2 ?? NOT TO BE IMPLEMENTED NOW
 public:
     Cost();
-    Cost(Query*, Relation**);
+    Cost(Relation**, Predicates*);
 
     int cost();        // (2.2 = 3.5 & 1.0 = 2.1)
 };

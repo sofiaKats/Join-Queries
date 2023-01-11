@@ -4,13 +4,16 @@
 
 using namespace std;
 
-BestTree::BestTree(int N){
+BestTree::BestTree(int N, Relation** rels, int relSize){
     size = N;
     activeSize = 0;
     bestTrees = new JoinTreeList*[N];
     for (int i = 0; i < N; i++){
         bestTrees[i] = new JoinTreeList();
     }
+    this->rels = rels;
+    this->relSize = relSize;
+
 }
 
 void BestTree::print(){

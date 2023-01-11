@@ -2,12 +2,11 @@
 
 //-------------------------JoinTree---------------------------------------
 
-JoinTree::JoinTree(Predicates* p){
+JoinTree::JoinTree(Predicates* p, Relation** rels){
     //cout << "New join tree of size-1 predicates was just created!" << endl;
     arr = new Predicates*[1];
     size = 1;
-    //cost = nullptr;
-    cost = new Cost();
+    cost = new Cost(rels, p);
     arr[0] = p;
 }
 

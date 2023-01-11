@@ -3,9 +3,11 @@
 using namespace std;
 
 //MALLON THA PREPEI NA PAIRNEI SAN ORISMA TA RELATIONS
-Cost::Cost(Query* q, Relation**){
-    query = q;
-    metadata = new tempMetadata**[q->number_of_relations];
+Cost::Cost(Relation** rels, Predicates* p){
+    metadata = new Metadata**[2];
+    metadata[0] = rels[p->relation_left]->column_metadata;
+    metadata[1] = rels[p->relation_right]->column_metadata;
+    cout << "In cost constructor: " << metadata[0][0]->getD() << endl;
 }
 
 //PRIORITY FOR IMPLEMENTATION, CASE 0, CASE 2

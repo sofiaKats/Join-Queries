@@ -30,7 +30,7 @@ private:
     bool equalPredicates(Predicates*, Predicates*);
     bool connected(Predicates*, Set*);
 public:
-    JoinEnum(Query*);
+    JoinEnum(Query*, Relation**, int);
     JoinTree* DP_linear();
 
 };
