@@ -40,7 +40,7 @@ int main(int argc, char* argv[]){
   }
   delete[] out;
 
-  cout << "==== Run in ~" << duration << " sec\n";
+  cout << "\n==== Run in ~" << duration << " sec\n";
   sch.destroy_scheduler();
   delete joiner;
   return 0;

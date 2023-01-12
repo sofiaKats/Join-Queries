@@ -10,7 +10,7 @@ void Joiner::AddRelation(const char* fileName){
 //---------------------------------------------------------------------------
 Relation& Joiner::GetRelation(unsigned relationId){
   if (relationId >= numRelations) {
-    char error[256];
+    char error[100];
     sprintf(error, "* relation with id: %d does not exist", relationId);
     throw runtime_error(error);
   }
@@ -28,8 +28,8 @@ RelColumn* Joiner::GetRelationCol(unsigned relationId, unsigned colId){
 }
 //-----------------------------------------------------------------------
 RelColumn* Joiner::GetUsedRelation(UsedRelations* usedRelations, unsigned relationId, unsigned binding, unsigned colId){
-  int firstRow = getFirstURrow(usedRelations);
-  if (firstRow == -1 || usedRelations->matchRows[firstRow]->arr[binding] == -1)
+  MatchRow* firstRow = getFirstURrow(usedRelations);
+  if (firstRow == NULL || firstRow->arr[binding] == -1)
     return GetRelationCol(relationId, colId);
 
   Relation& rel = GetRelation(relationId);
@@ -151,14 +151,14 @@ void Joiner::updateUsedRelations(UsedRelations* usedRelations, Matches* matches,
     updateURFirst(usedRelations, matches, relRid, relSid);
     return;
   }
-  int i = getFirstURrow(usedRelations);
+  MatchRow* firstRow = getFirstURrow(usedRelations);
   // CASE 2.1: Only one of the Relations has been joined before, the Relation R., or both
-  if (usedRelations->matchRows[i]->arr[relRid] != -1){
+  if (firstRow->arr[relRid] != -1){
     updateURonlyR(usedRelations, matches, relRid, relSid);
     return;
   }
   // CASE 2.2: Only one of the Relations has been joined before, the Relation S.
-  if (usedRelations->matchRows[i]->arr[relSid] != -1){
+  if (firstRow->arr[relSid] != -1){
     updateURonlyS(usedRelations, matches, relSid, relRid);
     return;
   }
@@ -267,6 +267,7 @@ void Joiner::updateURfilter(UsedRelations* usedRelations, int relId, SingleCol* 
     if (--actives == 0) return;
   }
 }
+
 void Joiner::updateURself(UsedRelations* usedRelations, int relRid, int relSid, SelfCols* sc){
   if (sc->activeSize == 0){ //NO matches clear UR
     usedRelations->activeSize = 0;
@@ -335,14 +336,14 @@ SelfCols* Joiner::selfJoin(RelColumn* relR, RelColumn* relS){
 bool Joiner::isSelfJoin(unsigned int relR, unsigned int relS){
   return relR == relS;
 }
-uint32_t Joiner::getFirstURrow(UsedRelations* usedRelations){
-  if (usedRelations == NULL || usedRelations->firstJoin) return -1;
+MatchRow* Joiner::getFirstURrow(UsedRelations* usedRelations){
+  if (usedRelations == NULL || usedRelations->firstJoin) return NULL;
   for (uint32_t i = 0; i < usedRelations->size; i++){
     if (usedRelations->matchRows[i] != NULL){
-      return i;
+      return usedRelations->matchRows[i];
     }
   }
-  return -1;
+  return NULL;
 }
 //-----------------------------------------------------------------------
 bool Joiner::isFilterJoin(char operation){
@@ -354,24 +355,21 @@ SingleCol* Joiner::filterJoin(RelColumn* rel, char operation, int n){
   if (operation == '>'){
     for (uint32_t i = 0; i < rel->num_tuples; i++){
       if (rel->tuples[i].payload > n){
-        singleCol->arr[singleCol->activeSize] = rel->tuples[i].key;
-        singleCol->activeSize++;
+        singleCol->arr[singleCol->activeSize++] = rel->tuples[i].key;
       }
     }
   }
   else if (operation == '<'){
     for (uint32_t i = 0; i < rel->num_tuples; i++){
       if (rel->tuples[i].payload < n){
-        singleCol->arr[singleCol->activeSize] = rel->tuples[i].key;
-        singleCol->activeSize++;
+        singleCol->arr[singleCol->activeSize++] = rel->tuples[i].key;
       }
     }
   }
   else {
     for (uint32_t i = 0; i < rel->num_tuples; i++){
       if (rel->tuples[i].payload == n){
-        singleCol->arr[singleCol->activeSize] = rel->tuples[i].key;
-        singleCol->activeSize++;
+        singleCol->arr[singleCol->activeSize++] = rel->tuples[i].key;
       }
     }
   }
@@ -404,9 +402,9 @@ void Joiner::moveUR(UsedRelations* usedRelations, UsedRelationsTemp* temp){
       if (usedRelations->matchRows[j] == NULL){
         usedRelations->matchRows[j] = temp->matchRows[i];
         usedRelations->activeSize++;
+        prevJ = j + 1;
         break;
       }
-      prevJ = j + 1;
     }
   }
   delete temp;
@@ -448,9 +446,9 @@ void Joiner::printMatches(Matches* matches){
 }
 //-----------------------------------------------------------------------
 bool Joiner::bothRelsUsed(UsedRelations* usedRelations, int relRid, int relSid){
-  int i = getFirstURrow(usedRelations);
-  if (i == -1) return false;
-  if ((usedRelations->matchRows[i]->arr[relRid] != -1) && (usedRelations->matchRows[i]->arr[relSid]!=-1))
+  MatchRow* firstRow = getFirstURrow(usedRelations);
+  if (firstRow == NULL) return false;
+  if ((firstRow->arr[relRid] != -1) && (firstRow->arr[relSid] != -1))
     return true;
   return false;
 }

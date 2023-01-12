@@ -18,20 +18,22 @@ Part* Partition::BuildPartitionedTable(){
   part->prefixSum = CreatePrefixSum(hist);
   part->rel = new RelColumn(endIndex - startIndex);
 
-  for (int i = startIndex; i < endIndex; i++){
-    int hash = Hash(rel->tuples[i].payload, n);
-    int index;
+  uint32_t* indexArr = new uint32_t[part->prefixSum->length]{};
 
-    for (int j = 0; j < part->prefixSum->length; j++){
+  for (uint32_t i = startIndex; i < endIndex; i++){
+    int hash = Hash(rel->tuples[i].payload, n);
+    uint32_t index;
+
+    for (int j = 0; j < part->prefixSum->length-1; j++){
       if (part->prefixSum->arr[j][0] == hash){
-        index = part->prefixSum->arr[j][1];
+        index = part->prefixSum->arr[j][1] + indexArr[j]++;
         break;
       }
     }
 
-    for (; part->rel->tuples[index].payload != 0; index++); //find empty bucket
     part->rel->tuples[index] = rel->tuples[i];
   }
+  delete[] indexArr;
   return part;
 }
 
@@ -95,15 +97,15 @@ void* Partition::thread_BuildPartitionedTable(void* vargp){
 }
 
 Hist* Partition::CreateHistogram(){
-  int histLength = pow(2,n);
+  uint32_t histLength = pow(2,n);
   Hist* hist = new Hist(histLength);
 
-  for (int i = startIndex; i < endIndex; i++){
+  for (uint32_t i = startIndex; i < endIndex; i++){
     int index = Hash(rel->tuples[i].payload, n);
     hist->arr[index]++;
   }
 
-  for (int i = 0; i < histLength; i++){ //calculate largestTableSize
+  for (uint32_t i = 0; i < histLength; i++){ //calculate largestTableSize
     if (hist->arr[i] == 0) continue;
     hist->activeSize++;
     if (hist->arr[i] > largestTableSize)
