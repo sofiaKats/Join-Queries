@@ -14,12 +14,21 @@ typedef struct tempMetadata{
 
 class Cost{
 private:
-    Query* query;
-    //tempMetadata*** metadata; 
+    int cost;
+    //metadata of every column of every relation
     Metadata*** metadata;
+    //number of columns of each relation
+    int* columns;
+
+    //new Predicate
+    Predicates* p;
+    int size;
 
     //Φίλτρα της μορφής σA=k (R.A = k)
     int cost_FilterEquals(); 
+
+    //Φίλτρα της μορφής σk1 <= A <= k2
+    int cost_FilterSmallerBigger();
 
     //Φίλτρα της μορφής σA=Β (R.A = R.Β)
     int cost_FilterSelfJoin();
@@ -30,10 +39,9 @@ private:
     //Αυτοσυσχέτιση (R.A = R.A) ?? MALLON AUTO ENNOEI    
     int cost_SelfRelation();
 
-    //Φίλτρα της μορφής σk1 <= A <= k2 ?? NOT TO BE IMPLEMENTED NOW
 public:
-    Cost();
-    Cost(Relation**, Predicates*);
+    Cost(Relation**, Predicates*, int);
+    Cost(Predicates*, Cost*);
 
-    int cost();        // (2.2 = 3.5 & 1.0 = 2.1)
+    int findCost();        // (2.2 = 3.5 & 1.0 = 2.1)
 };

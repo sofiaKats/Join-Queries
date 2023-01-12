@@ -8,8 +8,8 @@ public:
 
     Cost* cost;
 
-    JoinTree(Predicates**,  int, Predicates*);
-    JoinTree(Predicates*, Relation**);
+    JoinTree(Predicates**,  int, Predicates*, Cost*);
+    JoinTree(Predicates*, Relation**, int);
     void print();
 };
 

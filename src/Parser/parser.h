@@ -9,9 +9,10 @@
 #define BLUE "\033[3;1;36m"
 
 #define FILTER_EQUALS 0
-#define FILTER_SELF_JOIN 1
-#define DIFF_RELATIONS 2
-#define SELF_RELATION 3
+#define FILTER_BIGGER_SMALLER 1
+#define FILTER_SELF_JOIN 2
+#define DIFF_RELATIONS 3
+#define SELF_RELATION 4
 
 
 using namespace std;

@@ -2,15 +2,15 @@
 
 //-------------------------JoinTree---------------------------------------
 
-JoinTree::JoinTree(Predicates* p, Relation** rels){
+JoinTree::JoinTree(Predicates* p, Relation** rels, int relSize){
     //cout << "New join tree of size-1 predicates was just created!" << endl;
     arr = new Predicates*[1];
     size = 1;
-    cost = new Cost(rels, p);
+    cost = new Cost(rels, p, relSize);
     arr[0] = p;
 }
 
-JoinTree::JoinTree(Predicates** p, int size, Predicates* newR){
+JoinTree::JoinTree(Predicates** p, int size, Predicates* newR, Cost* oldCost){
     arr = new Predicates*[size + 1];
     this->size = size + 1;
     cost = nullptr;
@@ -18,7 +18,7 @@ JoinTree::JoinTree(Predicates** p, int size, Predicates* newR){
         arr[i] = p[i];
     }
     arr[size] = newR;
-    cost = new Cost();
+    cost = new Cost(newR, oldCost);
 }
 
 void JoinTree::print(){
@@ -67,7 +67,7 @@ bool JoinTreeList::equalPredicates(Predicates* p1, Predicates* p2){
     if (p1->binding_left == p2->binding_left && p1->binding_right == p2->binding_right 
         && p1->operation == p2->operation && p1->column_left == p2->column_left 
         && p1->relation_right == p2->relation_right && p1->column_right == p2->column_right
-        && p1->number == p2->number)
+        && p1->number_after_operation == p2->number_after_operation)
         return true;
     return false;
 }
@@ -75,19 +75,26 @@ bool JoinTreeList::equalPredicates(Predicates* p1, Predicates* p2){
 
 JoinTreeNode* JoinTreeList::contains(Predicates** p, int size){
     if (head == nullptr) return nullptr;
-    bool flag = true;
+    bool flag = false;
     JoinTreeNode* temp = head;
     while (temp != nullptr){
         for (int i = 0; i < size; i++){
-            if (!equalPredicates(p[i], temp->jt->arr[i])){
-                flag = false;
-                break;
+            for (int j = 0; j < size; j++){
+                if (equalPredicates(p[i], temp->jt->arr[j])){
+                    flag = true;
+                    break;
+                }
             }
+            // if (!equalPredicates(p[i], temp->jt->arr[i])){
+            //     flag = false;
+            //     break;
+            // }
+            if (flag == false) break;
         }
         if (flag == true) return temp;
         temp = temp->next;
     }
-    if (flag == false) {cout << "-.-.-.-.Not contained!\n"; return nullptr;};    
+    if (flag == false) {/*cout << ".-.-.-. Not contained!\n";*/ return nullptr;};    
 }
 
 void JoinTreeList::replace(JoinTreeNode* old, JoinTree* newJ){

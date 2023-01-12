@@ -143,12 +143,13 @@ bool JoinEnum::connected(Predicates* p1, Set* s){
 
 JoinTree* JoinEnum::DP_linear(){
     for (int i = filterIndex; i < relSetSize; i++){
-        JoinTree* jt = new JoinTree(relSet[i], bt->rels);
-        bt->bestTrees[0]->add(jt);
+        JoinTree* jt = new JoinTree(relSet[i], bt->rels, bt->relSize);
+        bt->bestTrees[filterIndex]->add(jt);
     }
+    //bt->bestTrees[filterIndex]->print();
 
     SetArr* subsets = getSubsets(1);
-     cout << ".........Get all subsets with size 1" << endl;
+    cout << ".........Get all subsets with size 1" << endl;
 
     
     for (int i = 1 + filterIndex; i < relSetSize; i++){
@@ -164,14 +165,26 @@ JoinTree* JoinEnum::DP_linear(){
                 if (subsetContains(relSet[r], S)) continue;
                 if (!connected(relSet[r], S)) continue;
 
-                
-                JoinTree* CurrTree = new JoinTree(S->prdcts, S->setSize, relSet[r]);
+                //bt->bestTrees[i - 1]->print();
+                JoinTreeNode* prevTree = bt->bestTrees[i - 1]->contains(S->prdcts, S->setSize);
+
+                JoinTree* CurrTree = new JoinTree(S->prdcts, S->setSize, relSet[r], prevTree->jt->cost);
                 Set* S_new = new Set(S, relSet[r]);
 
                 subsets_new->add(S_new);
 
+                //bt->bestTrees[i]->print();
                 JoinTreeNode* JoinTreeNode = bt->bestTrees[i]->contains(S_new->prdcts, S_new->setSize);
-                if ( JoinTreeNode == NULL || JoinTreeNode->jt->cost->cost() > CurrTree->cost->cost()){
+                // if (JoinTreeNode == nullptr) cout << "Nullptr!";
+                // else {
+                //     cout << "Not null ptr";
+                //     cout << "JoinTreeNode: ";
+                //     JoinTreeNode->jt->print();
+                // }
+
+                // cout << "CurrTree: ";
+                // CurrTree->print();
+                if ( JoinTreeNode == NULL || JoinTreeNode->jt->cost->findCost() > CurrTree->cost->findCost()){
                     bt->bestTrees[i]->replace(JoinTreeNode, CurrTree);                    
                 }                
             }

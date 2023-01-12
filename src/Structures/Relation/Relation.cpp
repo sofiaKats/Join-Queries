@@ -144,6 +144,10 @@ void Metadata::setL(uint64_t L){ l=L; }
 // returns maximum value of a particular column
 uint64_t Metadata::getU(void){ return u; }
 
+int Metadata::getF(void) {return f; }
+
+void Metadata::setF(int F) {f = F; }
+
 // sets maxium value of a particular column
 void Metadata::setU(uint64_t U){ u=U; }
 
@@ -152,7 +156,7 @@ void Metadata::InitDistinctArr(void) {
   if(size > NVALUE) size = NVALUE;
   distinct_arr = new bool[size];
   // initialize array with zeros
-  for(int i=0; i<size; i++) distinct_arr[i] = false;
+  for(int i = 0; i < size; i++) distinct_arr[i] = false;
 }
 
 int Metadata::getSizeOfDistinctArray(void){ return size; }

@@ -26,6 +26,8 @@ public:
   int getSizeOfDistinctArray(void);
   void setD(int D);
   int getD(void);
+  int getF(void);
+  void setF(int);
   void increase_d_value_by_1(void);
   void decrease_d_value_by_1(void);
 };
