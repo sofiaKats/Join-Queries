@@ -28,10 +28,14 @@ int main(int argc, char* argv[]){
   for (int i = 0; i < relations->size; i++){
     r[i] = new Relation(relations->paths[i]);
   }
-  cout << relations->size << endl;
 
-  jn = new JoinEnum(queries->queries_arr[0], r, relations->size);
-  jn->DP_linear();
+  for (int i = 0; i < queries->size; i++){
+    if (queries->queries_arr[i] == nullptr) continue;
+    JoinEnum* jn = new JoinEnum(queries->queries_arr[i], r, relations->size);
+    jn->reassignPriority(queries->queries_arr[i], jn->DP_linear());
+    jn->reassignPrdctOrder();
+    delete jn;
+  }
 
   exit(1); // we need munmap to be called to free mapped memory
 }

@@ -57,6 +57,7 @@
         "typeinfo": "cpp",
         "optional": "cpp",
         "any": "cpp",
-        "regex": "cpp"
+        "regex": "cpp",
+        "variant": "cpp"
     }
 }

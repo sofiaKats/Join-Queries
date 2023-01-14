@@ -2,6 +2,7 @@
 #include "../partition-phase/PartitionedHashJoin.h"
 #include "../Structures/Structures.h"
 #include "../Parser/parser.h"
+#include "../Join-Enumeration/JoinEnum.hpp"
 
 //---------------------------------------------------------------------------
 class Joiner {
@@ -57,8 +58,10 @@ public:
   Joiner* obj;
   Query* query;
   char** output;
+  Relation** rels;
+  int relSize;
   int id;
 
-  JoinerArgs(Joiner* o, Query* q, char** out, int i)
-   :obj(o), query(q), output(out), id(i){}
+  JoinerArgs(Joiner* o, Query* q, char** out, int i, Relation** r, int s)
+   :obj(o), query(q), output(out), id(i), rels(r), relSize(s){}
 };

@@ -22,6 +22,8 @@ private:
 
     //new Predicate
     Predicates* p;
+
+    // relation number
     int size;
 
     //Φίλτρα της μορφής σA=k (R.A = k)

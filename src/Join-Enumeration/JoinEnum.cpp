@@ -47,6 +47,7 @@ void SetArr::add(Set* set){
 
 
 JoinEnum::JoinEnum(Query* q, Relation** r, int size){
+    this->q = q;
     filterIndex = 0;
     relSet = new Predicates*[q->number_of_predicates];
     for (int i = 0; i < q->number_of_predicates; i++){
@@ -74,7 +75,7 @@ void JoinEnum::getSubsetsUtil(int r, int index, Predicates** data, int i, SetArr
             //cout << "--" << data[j]->binding_left << " ";
             subsets->sets[subsetsIndex]->setSize++;
         }
-        cout << endl;
+        //cout << endl;
         subsetsIndex++;
         subsets->setArrSize++;        
         return;
@@ -109,18 +110,18 @@ SetArr* JoinEnum::getSubsets(int r){
 }
 
 bool JoinEnum::subsetContains(Predicates* rel, Set* set){
-    set->print();
-    //
-    cout << "------while rel is ";
-    cout << rel->relation_left << "." << rel->column_left << rel->operation;
-    if (rel->number_after_operation) cout << rel->number;
-    else cout << rel->relation_right << "." << rel->column_right;
-    cout << endl;
+    // set->print();
+    // //
+    // cout << "------while rel is ";
+    // cout << rel->relation_left << "." << rel->column_left << rel->operation;
+    // if (rel->number_after_operation) cout << rel->number;
+    // else cout << rel->relation_right << "." << rel->column_right;
+    // cout << endl;
     //
     for (int i = 0; i < set->setSize; i++){
         if (equalPredicates(rel, set->prdcts[i])) return true;
     }
-    cout << "Relation not contained in curr set predicates" << endl;
+    //cout << "Relation not contained in curr set predicates" << endl;
     return false;
 }
 
@@ -142,16 +143,17 @@ bool JoinEnum::connected(Predicates* p1, Set* s){
 }
 
 JoinTree* JoinEnum::DP_linear(){
-    for (int i = filterIndex; i < relSetSize; i++){
+    filterIndex = 0;
+    for (int i = 0; i < relSetSize; i++){
         JoinTree* jt = new JoinTree(relSet[i], bt->rels, bt->relSize);
         bt->bestTrees[filterIndex]->add(jt);
     }
     //bt->bestTrees[filterIndex]->print();
 
     SetArr* subsets = getSubsets(1);
-    cout << ".........Get all subsets with size 1" << endl;
+    //cout << ".........Get all subsets with size 1" << endl;
 
-    
+    //
     for (int i = 1 + filterIndex; i < relSetSize; i++){
         //SetArr* subsets = getSubsets(i);
 
@@ -159,7 +161,7 @@ JoinTree* JoinEnum::DP_linear(){
         for (int j = 0; j < subsets->setArrSize; j++){
             Set* S = subsets->sets[j];
 
-            cout << "SUBSET NO: " << j << endl;
+            //cout << "SUBSET NO: " << j << endl;
 
             for (int r = filterIndex; r < relSetSize; r++){
                 if (subsetContains(relSet[r], S)) continue;
@@ -175,12 +177,6 @@ JoinTree* JoinEnum::DP_linear(){
 
                 //bt->bestTrees[i]->print();
                 JoinTreeNode* JoinTreeNode = bt->bestTrees[i]->contains(S_new->prdcts, S_new->setSize);
-                // if (JoinTreeNode == nullptr) cout << "Nullptr!";
-                // else {
-                //     cout << "Not null ptr";
-                //     cout << "JoinTreeNode: ";
-                //     JoinTreeNode->jt->print();
-                // }
 
                 // cout << "CurrTree: ";
                 // CurrTree->print();
@@ -190,8 +186,72 @@ JoinTree* JoinEnum::DP_linear(){
             }
         }
         subsets = subsets_new;
-        cout << "\n.........Get all subsets with size " << i << endl;
+        //cout << "\n.........Get all subsets with size " << i << endl;
     }
-    bt->bestTrees[relSetSize - 1]->getHead()->jt->print();
-    //return bt->bestTrees[relSetSize - 1]->getHead()->jt;
+    //bt->bestTrees[relSetSize - 1]->getHead()->jt->print();
+    return bt->bestTrees[relSetSize - 1]->getHead()->jt;
+}
+
+void JoinEnum::reassignPriority(Query* q, JoinTree* jt){
+ //   cout << "Reassign priority " << endl;
+    for (int i = 0; i < jt->size; i++){
+        for (int j = 0; j < q->number_of_predicates; j++){
+            if (jt->arr[i] == q->prdcts[j])
+                q->join_enum_predicates[i] = j;
+        }
+    }
+    // for (int j = 0; j < q->number_of_predicates; j++){
+    //     int i = q->join_enum_predicates[j];
+
+    //     cout << q->prdcts[i]->relation_left << "." << q->prdcts[i]->column_left << q->prdcts[i]->operation;
+    //     if (q->prdcts[i]->number_after_operation) cout << q->prdcts[i]->number;
+    //     else cout << q->prdcts[i]->relation_right << "." << q->prdcts[i]->column_right;
+    //     cout << " -> ";    
+    // }
+}
+
+void JoinEnum::reassignPrdctOrder(){
+    //cout << "Reassign predicate order " << endl;
+    bool usedRels[q->number_of_projections] = {0};
+    for (int i = 0; i < q->number_of_predicates; i++){
+        int index = q->join_enum_predicates[i];
+        if (q->prdcts[index]->filter) {
+            usedRels[q->prdcts[index]->binding_left] = true;
+            continue;
+        }
+
+        int relR = q->prdcts[index]->binding_left;
+        int relS = q->prdcts[index]->binding_right;
+
+        // if (usedRels[relR] == false && usedRels[relS] == false) continue;
+        // if (usedRels[relR] == true && usedRels[relS] == false) continue;
+        // if (usedRels[relR] == true && usedRels[relS] == true) continue;
+
+        if (usedRels[relR] == false && usedRels[relS] == true){
+
+            //  switch relations, for example 3.3 = 0.1 is switched to 0.1 = 3.3
+            int temp_col_left = q->prdcts[index]->column_left;
+            int temp_rel_left = q->prdcts[index]->relation_left;
+            int temp_bind_left = q->prdcts[index]->binding_left;
+            q->prdcts[index]->binding_left = q->prdcts[index]->binding_right;
+            q->prdcts[index]->column_left = q->prdcts[index]->column_right;
+            q->prdcts[index]->relation_left = q->prdcts[index]->relation_right;
+
+            q->prdcts[index]->binding_right = temp_bind_left;
+            q->prdcts[index]->column_right = temp_col_left;
+            q->prdcts[index]->relation_right = temp_rel_left;
+        }
+        
+        usedRels[relR] == true;
+        usedRels[relS] == true;
+    }
+
+    // for (int j = 0; j < q->number_of_predicates; j++){
+    //     int i = q->join_enum_predicates[j];
+
+    //     cout << q->prdcts[i]->binding_left << "." << q->prdcts[i]->column_left << q->prdcts[i]->operation;
+    //     if (q->prdcts[i]->number_after_operation) cout << q->prdcts[i]->number;
+    //     else cout << q->prdcts[i]->binding_right << "." << q->prdcts[i]->column_right;
+    //     cout << " -> ";    
+    // }
 }

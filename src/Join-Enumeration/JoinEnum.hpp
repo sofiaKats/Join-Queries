@@ -18,6 +18,7 @@ typedef struct SetArr{
 
 class JoinEnum{
 private:
+    Query* q;
     BestTree* bt;
     Predicates** relSet; //all predicates of query   
     int relSetSize;
@@ -32,5 +33,6 @@ private:
 public:
     JoinEnum(Query*, Relation**, int);
     JoinTree* DP_linear();
-
+    void reassignPriority(Query*, JoinTree*);
+    void reassignPrdctOrder();
 };

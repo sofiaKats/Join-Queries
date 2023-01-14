@@ -50,6 +50,8 @@ void* Joiner::thread_executeQuery(void* vargp){
   JoinerArgs* args = (JoinerArgs*)vargp;
   Joiner* obj = args->obj;
   Query* query = args->query;
+  Relation** rels = args->rels;
+  int relSize = args->relSize;
   UsedRelations* ur = NULL;
   int id = args->id;
 
@@ -59,13 +61,19 @@ void* Joiner::thread_executeQuery(void* vargp){
     return NULL;
   }
   if (query == NULL){
-    args->output[id] = new char[2]{"F"};
+    args->output[id] = new char[2]{'F'};
     return NULL;
   }
+  // //New stuff
+  // JoinEnum* jn = new JoinEnum(query, rels, relSize);
+  // jn->reassignPriority(query, jn->DP_linear());
+  // jn->reassignPrdctOrder();
+  // //delete jn;
 
   for (int i = 0; i < query->number_of_predicates; i++){
     /// Priority index
-    int idx = query->priority_predicates[i];
+    //int idx = query->priority_predicates[i];
+    int idx = query->join_enum_predicates[i];
 
     if (obj->bothRelsUsed(ur, query->prdcts[idx]->binding_left, query->prdcts[idx]->binding_right)){
       query->prdcts[idx]->self_join = 1;

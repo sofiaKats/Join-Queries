@@ -21,6 +21,7 @@ public:
   uint64_t getL(void);
   void setL(uint64_t L);
   uint64_t getU(void);
+  bool checkXdistinct(int);
   void setU(uint64_t U);
   void InitDistinctArr(void);
   int getSizeOfDistinctArray(void);

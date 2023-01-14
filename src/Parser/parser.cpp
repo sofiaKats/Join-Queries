@@ -321,8 +321,8 @@ Rels* Parser::OpenRelFileAndParse(){
         if (read == 0) break;
         line[strlen(line)-1] = '\0';
         r->paths[filesCount] = new char[50];
-        //sprintf(r->paths[filesCount++], "./workloads/small/%s", line);
-        sprintf(r->paths[filesCount++], "../main/workloads/small/%s", line);
+        sprintf(r->paths[filesCount++], "./workloads/small/%s", line);
+        //sprintf(r->paths[filesCount++], "../main/workloads/small/%s", line);
 
     }
     return r;

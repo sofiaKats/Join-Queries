@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
-
+#pragma once
 
 #define IS_FINISHED 1
 #define REDFUL "\033[3;101;37m"
@@ -76,6 +76,7 @@ public:
     int priority_predicates[15];// index 0:highest priority, index 15: lowest priority, each index holds the index of the
     // predicate from the prdcts array (assuming that the only filter of all the predicates is stored in index:5 of prdcts array
     // it will be priority_predicates[0] = 5)
+    int join_enum_predicates[15];
     Query();
     ~Query();
     int ParseRelations(char* relations); // parses first part of query to find the relations of the query

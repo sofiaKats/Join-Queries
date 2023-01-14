@@ -170,3 +170,15 @@ int Metadata::getD(void){ return d; }
 void Metadata::increase_d_value_by_1(void){ d+=1; }
 
 void Metadata::decrease_d_value_by_1(void){ d-=1; }
+
+bool Metadata::checkXdistinct(int x){
+  int position;
+  if(getSizeOfDistinctArray() < NVALUE)
+  // if array size < N, we change index ~ x-u ~
+    position = (x > u) ? x - u : u - x;
+  else
+    // if array size >= N, the we change index ~ x-l mod N ~
+    position = (x > l) ? (x - l) % NVALUE : (l - x) % NVALUE;
+
+  return distinct_arr[position];
+}

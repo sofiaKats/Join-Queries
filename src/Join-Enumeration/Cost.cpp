@@ -4,7 +4,7 @@
 
 using namespace std;
 
-//Cost Constructor for just one predicate
+//  Cost Constructor for just one predicate
 Cost::Cost(Relation** rels, Predicates* p, int relSize){
     metadata = new Metadata**[relSize];
     columns = new int[relSize];
@@ -15,7 +15,6 @@ Cost::Cost(Relation** rels, Predicates* p, int relSize){
     }
     this->p = p;
     cost = 0;
-    cout << "In cost constructor: " << metadata[p->relation_right][0]->getL() << endl;
 }
 
 //---------------------------------------------------------------------------
@@ -67,12 +66,38 @@ int Cost::findCost(){
 //---------------------------------------------------------------------------
 
 int Cost::cost_FilterEquals(){
-    //for the specific column
-    // int col = p->relation_left;
-    // int k = p->number_after_operation;
-    // metadata[p->relation_left][col]->setL(k);
-    // metadata[p->relation_left][col]->setU(k);
-    return 0;
+//..............for the specific column.........................
+    int col = p->column_left;
+    int k = p->number;
+
+    //set new values
+    metadata[p->relation_left][col]->setL(k);
+    metadata[p->relation_left][col]->setU(k);
+
+    int F_a = metadata[p->relation_left][col]->getF();
+    int D_a = metadata[p->relation_left][col]->getD();
+
+    if (!metadata[p->relation_left][col]->checkXdistinct(k)){
+        if (D_a != 0) metadata[p->relation_left][col]->setF(F_a / D_a);
+        metadata[p->relation_left][col]->setD(1);
+    }
+    else {
+        metadata[p->relation_left][col]->setD(0);
+        metadata[p->relation_left][col]->setF(0);
+    }
+//..............for the other columns...............................
+    for (int i = 0; i < columns[p->relation_left]; i++){
+        if (i == col) continue; 
+
+        int F_c = metadata[p->relation_left][i]->getF();
+        int D_c = metadata[p->relation_left][i]->getD();
+
+        //  set new values
+        //  u, l dont change
+        if (D_c != 0 && F_a != 0) metadata[p->relation_left][i]->setD(D_c * (1 - pow(1 - metadata[p->relation_left][col]->getF() / F_a, F_c / D_c)) );
+        metadata[p->relation_left][i]->setF(metadata[p->relation_left][col]->getF());
+    }
+    return metadata[p->relation_left][col]->getF();
 }
 
 //---------------------------------------------------------------------------
@@ -83,8 +108,8 @@ int Cost::cost_FilterSmallerBigger(){
 //..............for the specific column.........................
     int rel = p->relation_left;
     int col = p->column_left;
-    int k1 = p->number_after_operation;
-    int k2 = p->number_after_operation;
+    int k1 = p->number;
+    int k2 = p->number;
 
     int U = metadata[rel][col]->getU();
     int D = metadata[rel][col]->getD();
@@ -93,20 +118,25 @@ int Cost::cost_FilterSmallerBigger(){
 
     //make sure k is within limits
     if (p->operation == '>'){
-        if (k1 < L) { k1 = L; k2 = U; }
+        if (k1 < L) { k1 = L; }
+        k2 = U; 
     }
     else if (p->operation == '<'){
-        if (k2 > U){ k2 = U; k1 = L; }
+        if (k2 > U){ k2 = U; }
+        k1 = L;
     }
 
     // set new values
     metadata[rel][col]->setL(k1);
     metadata[rel][col]->setU(k2);
 
-    int D_new = (k2 - k1) / (U - L) * D;
-    int F_new = (k2 - k1) / (U - L) * F;
-    metadata[rel][col]->setD(D_new);
-    metadata[rel][col]->setF(F_new);
+    int F_new = F;
+    if (U != L){
+        int D_new = ((k2 - k1) / (U - L)) * D;
+        int F_new = ((k2 - k1) / (U - L)) * F;
+        metadata[rel][col]->setD(D_new);
+        metadata[rel][col]->setF(F_new);
+    }
 
 //..............for the other columns............................
     for (int i = 0; i < columns[rel]; i++){
@@ -116,7 +146,7 @@ int Cost::cost_FilterSmallerBigger(){
 
         // set new values
         // l, u stay the same
-        if (D_c != 0) metadata[rel][i]->setD(D_c * (1 - pow(1 - F_new / F, F_c / D_c)));
+        if (D_c != 0 && F != 0) metadata[rel][i]->setD(D_c * (1 - pow(1 - F_new / F, F_c / D_c)));
         metadata[rel][i]->setF(F_new);
     }
     return F_new;    
@@ -185,8 +215,8 @@ int Cost::cost_FilterSelfJoin(){
     metadata[rel][colB]->setF(F_new);
 
    
-    if (D_a != 0) metadata[rel][colA]->setD(D_a * (1 - pow(1 - F_new / F_a, F_a / D_a)));
-    if (D_a != 0) metadata[rel][colB]->setD(D_a * (1 - pow(1 - F_new / F_a, F_a / D_a)));
+    if (D_a != 0 && F_a != 0 ) metadata[rel][colA]->setD(D_a * (1 - pow(1 - F_new / F_a, F_a / D_a)));
+    if (D_a != 0 && F_a != 0) metadata[rel][colB]->setD(D_a * (1 - pow(1 - F_new / F_a, F_a / D_a)));
 
 //..............for the other columns............................
     for (int i = 0; i < columns[rel]; i++){
@@ -196,7 +226,7 @@ int Cost::cost_FilterSelfJoin(){
         
         // set new values
         // l, u stay the same
-        if (D_c != 0) metadata[rel][i]->setD(D_c * (1 - pow(1 - F_new / F_a, F_a / D_c)));
+        if (D_c != 0 && F_a != 0) metadata[rel][i]->setD(D_c * (1 - pow(1 - F_new / F_a, F_a / D_c)));
         metadata[rel][i]->setF(F_new);
     }
     return F_new;

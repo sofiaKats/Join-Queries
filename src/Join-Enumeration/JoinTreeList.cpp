@@ -64,11 +64,17 @@ void JoinTreeList::add(JoinTree* jt){
 }
 
 bool JoinTreeList::equalPredicates(Predicates* p1, Predicates* p2){
-    if (p1->binding_left == p2->binding_left && p1->binding_right == p2->binding_right 
-        && p1->operation == p2->operation && p1->column_left == p2->column_left 
-        && p1->relation_right == p2->relation_right && p1->column_right == p2->column_right
-        && p1->number_after_operation == p2->number_after_operation)
-        return true;
+    if (p1->binding_left == p2->binding_left && p1->operation == p2->operation
+     && p1->column_left == p2->column_left){
+        if (p1->number_after_operation && p2->number_after_operation){
+            if (p1->number == p2->number) return true;
+        }
+        else if (p1->relation_after_operation && p2->relation_after_operation){
+            if ( p1->binding_right == p2->binding_right && p1->column_right == p2->column_right )
+                return true;
+        }
+        return false;
+    } 
     return false;
 }
 
@@ -85,11 +91,6 @@ JoinTreeNode* JoinTreeList::contains(Predicates** p, int size){
                     break;
                 }
             }
-            // if (!equalPredicates(p[i], temp->jt->arr[i])){
-            //     flag = false;
-            //     break;
-            // }
-            if (flag == false) break;
         }
         if (flag == true) return temp;
         temp = temp->next;
