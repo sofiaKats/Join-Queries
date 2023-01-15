@@ -53,12 +53,31 @@ JoinEnum::JoinEnum(Query* q, Relation** r, int size){
     for (int i = 0; i < q->number_of_predicates; i++){
 
         int idx = q->priority_predicates[i];
+        relSet[i] = q->prdcts[idx];
+        if (relSet[i]->number_after_operation) filterIndex++;
+    }
+    relSetSize = q->number_of_predicates;
+    bt = new BestTree(relSetSize, r, size);
+}
+
+JoinEnum::JoinEnum(Queries* queries, Relation** r, int size){
+    this->q = q;
+    filterIndex = 0;
+    relSet = new Predicates*[q->number_of_predicates];
+    for (int i = 0; i < q->number_of_predicates; i++){
+
+        int idx = q->priority_predicates[i];
         relSet[i] = new Predicates();
         relSet[i] = q->prdcts[idx];
         if (relSet[i]->number_after_operation) filterIndex++;
     }
     relSetSize = q->number_of_predicates;
     bt = new BestTree(relSetSize, r, size);
+}
+
+JoinEnum::~JoinEnum(){
+    // delete [] relSet;
+    delete bt;
 }
 
 

@@ -10,16 +10,17 @@ public:
 
     JoinTree(Predicates**,  int, Predicates*, Cost*);
     JoinTree(Predicates*, Relation**, int);
+    ~JoinTree();
     void print();
 };
 
 
 typedef struct JoinTreeNode{
     JoinTree* jt;
-    //bitVector of relationships
     int index;
     JoinTreeNode* next;
     JoinTreeNode(JoinTree*,int);
+    ~JoinTreeNode();
 }JoinTreeNode;
 
 class JoinTreeList

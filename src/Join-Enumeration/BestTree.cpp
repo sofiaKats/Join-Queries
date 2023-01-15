@@ -16,6 +16,13 @@ BestTree::BestTree(int N, Relation** rels, int relSize){
 
 }
 
+BestTree::~BestTree(){
+    for (int i = 0; i < size; i++){
+        delete bestTrees[i];
+    }
+    delete [] bestTrees;
+}
+
 void BestTree::print(){
     for (int i = 0; i < size; i++){
         cout << "BestTree with subset size: " << i << endl;

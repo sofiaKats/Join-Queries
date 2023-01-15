@@ -21,6 +21,14 @@ JoinTree::JoinTree(Predicates** p, int size, Predicates* newR, Cost* oldCost){
     cost = new Cost(newR, oldCost);
 }
 
+JoinTree::~JoinTree(){
+    // for (int i = 0; i < size; i++){
+    //     delete arr[i];
+    // }
+    // delete [] arr;
+    // delete cost;
+}
+
 void JoinTree::print(){
     for (int i = 0; i < size; i++){
         cout << arr[i]->relation_left << "." << arr[i]->column_left << arr[i]->operation;
@@ -38,11 +46,25 @@ JoinTreeNode::JoinTreeNode(JoinTree* jt, int i){
     this->index = i;
     next = nullptr; 
 }
+JoinTreeNode::~JoinTreeNode(){
+    delete jt;
+}
 
 //-------------------------JoinTreeList---------------------------------------
 JoinTreeList::JoinTreeList(){
     head = nullptr;
     size = 0;
+}
+
+JoinTreeList::~JoinTreeList(){
+    JoinTreeNode* curr = head;
+    while (curr != nullptr)
+    {
+        JoinTreeNode* nextNode = curr->next;    // get next node
+        delete curr;                         // delete current
+        curr = nextNode;        
+    }
+    
 }
 
 

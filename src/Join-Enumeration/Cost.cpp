@@ -31,6 +31,11 @@ Cost::Cost(Predicates* p, Cost* c){
     this->cost = c->cost;
 }
 
+Cost::~Cost(){
+    // delete [] metadata;
+    // delete [] columns;
+}
+
 //---------------------------------------------------------------------------
 
 int Cost::findCost(){

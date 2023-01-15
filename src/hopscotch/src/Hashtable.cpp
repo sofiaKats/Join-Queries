@@ -139,7 +139,7 @@ void Hashtable::remove_value(int pos, int hash_value ){
 
 
 void Hashtable::resize(){
-    //cout << " start resize " << endl;
+    cout << "\n start resize " << endl;
     Index** hashtable_old = hashtable;
     int table_size_old = table_size;
 

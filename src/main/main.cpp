@@ -26,12 +26,13 @@ int main(int argc, char* argv[]){
   cout << "\n==== Running queries...\n\n";
   out = new char*[queries->size];
   clock_gettime(CLOCK_MONOTONIC, &start);
+
   for (int i = 0; i < queries->size; i++){
     if (queries->queries_arr[i] == nullptr) continue;
     JoinEnum* jn = new JoinEnum(queries->queries_arr[i], joiner->relations, relations->size);
     jn->reassignPriority(queries->queries_arr[i], jn->DP_linear());
     jn->reassignPrdctOrder();
-    delete jn;
+    //delete jn;
   }
 
   for (int i = 0; i < queries->size; i++)

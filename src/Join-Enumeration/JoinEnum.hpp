@@ -32,6 +32,10 @@ private:
     bool connected(Predicates*, Set*);
 public:
     JoinEnum(Query*, Relation**, int);
+    JoinEnum(Queries*, Relation**, int);
+    void Solve();
+
+    ~JoinEnum();
     JoinTree* DP_linear();
     void reassignPriority(Query*, JoinTree*);
     void reassignPrdctOrder();

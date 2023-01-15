@@ -44,6 +44,7 @@ private:
 public:
     Cost(Relation**, Predicates*, int);
     Cost(Predicates*, Cost*);
+    ~Cost();
 
     int findCost();        // (2.2 = 3.5 & 1.0 = 2.1)
 };
