@@ -35,11 +35,12 @@ RelColumn* Joiner::GetUsedRelation(UsedRelations* usedRelations, unsigned relati
   Relation& rel = GetRelation(relationId);
   RelColumn* relColumn = new RelColumn(usedRelations->activeSize);
 
+  uint32_t rowid;
   relColumn->num_tuples = 0;
-  for (int i=0; i<usedRelations->size; i++){
+  for (uint32_t i=0; i<usedRelations->size; i++){
     if (usedRelations->matchRows[i] == NULL) continue;
 
-    uint32_t rowid = usedRelations->matchRows[i]->arr[binding];
+    rowid = usedRelations->matchRows[i]->arr[binding];
     relColumn->tuples[relColumn->num_tuples].key = rowid;
     relColumn->tuples[relColumn->num_tuples++].payload = rel.columns[colId][rowid];
   }
@@ -140,7 +141,7 @@ void* Joiner::thread_executeQuery(void* vargp){
 uint64_t Joiner::Checksum(UsedRelations* usedRelations, unsigned relationId, unsigned binding, unsigned colId){
   uint64_t sum = 0;
   Relation& rel = GetRelation(relationId);
-  for (int i=0; i<usedRelations->size; i++){
+  for (uint32_t i=0; i<usedRelations->size; i++){
     if (usedRelations->matchRows[i] == NULL) continue;
     uint32_t idx = usedRelations->matchRows[i]->arr[binding];
     sum += rel.columns[colId][idx];
