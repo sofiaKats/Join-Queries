@@ -309,13 +309,12 @@ int Hashtable::findNeighborPosByK(int currPos, int k){
 
 MatchesPtr* Hashtable::contains(Tuple* tuple){
     //find hash value and neighborhood
-    int nei = H;
     MatchesPtr* matches = new MatchesPtr(64);
     int32_t payload2 = tuple->payload;
     int hashhop = hash(payload2);
     int currentBucket = hashhop;
 
-    for (int loops = 0; loops < nei; loops++){
+    for (int loops = 0; loops < H; loops++){
         if (hashtable[hashhop]->get_bitmap_index(loops) == 1){
             int payload1 = hashtable[currentBucket]->getTuple()->payload;
 
