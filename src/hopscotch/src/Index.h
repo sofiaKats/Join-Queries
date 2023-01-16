@@ -47,10 +47,8 @@ public:
     //for (int i = 0; i < size; i++) {this->arr[i] = new int;}
   }
   bool isFull(){
-    if (activeSize == size) return true;
-    return false;
+    return activeSize == size;
   }
-
 };
 
 // each index of the hopscoth table has a value and a corresponding bitmap
