@@ -28,3 +28,6 @@ public:
 };
 
 extern JobScheduler sch;
+extern JobScheduler sch2;
+extern int count;
+

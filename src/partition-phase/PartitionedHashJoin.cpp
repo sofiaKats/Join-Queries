@@ -10,15 +10,12 @@ PartitionedHashJoin::PartitionedHashJoin(RelColumn* relR, RelColumn* relS){
 
 Matches* PartitionedHashJoin::Solve(){
   Matches* matches;
-  Part *partitionedS = NULL, *partitionedR = new Part(); //Move to Merge
-  partitionedR->rel = new RelColumn(relR->num_tuples); // Move to Merge
-  int passCount = PartitionRec(&partitionedR, relR);
+  Part *partitionedS = NULL, *partitionedR = NULL;
+  int passCount = PartitionRec(&partitionedR, relR->num_tuples, relR);
 
   try{
     BuildHashtables(partitionedR);
-    partitionedS = new Part(); //Move to Merge
-    partitionedS->rel = new RelColumn(relS->num_tuples); //Move to Merge
-    PartitionRec(&partitionedS, relS, passCount);
+    PartitionRec(&partitionedS, relS->num_tuples, relS, passCount);
     matches = Join(partitionedR, partitionedS);
 
   }
@@ -31,20 +28,21 @@ Matches* PartitionedHashJoin::Solve(){
   return matches;
 }
 
-void PartitionedHashJoin::Merge(Part** destPart, Part* part, uint32_t from, int n, int passNum){
+void PartitionedHashJoin::Merge(Part** destPart, uint32_t relSize, Part* part, uint32_t from, int n, int passNum){
   if (passNum == 1) { *destPart = part; return; }
   uint32_t partIndex = 0;
   uint32_t index = 0;
   uint32_t base = 0;
 
+  if (*destPart == NULL){
+    *destPart = new Part();
+    (*destPart)->rel = new RelColumn(relSize);
+    (*destPart)->prefixSum = new PrefixSum(pow(2, n) + 1);
+  }
   //Merge Relation table
   for (int i = from; i < from + part->rel->num_tuples; i++){
    (*destPart)->rel->tuples[i] = part->rel->tuples[partIndex++];
   }
-  //Init PrefixSum table
-  if ((*destPart)->prefixSum == NULL)
-   (*destPart)->prefixSum = new PrefixSum(pow(2, n) + 10);
-
   //Merge PrefixSum table
   index = (*destPart)->prefixSum->activeSize;
   index = index == 0 ? index : --(*destPart)->prefixSum->activeSize;
@@ -58,7 +56,7 @@ void PartitionedHashJoin::Merge(Part** destPart, Part* part, uint32_t from, int 
   delete part;
 }
 
-int PartitionedHashJoin::PartitionRec(Part** finalPart, RelColumn* rel, int maxPasses, int n, int passNum, uint32_t from, uint32_t to){
+int PartitionedHashJoin::PartitionRec(Part** finalPart, uint32_t finalSize, RelColumn* rel, int maxPasses, int n, int passNum, uint32_t from, uint32_t to){
   passNum++;
   n++;
   int passCount = 0;
@@ -67,15 +65,15 @@ int PartitionedHashJoin::PartitionRec(Part** finalPart, RelColumn* rel, int maxP
   Part* part = partition->BuildPartitionedTable();
 
   if (passNum == maxPasses || partition->GetLargestTableSize() < L2CACHE){
-    //Merge Relation and PrefixSum table to finalPart tables
-    Merge(finalPart, part, from, n, passNum);
+    //Merge Relation and PrefixSum table to a final Part
+    Merge(finalPart, finalSize, part, from, n, passNum);
     delete partition;
     return passNum;
   }
   for (uint32_t i = 0; i < part->prefixSum->length - 1; i++){
     from = part->prefixSum->arr[i][1];
     to = part->prefixSum->arr[i+1][1];
-    passCount = PartitionRec(finalPart, part->rel, maxPasses, n, passNum, from, to);
+    passCount = PartitionRec(finalPart, finalSize, part->rel, maxPasses, n, passNum, from, to);
   }
 
   delete partition;
@@ -108,29 +106,31 @@ void PartitionedHashJoin::BuildHashtables(Part* part){
   }
 }
 
-// Matches* PartitionedHashJoin::Join(Part* p1, Part* p2){
-//   /// Build final array of tuples containing matching rowids
-//   uint32_t matchesSize = (p1->rel->num_tuples > p2->rel->num_tuples ? p2->rel->num_tuples : p1->rel->num_tuples) * MAX_NEI_SIZE;
-//   Matches* final = new Matches(matchesSize);
-//
-//   pthread_mutex_t mtx;
-//   pthread_mutex_init(&mtx,NULL);
-//
-//   // For every partition table
-//   for (int i = 0; i < p2->prefixSum->length; i++){
-//     if (p2->prefixSum->arr[i][0] == -1) break;
-//     int hash = p2->prefixSum->arr[i][0];
-//     int hashIndex = ExistsInPrefix(hash, p1->prefixSum);
-//     if (hashIndex != -1) // If hash value exists in relation R
-//       sch.submit_job(new Job(thread_Join, (void*)new JoinArgs(final, p1, p2, hashIndex, i, &mtx)));
-//   }
-//   sch.wait_all_tasks_finish();
-//   pthread_mutex_destroy(&mtx);
-//
-//   return final;
-// }
+Matches* PartitionedHashJoin::Join(Part* p1, Part* p2){
+  /// Build final array of tuples containing matching rowids
+  uint32_t matchesSize = (p1->rel->num_tuples > p2->rel->num_tuples ? p2->rel->num_tuples : p1->rel->num_tuples) * MAX_MATCHES;
+  Matches* final = new Matches(matchesSize);
+
+  pthread_mutex_t mtx;
+  pthread_mutex_init(&mtx,NULL);
+
+  // For every partition table
+  for (int i = 0; i < p2->prefixSum->length; i++){
+    if (p2->prefixSum->arr[i][0] == -1) break;
+    int hash = p2->prefixSum->arr[i][0];
+    int hashIndex = ExistsInPrefix(hash, p1->prefixSum);
+    if (hashIndex != -1) // If hash value exists in relation R
+      sch2.submit_job(new Job(thread_Join, (void*)new JoinArgs(final, p1, p2, hashIndex, i, &mtx)));
+  }
+  sch2.wait_all_tasks_finish();
+  pthread_mutex_destroy(&mtx);
+
+  return final;
+}
 
 void* PartitionedHashJoin::thread_Join(void* vargp){
+  //cout << "Thread id in join is " <<  pthread_self() << endl;
+
   JoinArgs* args = (JoinArgs*)vargp;
   Part* p1 = args->part1;
   Part* p2 = args->part2;
@@ -152,38 +152,38 @@ void* PartitionedHashJoin::thread_Join(void* vargp){
   delete args;
   return NULL;
 }
-Matches* PartitionedHashJoin::Join(Part* p1, Part* p2){
-  int hashtablesIndex;
+// Matches* PartitionedHashJoin::Join(Part* p1, Part* p2){
+//   int hashtablesIndex;
 
-  /// Build final array of tuples containing matching rowids
-  uint32_t matchesSize = (p1->rel->num_tuples > p2->rel->num_tuples ? p2->rel->num_tuples : p1->rel->num_tuples) * MAX_MATCHES;
-  Matches* final = new Matches(matchesSize);
+//   /// Build final array of tuples containing matching rowids
+//   uint32_t matchesSize = (p1->rel->num_tuples > p2->rel->num_tuples ? p2->rel->num_tuples : p1->rel->num_tuples) * MAX_MATCHES;
+//   Matches* final = new Matches(matchesSize);
 
-  // For every partition table
-  for (int i = 0; i < p2->prefixSum->length; i++){
-    if (p2->prefixSum->arr[i][0] == -1) break;
+//   // For every partition table
+//   for (int i = 0; i < p2->prefixSum->length; i++){
+//     if (p2->prefixSum->arr[i][0] == -1) break;
 
-    int hash = p2->prefixSum->arr[i][0];
+//     int hash = p2->prefixSum->arr[i][0];
 
-    // If hash value exists in relation R
-    hashtablesIndex = ExistsInPrefix(hash, p1->prefixSum);
+//     // If hash value exists in relation R
+//     hashtablesIndex = ExistsInPrefix(hash, p1->prefixSum);
 
-    if (hashtablesIndex != -1){
-      // For every tuple in this partition
-      for (uint32_t j = p2->prefixSum->arr[i][1]; j < p2->prefixSum->arr[i+1][1]; j++){
-        Tuple* tuple = new Tuple(p2->rel->tuples[j].key, p2->rel->tuples[j].payload);
-        MatchesPtr* matches = p1->hashtables[hashtablesIndex]->contains(tuple);
+//     if (hashtablesIndex != -1){
+//       // For every tuple in this partition
+//       for (uint32_t j = p2->prefixSum->arr[i][1]; j < p2->prefixSum->arr[i+1][1]; j++){
+//         Tuple* tuple = new Tuple(p2->rel->tuples[j].key, p2->rel->tuples[j].payload);
+//         MatchesPtr* matches = p1->hashtables[hashtablesIndex]->contains(tuple);
 
-        for (uint32_t k = 0; k < matches->activeSize; k++)
-          final->tuples[final->activeSize++] = matches->tuples[k];
+//         for (uint32_t k = 0; k < matches->activeSize; k++)
+//           final->tuples[final->activeSize++] = matches->tuples[k];
 
-        delete matches;
-        delete tuple;
-      }
-    }
-  }
-  return final;
-}
+//         delete matches;
+//         delete tuple;
+//       }
+//     }
+//   }
+//   return final;
+// }
 
 int PartitionedHashJoin::ExistsInPrefix(int hash, PrefixSum* prefixSum){
   for (int i = 0; i < prefixSum->length; i++){

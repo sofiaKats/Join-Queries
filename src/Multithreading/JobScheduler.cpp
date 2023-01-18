@@ -2,8 +2,9 @@
 
 //-----------------------------------------------------------------------
 JobScheduler sch;
+JobScheduler sch2;
 //-----------------------------------------------------------------------
-JobScheduler::JobScheduler(){ initialize_scheduler(NUM_THREADS); }
+JobScheduler::JobScheduler(){ initialize_scheduler(NUM_THREADS / 2); /*for (int i = 0; i < NUM_THREADS / 2; i++) cout << tids[i] << " "; cout << endl;*/}
 //-----------------------------------------------------------------------
 int JobScheduler::initialize_scheduler(int execution_threads){
   this->execution_threads = execution_threads;
@@ -45,10 +46,8 @@ void* JobScheduler::do_work(void* object){
 
 		while(sch->q->size <= 0){ //while queue empty
       if(sch->wait_all){
-        sch->counter++;
-        pthread_cond_signal(&(sch->q_empty));
-				//pthread_mutex_unlock(&(sch->qlock));
-        //pthread_barrier_wait(&(sch->barrier));
+        if (++sch->counter >= sch->execution_threads)
+          pthread_cond_signal(&(sch->q_empty));
 			}
       if(sch->quit){
 				pthread_mutex_unlock(&(sch->qlock));
@@ -64,7 +63,7 @@ void* JobScheduler::do_work(void* object){
 		if(sch->q->size == 0){
 			sch->q->head = NULL;
 			sch->q->tail = NULL;
-      pthread_cond_signal(&(sch->q_empty));
+      pthread_cond_broadcast(&(sch->q_empty));
 		}
 		else{
 			sch->q->head = j->next;
@@ -105,14 +104,11 @@ int JobScheduler::wait_all_tasks_finish(){
   pthread_cond_broadcast(&q_not_empty);
   pthread_mutex_unlock(&qlock);
 
-  //pthread_barrier_wait(&barrier);
-  while(1){
+  //while(counter < execution_threads){
     pthread_cond_wait(&q_empty,&qlock);
-    if(counter >= execution_threads) break;
-  }
+  //}
   this->wait_all = false;
   pthread_mutex_unlock(&qlock);
-
   return 0;
 }
 //-----------------------------------------------------------------------

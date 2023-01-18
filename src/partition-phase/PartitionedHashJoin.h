@@ -7,14 +7,14 @@ class PartitionedHashJoin {
 private:
   RelColumn* relR;
   RelColumn* relS;
-  void Merge(Part**, Part*, uint32_t, int, int);
+  void Merge(Part**, uint32_t, Part*, uint32_t, int, int);
   int ExistsInPrefix(int, PrefixSum*);
   static void* thread_Join(void* vargp);
 
 public:
   PartitionedHashJoin(RelColumn*, RelColumn*);
   Matches* Solve();
-  int PartitionRec(Part**, RelColumn*, int = MAX_PASSES, int = N, int = 0, uint32_t = 0, uint32_t = -1);
+  int PartitionRec(Part**, uint32_t, RelColumn*, int = MAX_PASSES, int = N, int = 0, uint32_t = 0, uint32_t = -1);
   void BuildHashtables(Part*);
   Matches* Join(Part*, Part*);
   void PrintHashtables(Part*);

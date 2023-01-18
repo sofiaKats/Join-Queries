@@ -52,6 +52,7 @@ int main(int argc, char* argv[]){
 
   cout << "\n==== Run in ~" << duration << " sec\n";
   sch.destroy_scheduler();
+  sch2.destroy_scheduler();
   delete joiner;
   return 0;
 }
