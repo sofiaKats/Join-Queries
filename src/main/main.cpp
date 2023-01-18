@@ -11,19 +11,27 @@ int main(int argc, char* argv[]){
   Queries *queries;
   Rels* relations;
   char** out;
+  bool testMode = false;
 
-  cout << "==== Loading files...\n\n";
+  if (argc > 1 && !strcmp(argv[1], "-t"))
+    testMode = true;
+  else if (argc > 1){
+    cout << "usage: ./program [-t|testing]\n";
+    return -1;
+  }
+
+  if (!testMode) cout << "==== Loading files...\n\n";
   relations = parser.OpenRelFileAndParse();
-  cout << "  -- loaded rel files\n";
+  if (!testMode) cout << "  -- loaded rel files\n";
   joiner = new Joiner(relations->size);
   for (int i = 0; i<relations->size; i++){
     joiner->AddRelation(relations->paths[i]);
   }
 
   queries = parser.OpenQueryFileAndParse();
-  cout << "  -- loaded query files\n";
+  if (!testMode) cout << "  -- loaded query files\n";
 
-  cout << "\n==== Running queries...\n\n";
+  if (!testMode) cout << "\n==== Running queries...\n\n";
   out = new char*[queries->size];
   clock_gettime(CLOCK_MONOTONIC, &start);
 
@@ -45,12 +53,12 @@ int main(int argc, char* argv[]){
   duration += (end.tv_nsec - start.tv_nsec) / 1000000000.0;
 
   for (int i = 0; i<queries->size; i++){
-    cout << out[i] << endl;
+    cout << out[i] <<endl;
     delete out[i];
   }
   delete[] out;
 
-  cout << "\n==== Run in ~" << duration << " sec\n";
+  if (!testMode) cout << "\n==== Run in ~" << duration << " sec\n";
   sch.destroy_scheduler();
   sch2.destroy_scheduler();
   delete joiner;
