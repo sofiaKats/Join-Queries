@@ -2,9 +2,8 @@
 
 //-----------------------------------------------------------------------
 JobScheduler sch;
-JobScheduler sch2;
 //-----------------------------------------------------------------------
-JobScheduler::JobScheduler(){ initialize_scheduler(NUM_THREADS / 2); /*for (int i = 0; i < NUM_THREADS / 2; i++) cout << tids[i] << " "; cout << endl;*/}
+JobScheduler::JobScheduler(){ initialize_scheduler(NUM_THREADS); }
 //-----------------------------------------------------------------------
 int JobScheduler::initialize_scheduler(int execution_threads){
   this->execution_threads = execution_threads;

@@ -53,14 +53,13 @@ int main(int argc, char* argv[]){
   duration += (end.tv_nsec - start.tv_nsec) / 1000000000.0;
 
   for (int i = 0; i<queries->size; i++){
-    cout << out[i] <<endl;
+    cout << out[i] << endl;
     delete out[i];
   }
   delete[] out;
 
   if (!testMode) cout << "\n==== Run in ~" << duration << " sec\n";
   sch.destroy_scheduler();
-  sch2.destroy_scheduler();
   delete joiner;
   return 0;
 }
