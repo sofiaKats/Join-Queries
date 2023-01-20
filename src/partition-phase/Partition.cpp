@@ -19,21 +19,21 @@ Part* Partition::BuildPartitionedTable(){
   part->rel = new RelColumn(endIndex - startIndex);
 
   uint32_t* indexArr = new uint32_t[part->prefixSum->length]{};
+  uint32_t index;
 
   for (uint32_t i = startIndex; i < endIndex; i++){
     int hash = Hash(rel->tuples[i].payload, n);
-    uint32_t index;
 
     for (int j = 0; j < part->prefixSum->length-1; j++){
       if (part->prefixSum->arr[j][0] == hash){
         index = part->prefixSum->arr[j][1] + indexArr[j]++;
+        part->rel->tuples[index] = rel->tuples[i];
         break;
       }
     }
-
-    part->rel->tuples[index] = rel->tuples[i];
   }
   delete[] indexArr;
+  delete hist;
   return part;
 }
 

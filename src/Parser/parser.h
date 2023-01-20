@@ -5,7 +5,7 @@
 
 #define IS_FINISHED 1
 #define REDFUL "\033[3;101;37m"
-#define RESTORE "\033[0m" 
+#define RESTORE "\033[0m"
 #define BLUE "\033[3;1;36m"
 
 #define FILTER_EQUALS 0
@@ -30,9 +30,9 @@ public:
     bool relation_after_operation; // flag to check if there is a relation after the operation of the predicate
     // can be used to speed up the filter process of the relations
     bool number_after_operation; // flag to check if there is a number after the operation of the predicate
-    int number;      // the number filter after the operation if it exists    
+    int number;      // the number filter after the operation if it exists
     int binding_right; // the relation after the operation if it exists
-    int relation_right; //the rightmost relation from the operation 
+    int relation_right; //the rightmost relation from the operation
     int column_right;  // the column after the operation if it exists
     // flags indicating the nature of a predicate
     bool filter;
@@ -70,7 +70,7 @@ public:
     char* relation[15]; // the relations that are to be used in the particular query
     int number_of_relations;
     Predicates** prdcts;
-    Projection** projections; // each object holds the relation and column to be SUMMED from part 3 of query 
+    Projection** projections; // each object holds the relation and column to be SUMMED from part 3 of query
     int number_of_projections;
     int number_of_predicates;
     int priority_predicates[15];// index 0:highest priority, index 15: lowest priority, each index holds the index of the
@@ -93,7 +93,7 @@ typedef struct Queries{
         for (int i = 0; i<size; i++){
             delete queries_arr[i];
         }
-        delete [] queries_arr;
+        delete[] queries_arr;
     }
 
 }Queries;
@@ -103,15 +103,15 @@ typedef struct Rels{
     char** paths;
     ~Rels(){
         for (int i = 0; i<size; i++){
-            delete paths[i];
+            delete[] paths[i];
         }
-        delete [] paths;
+        delete[] paths;
     }
 }Rels;
 
 class Parser {
     Queries* q;
-    Rels* r;    
+    Rels* r;
 public:
     Parser();
     ~Parser();

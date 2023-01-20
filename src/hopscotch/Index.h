@@ -35,7 +35,6 @@ public:
   Duplicates(int size){
     this->size = size;
     this->arr = new int[size];
-    //for (int i = 0; i < size; i++) {this->arr[i] = new int;}
   }
   ~Duplicates(){
     delete [] arr;

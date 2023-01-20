@@ -18,6 +18,7 @@ Index::Index(int H) : has_value(false)
 
 Index::~Index()
 {
+    delete duplicates;
     delete [] bitmap;
     if (has_value)
       delete tuple;
@@ -55,13 +56,13 @@ Tuple* Index::getTuple(){ return tuple;}
 void Index::setTuple(Tuple* t) {this->tuple = t;}
 
 bool Index::has_duplicates(){
-    if (duplicates == nullptr) return false; 
+    if (duplicates == nullptr) return false;
     else return true;
 }
 
 void Index::addDupl(int value){
     if (duplicates == nullptr){
-        duplicates = new Duplicates(100);
+        duplicates = new Duplicates(50);
     }
     if (duplicates->isFull()) duplicates->resize();
     duplicates->arr[duplicates->activeSize] = value;

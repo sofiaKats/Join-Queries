@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include "Relation/Relation.hpp"
-#include "../hopscotch/src/Hashtable.h"
+#include "../hopscotch/Hashtable.h"
 
 #define MAX_MATCHES 36
 

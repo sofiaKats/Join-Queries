@@ -24,8 +24,6 @@ Queries* Parser::OpenQueryFileAndParse() {
 
     if(fp == NULL) { perror("Error opening file"); exit(-1);}
 
-
-
     while ((read = getline(&line, &len, fp)) != -1) {
         if (read == 0) break;
         lines++;
@@ -182,7 +180,7 @@ void Query::PredicatePriority(void) {
                 //NEW
                 if (prdcts[i]->column_left == prdcts[i]->column_right)
                     prdcts[i]->flag = SELF_RELATION;
-                else 
+                else
                     prdcts[i]->flag = FILTER_SELF_JOIN;
             }
         }
@@ -300,17 +298,15 @@ Rels* Parser::OpenRelFileAndParse(){
     size_t len = 0;
     ssize_t read;
     unsigned filesCount = 0;
-    char** paths;
 
     fp = fopen("./workloads/small/small.init", "r");
-    //fp = fopen("../main/workloads/small/small.init", "r");
     if (fp == NULL){
         cout << "Could not open init file" << endl;
         exit(EXIT_FAILURE);
     }
     while ((read = getline(&line, &len, fp)) != -1) { //count lines to allocate relation table
         if (read == 0) break;
-        ++filesCount;
+        filesCount++;
     }
     r->paths = new char*[filesCount];
     r->size = filesCount;
@@ -322,8 +318,7 @@ Rels* Parser::OpenRelFileAndParse(){
         line[strlen(line)-1] = '\0';
         r->paths[filesCount] = new char[50];
         sprintf(r->paths[filesCount++], "./workloads/small/%s", line);
-        //sprintf(r->paths[filesCount++], "../main/workloads/small/%s", line);
-
     }
+    fclose(fp);
     return r;
 }

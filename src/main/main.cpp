@@ -19,7 +19,7 @@ int main(int argc, char* argv[]){
     cout << "usage: ./program [-t|testing]\n";
     return -1;
   }
-
+  //Load relations and queries
   if (!testMode) cout << "==== Loading files...\n\n";
   relations = parser.OpenRelFileAndParse();
   if (!testMode) cout << "  -- loaded rel files\n";
@@ -27,14 +27,9 @@ int main(int argc, char* argv[]){
   for (int i = 0; i<relations->size; i++){
     joiner->AddRelation(relations->paths[i]);
   }
-
   queries = parser.OpenQueryFileAndParse();
   if (!testMode) cout << "  -- loaded query files\n";
-
-  if (!testMode) cout << "\n==== Running queries...\n\n";
-  out = new char*[queries->size];
-  clock_gettime(CLOCK_MONOTONIC, &start);
-
+  //Load join enumeration
   for (int i = 0; i < queries->size; i++){
     if (queries->queries_arr[i] == nullptr) continue;
     JoinEnum* jn = new JoinEnum(queries->queries_arr[i], joiner->relations, relations->size);
@@ -42,10 +37,14 @@ int main(int argc, char* argv[]){
     jn->reassignPrdctOrder();
     //delete jn;
   }
+  //Run queries
+  if (!testMode) cout << "\n==== Running queries...\n\n";
+  out = new char*[queries->size]{};
+
+  clock_gettime(CLOCK_MONOTONIC, &start);
 
   for (int i = 0; i < queries->size; i++)
     sch.submit_job(new Job(joiner->thread_executeQuery, (void*)new JoinerArgs(joiner, queries->queries_arr[i], out, i, joiner->relations, joiner->numRelations)));
-
   sch.wait_all_tasks_finish();
 
   clock_gettime(CLOCK_MONOTONIC, &end);
@@ -53,8 +52,9 @@ int main(int argc, char* argv[]){
   duration += (end.tv_nsec - start.tv_nsec) / 1000000000.0;
 
   for (int i = 0; i<queries->size; i++){
+    if(out[i] == NULL) continue;
     cout << out[i] << endl;
-    delete out[i];
+    delete[] out[i];
   }
   delete[] out;
 
