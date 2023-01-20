@@ -10,6 +10,10 @@ Set::Set(){
     this->setSize = 0;
 }
 
+Set::~Set(){
+    delete [] prdcts;
+}
+
 Set::Set(Set* set, Predicates* p){
     setSize = 0;
     prdcts = new Predicates*[set->setSize + 1];
@@ -36,6 +40,13 @@ void Set::print(){
 SetArr::SetArr(){
     sets = new Set*[20]; 
     setArrSize = 0;   
+}
+
+SetArr::~SetArr(){
+    for (int i = 0; i < setArrSize; i++){
+        delete sets[i];
+    }
+    delete [] sets;
 }
 
 void SetArr::add(Set* set){
@@ -76,25 +87,20 @@ JoinEnum::JoinEnum(Queries* queries, Relation** r, int size){
 }
 
 JoinEnum::~JoinEnum(){
-    // delete [] relSet;
+    delete [] relSet;
     delete bt;
 }
 
 
 void JoinEnum::getSubsetsUtil(int r, int index, Predicates** data, int i, SetArr* subsets, int subsetsIndex){
-    //cout << "..........subsetsIndex : " << subsetsIndex << endl; 
     int n = relSetSize;
     // Current combination is ready, print it
     if (index == r) {
-        //cout << "here!" << endl;
         subsets->sets[subsetsIndex] = new Set();
         for (int j = 0; j < r; j++){      
-            //cout << data[j]->binding_left << endl;      
             subsets->sets[subsetsIndex]->prdcts[j] = data[j];
-            //cout << "--" << data[j]->binding_left << " ";
             subsets->sets[subsetsIndex]->setSize++;
         }
-        //cout << endl;
         subsetsIndex++;
         subsets->setArrSize++;        
         return;
@@ -124,23 +130,13 @@ SetArr* JoinEnum::getSubsets(int r){
  
     // Print all combination using temporary array 'data[]'
     getSubsetsUtil(r, 0, data, filterIndex, subsets, 0);
-    //cout << "END" << endl;
     return subsets;
 }
 
 bool JoinEnum::subsetContains(Predicates* rel, Set* set){
-    // set->print();
-    // //
-    // cout << "------while rel is ";
-    // cout << rel->relation_left << "." << rel->column_left << rel->operation;
-    // if (rel->number_after_operation) cout << rel->number;
-    // else cout << rel->relation_right << "." << rel->column_right;
-    // cout << endl;
-    //
     for (int i = 0; i < set->setSize; i++){
         if (equalPredicates(rel, set->prdcts[i])) return true;
     }
-    //cout << "Relation not contained in curr set predicates" << endl;
     return false;
 }
 
@@ -167,47 +163,32 @@ JoinTree* JoinEnum::DP_linear(){
         JoinTree* jt = new JoinTree(relSet[i], bt->rels, bt->relSize);
         bt->bestTrees[filterIndex]->add(jt);
     }
-    //bt->bestTrees[filterIndex]->print();
-
     SetArr* subsets = getSubsets(1);
-    //cout << ".........Get all subsets with size 1" << endl;
-
-    //
     for (int i = 1 + filterIndex; i < relSetSize; i++){
-        //SetArr* subsets = getSubsets(i);
 
         SetArr* subsets_new = new SetArr();
         for (int j = 0; j < subsets->setArrSize; j++){
             Set* S = subsets->sets[j];
-
-            //cout << "SUBSET NO: " << j << endl;
-
             for (int r = filterIndex; r < relSetSize; r++){
                 if (subsetContains(relSet[r], S)) continue;
                 if (!connected(relSet[r], S)) continue;
 
-                //bt->bestTrees[i - 1]->print();
                 JoinTreeNode* prevTree = bt->bestTrees[i - 1]->contains(S->prdcts, S->setSize);
 
                 JoinTree* CurrTree = new JoinTree(S->prdcts, S->setSize, relSet[r], prevTree->jt->cost);
                 Set* S_new = new Set(S, relSet[r]);
 
                 subsets_new->add(S_new);
-
-                //bt->bestTrees[i]->print();
                 JoinTreeNode* JoinTreeNode = bt->bestTrees[i]->contains(S_new->prdcts, S_new->setSize);
-
-                // cout << "CurrTree: ";
-                // CurrTree->print();
                 if ( JoinTreeNode == NULL || JoinTreeNode->jt->cost->findCost() > CurrTree->cost->findCost()){
                     bt->bestTrees[i]->replace(JoinTreeNode, CurrTree);                    
                 }                
             }
         }
+        delete subsets;
         subsets = subsets_new;
-        //cout << "\n.........Get all subsets with size " << i << endl;
     }
-    //bt->bestTrees[relSetSize - 1]->getHead()->jt->print();
+    delete subsets;
     return bt->bestTrees[relSetSize - 1]->getHead()->jt;
 }
 
@@ -219,14 +200,6 @@ void JoinEnum::reassignPriority(Query* q, JoinTree* jt){
                 q->join_enum_predicates[i] = j;
         }
     }
-    // for (int j = 0; j < q->number_of_predicates; j++){
-    //     int i = q->join_enum_predicates[j];
-
-    //     cout << q->prdcts[i]->relation_left << "." << q->prdcts[i]->column_left << q->prdcts[i]->operation;
-    //     if (q->prdcts[i]->number_after_operation) cout << q->prdcts[i]->number;
-    //     else cout << q->prdcts[i]->relation_right << "." << q->prdcts[i]->column_right;
-    //     cout << " -> ";    
-    // }
 }
 
 void JoinEnum::reassignPrdctOrder(){
@@ -241,10 +214,6 @@ void JoinEnum::reassignPrdctOrder(){
 
         int relR = q->prdcts[index]->binding_left;
         int relS = q->prdcts[index]->binding_right;
-
-        // if (usedRels[relR] == false && usedRels[relS] == false) continue;
-        // if (usedRels[relR] == true && usedRels[relS] == false) continue;
-        // if (usedRels[relR] == true && usedRels[relS] == true) continue;
 
         if (usedRels[relR] == false && usedRels[relS] == true){
 
@@ -264,13 +233,4 @@ void JoinEnum::reassignPrdctOrder(){
         usedRels[relR] == true;
         usedRels[relS] == true;
     }
-
-    // for (int j = 0; j < q->number_of_predicates; j++){
-    //     int i = q->join_enum_predicates[j];
-
-    //     cout << q->prdcts[i]->binding_left << "." << q->prdcts[i]->column_left << q->prdcts[i]->operation;
-    //     if (q->prdcts[i]->number_after_operation) cout << q->prdcts[i]->number;
-    //     else cout << q->prdcts[i]->binding_right << "." << q->prdcts[i]->column_right;
-    //     cout << " -> ";    
-    // }
 }

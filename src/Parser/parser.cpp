@@ -1,7 +1,6 @@
 #include "parser.h"
 
 /********************************* PARSER FUNCTIONS *********************************/
-// CHANGE 1 TO 50!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 Parser::Parser() {
     q = new Queries();
     r = new Rels();
@@ -319,6 +318,7 @@ Rels* Parser::OpenRelFileAndParse(){
         r->paths[filesCount] = new char[50];
         sprintf(r->paths[filesCount++], "./workloads/small/%s", line);
     }
+    if (line) free(line);
     fclose(fp);
     return r;
 }

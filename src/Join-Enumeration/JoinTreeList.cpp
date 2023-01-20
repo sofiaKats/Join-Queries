@@ -22,11 +22,8 @@ JoinTree::JoinTree(Predicates** p, int size, Predicates* newR, Cost* oldCost){
 }
 
 JoinTree::~JoinTree(){
-    // for (int i = 0; i < size; i++){
-    //     delete arr[i];
-    // }
-    // delete [] arr;
-    // delete cost;
+    delete [] arr;
+    delete cost;
 }
 
 void JoinTree::print(){

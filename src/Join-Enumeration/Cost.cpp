@@ -32,8 +32,8 @@ Cost::Cost(Predicates* p, Cost* c){
 }
 
 Cost::~Cost(){
-    // delete [] metadata;
-    // delete [] columns;
+    delete [] metadata;
+    delete [] columns;
 }
 
 //---------------------------------------------------------------------------

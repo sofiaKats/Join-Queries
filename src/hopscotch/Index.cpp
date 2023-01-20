@@ -17,10 +17,10 @@ Index::Index(int H) : has_value(false)
 }
 
 Index::~Index()
-{
-    delete duplicates;
+{   if (has_duplicates())
+        delete duplicates;
     delete [] bitmap;
-    if (has_value)
+    if (get_has_value())
       delete tuple;
 }
 

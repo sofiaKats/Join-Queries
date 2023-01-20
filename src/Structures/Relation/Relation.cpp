@@ -66,12 +66,10 @@ Relation::~Relation()
   delete[] columns;
   munmap(address, length);
   // Segmentation fault
-  /*for(int colId=0; colId<numColumns; colId++){
+  for(int colId=0; colId < numColumns; colId++){
     delete column_metadata[colId];
-    // delete [] columns[colId];
   }
   delete [] column_metadata;
-  delete [] columns;*/
 }
 
 //---------------------------------------------------------------------------

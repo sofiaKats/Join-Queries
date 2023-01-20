@@ -18,8 +18,6 @@ Hashtable::Hashtable(int tableR_size){
     hashtable = new Index*[table_size];
     for (int i=0; i < table_size; i++)
         hashtable[i] = new Index(H);
-
-    //cout << "Hashtable size is " << table_size << " tableR size " << tableR_size << endl;
 }
 
 Hashtable::~Hashtable(){
@@ -95,7 +93,6 @@ int Hashtable::find_empty_index(int i, int key){
 }
 
 void Hashtable::add_value(int pos, int value, int hash_value, Tuple* tuple, Duplicates* dupl){
-    //hash_value = hash(tuple->payload);
 
     hashtable[pos]->set_value(tuple->key);
     hashtable[pos]->set_has_value(true);
@@ -110,12 +107,10 @@ void Hashtable::add_value(int pos, int value, int hash_value, Tuple* tuple, Dupl
         indx = (i + table_size) % table_size;
         if (hash_value == indx) {
             hashtable[indx]->set_bitmap_index_to_1(loop);
-            //if (tuple->key == 470) {cout << "<><><><><>pos is " << i << endl;}
         }
         else hashtable[indx]->set_bitmap_index_to_0(loop);
         loop++;
     }
-    //if (tuple->key == 3682) cout << "value is " << value << endl;
 }
 
 void Hashtable::remove_value(int pos, int hash_value ){
@@ -270,7 +265,6 @@ int Hashtable::findSwapNeighbourPos(int emptyPos){
         posLeftToCheckBitmaps--;
     }
     if (!changed) {
-        //cout << "No element y, table need rehashing!" << endl;
         return -1;
     }
     return emptyPos;
@@ -281,31 +275,6 @@ int Hashtable::findNeighborPosByK(int currPos, int k){
     return (currPos + k + table_size)%table_size;
 }
 
-// MatchesPtr* Hashtable::contains(Tuple* tuple){
-//     //find hash value and neighborhood
-//     int nei = H;
-//     MatchesPtr* matches = new MatchesPtr(nei);
-//     int payload2 = tuple->payload;
-//     int hashhop = hash(payload2);
-//     int currentBucket = hashhop;
-
-//     for (int loops = 0; loops < nei; loops++){
-//         if (hashtable[hashhop]->get_bitmap_index(loops) == 1){
-//             int payload1 = hashtable[currentBucket]->getTuple()->payload;
-
-//             if (payload1 == payload2){
-//                 Tuple* t = new Tuple(hashtable[currentBucket]->getTuple()->key, tuple->key);
-//                 if (!searchIfDupl(t, matches)){
-//                     matches->tuples[matches->activeSize] = t;
-//                     matches->activeSize++;
-//                 }
-//             }
-//         }
-//         currentBucket = findNeighborPosByK(currentBucket, 1);
-//     }
-
-//     return matches;
-// }
 
 MatchesPtr* Hashtable::contains(Tuple* tuple){
     //find hash value and neighborhood

@@ -6,6 +6,7 @@ typedef struct Set{
     int setSize; 
     Set();  
     Set(Set*, Predicates*);
+    ~Set();
     void print();
 }Set;
 
@@ -13,6 +14,7 @@ typedef struct SetArr{
     Set** sets;
     int setArrSize;
     SetArr();  
+    ~SetArr();
     void add(Set*);  
 }SetArr;
 
