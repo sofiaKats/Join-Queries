@@ -43,7 +43,7 @@ int main(int argc, char* argv[]){
 
   clock_gettime(CLOCK_MONOTONIC, &start);
 
-  for (int i = 0; i < 1; i++)
+  for (int i = 0; i < queries->size; i++)
     sch.submit_job(new Job(joiner->thread_executeQuery, (void*)new JoinerArgs(joiner, queries->queries_arr[i], out, i, joiner->relations, joiner->numRelations)));
   sch.wait_all_tasks_finish();
 
@@ -57,7 +57,6 @@ int main(int argc, char* argv[]){
     delete[] out[i];
   }
   delete[] out;
-  //delete queries;
 
   if (!testMode) cout << "\n==== Run in ~" << duration << " sec\n";
   sch.destroy_scheduler();

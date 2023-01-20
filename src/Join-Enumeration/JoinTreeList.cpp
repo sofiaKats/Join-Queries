@@ -31,7 +31,7 @@ void JoinTree::print(){
         cout << arr[i]->relation_left << "." << arr[i]->column_left << arr[i]->operation;
         if (arr[i]->number_after_operation) cout << arr[i]->number;
         else cout << arr[i]->relation_right << "." << arr[i]->column_right;
-        cout << " -> ";    
+        cout << " -> ";
     }
     cout << endl;
 }
@@ -41,7 +41,7 @@ void JoinTree::print(){
 JoinTreeNode::JoinTreeNode(JoinTree* jt, int i){
     this->jt = jt;
     this->index = i;
-    next = nullptr; 
+    next = nullptr;
 }
 JoinTreeNode::~JoinTreeNode(){
     delete jt;
@@ -59,9 +59,9 @@ JoinTreeList::~JoinTreeList(){
     {
         JoinTreeNode* nextNode = curr->next;    // get next node
         delete curr;                         // delete current
-        curr = nextNode;        
+        curr = nextNode;
     }
-    
+
 }
 
 
@@ -70,7 +70,7 @@ JoinTreeNode* JoinTreeList::getHead(){return head;}
 void JoinTreeList::add(JoinTree* jt){
     int index = 0;
     if (head == nullptr){
-        head = new JoinTreeNode(jt, index); 
+        head = new JoinTreeNode(jt, index);
         return;
     }
     JoinTreeNode* temp = head;
@@ -93,7 +93,7 @@ bool JoinTreeList::equalPredicates(Predicates* p1, Predicates* p2){
                 return true;
         }
         return false;
-    } 
+    }
     return false;
 }
 
@@ -114,7 +114,7 @@ JoinTreeNode* JoinTreeList::contains(Predicates** p, int size){
         if (flag == true) return temp;
         temp = temp->next;
     }
-    if (flag == false) {/*cout << ".-.-.-. Not contained!\n";*/ return nullptr;};    
+    return nullptr;    
 }
 
 void JoinTreeList::replace(JoinTreeNode* old, JoinTree* newJ){
